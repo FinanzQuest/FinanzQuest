@@ -1,3 +1,6 @@
+{
+	# empty
+}
 {$CADDY_HOST:finanzquest.app} {
 	# 10MB upload limit
 	request_body {
