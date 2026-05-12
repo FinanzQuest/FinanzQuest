@@ -16,22 +16,19 @@
     ./variables.nix
   ];
 
-
-  # systemd.services."docker-compose-myapp" = {
-  #   description = "Planbackend";
-  #   after = [ "docker.service" ];
-  #   wantedBy = [ "multi-user.target" ];
-
-  #   serviceConfig = {
-  #     Type = "oneshot";
-  #     RemainAfterExit = true;
-  #     WorkingDirectory = "/home/planuser/planbackend";
-  #     ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -d";
-  #     ExecStop = "${pkgs.docker-compose}/bin/docker-compose down";
-  #   };
-
-  #   path = [ pkgs.docker-compose ];
-  # };
+  systemd.services.finanzquest = {
+    description = "FinanzQuest";
+    after = [ "docker.service" "network.target" ];
+    requires = [ "docker.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      WorkingDirectory = "/home/admin/FinanzQuest";
+      ExecStart = "${pkgs.docker}/bin/docker compose up -d";
+      ExecStop = "${pkgs.docker}/bin/docker compose down";
+    };
+  };
 
   # configuration.nix
   environment.systemPackages = with pkgs; [
