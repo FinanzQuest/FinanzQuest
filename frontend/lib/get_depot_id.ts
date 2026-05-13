@@ -59,7 +59,7 @@ export async function getDepotIdWithInspect(params: SearchParams) {
 		}
 	}
 
-	console.log(defaultRes)
+	console.log("default depot:", defaultRes)
 
 	return {
 		depotId: defaultRes.depotId,

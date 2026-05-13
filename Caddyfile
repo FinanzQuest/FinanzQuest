@@ -1,11 +1,8 @@
-{
-	# empty
-}
-{$CADDY_HOST:finanzquest.app} {
+{$CADDY_HOST} {
 	# 10MB upload limit
-	request_body {
-		max_size 10MB
-	}
+    request_body {
+  		max_size 10MB
+   	}
 
 	handle /auth/v1/* {
 		uri strip_prefix /auth/v1
