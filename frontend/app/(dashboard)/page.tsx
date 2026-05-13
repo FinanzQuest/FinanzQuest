@@ -25,12 +25,9 @@ export default async function Page({
 	searchParams: Promise<SearchParams>
 }) {
 	const params = await searchParams
-
-	const {
-		depotId,
-		error: depotIdError,
-		noDepot,
-	} = await getDepotIdWithInspect(params)
+	const res = await getDepotIdWithInspect(params)
+	console.log("get_depot_response:", res)
+	const { depotId, error: depotIdError, noDepot } = res
 
 	if (noDepot) {
 		console.log("no depot found redirecting")

@@ -1,18 +1,24 @@
 "use server"
 import { cookies } from "next/headers"
 import { decodeDepotCookie, encodeDepotCookie } from "./encode"
-export async function setActiveDepotId(id: number, userId: string) {
-	const cookieStore = await cookies()
-	const day = 24 * 3600 * 1000
+
+const EXPIRES = 24 * 3600 * 1000
+
+export async function newActiveDepotCookie(id: number, userId: string) {
 	const encoded = await encodeDepotCookie(id, userId)
-	cookieStore.set({
+	return {
 		name: "activeDepotId",
 		value: encoded,
-		expires: Date.now() + day,
+		expires: Date.now() + EXPIRES,
 		path: "/",
-		sameSite: "lax",
+		sameSite: "lax" as "lax",
 		httpOnly: false,
-	})
+	}
+}
+
+export async function setActiveDepotId(id: number, userId: string) {
+	const cookieStore = await cookies()
+	cookieStore.set(await newActiveDepotCookie(id, userId))
 }
 
 export async function clearActiveDepotId() {

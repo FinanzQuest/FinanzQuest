@@ -3,6 +3,7 @@ import type { SearchParams } from "@/database/custom_types"
 import { createClient } from "@/utils/supabase/server"
 import { getDepotDefaultId } from "./db"
 import { getActiveDepotId } from "./depot_cookie/server"
+import { nullable, nullish } from "zod"
 
 export async function getDepotIdWithInspect(params: SearchParams) {
 	const client = await createClient()
@@ -64,7 +65,7 @@ export async function getDepotIdWithInspect(params: SearchParams) {
 	return {
 		depotId: defaultRes.depotId,
 		error: null,
-		noDepot: defaultRes.depotId ?? null,
+		noDepot: defaultRes.depotId === null || defaultRes.depotId === undefined,
 		isInspect: false,
 	}
 }
