@@ -53,7 +53,7 @@ export default async function Page({
 	// }
 
 	if (fres.depot === null) {
-		return <ErrorCard error={new Error("Depot not found")} />
+		return <ErrorCard error={new Error("Depot nicht gefunden")} />
 	}
 
 	const treeData = fres.positions
