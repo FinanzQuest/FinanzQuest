@@ -299,64 +299,65 @@ ALTER TABLE api.asset_prices ENABLE ROW LEVEL SECURITY;
 
 ALTER ROLE anon SET search_path = api;
 
-CREATE OR REPLACE VIEW depots.position_profits AS
-WITH position_summary AS (
-  SELECT
-    depot_id,
-    asset_id,
-    SUM(amount) AS current_amount,
-    SUM(
-      CASE WHEN amount > 0 THEN
-        amount * price + commission
-      ELSE
-        0
-      END) AS total_invested,
-    SUM(
-      CASE WHEN amount < 0 THEN
-        ABS(amount * price) - commission
-      ELSE
-        0
-      END) AS total_sold
-  FROM
-    depots.transactions
-  GROUP BY
-    depot_id,
-    asset_id
-  HAVING
-    SUM(amount) > 0 -- Only active positions
-),
-latest_prices AS (
-  SELECT DISTINCT ON (asset_id)
-    asset_id,
-    CLOSE AS current_price
-  FROM
-    api.asset_prices
-  WHERE close IS NOT NULL
-  ORDER BY
-    asset_id,
-    tstamp DESC
+CREATE OR REPLACE FUNCTION depots.get_position_profits(p_depot_id INT)
+RETURNS TABLE (
+  depot_id INT,
+  asset_id INT,
+  symbol TEXT,
+  name TEXT,
+  asset_type TEXT,
+  description TEXT,
+  current_amount NUMERIC,
+  total_invested NUMERIC,
+  total_sold NUMERIC,
+  current_price NUMERIC,
+  market_value NUMERIC,
+  total_profit NUMERIC
 )
-SELECT
-  ps.depot_id,
-  ps.asset_id,
-  a.symbol,
-  a.name,
-  a.asset_type,
-  a.description,
-  ps.current_amount,
-  ps.total_invested,
-  ps.total_sold,
-  lp.current_price,
-  ps.current_amount * lp.current_price AS market_value,
-  -- Total profit
-  ps.total_sold + (ps.current_amount * lp.current_price) - ps.total_invested AS total_profit
-FROM
-  position_summary ps
+LANGUAGE sql
+STABLE
+AS $$
+  WITH position_summary AS (
+    SELECT
+      t.depot_id,
+      t.asset_id,
+      SUM(t.amount) AS current_amount,
+      SUM(CASE WHEN t.amount > 0 THEN t.amount * t.price + t.commission ELSE 0 END) AS total_invested,
+      SUM(CASE WHEN t.amount < 0 THEN ABS(t.amount * t.price) - t.commission ELSE 0 END) AS total_sold
+    FROM depots.transactions t
+    WHERE t.depot_id = p_depot_id
+    GROUP BY t.depot_id, t.asset_id
+    HAVING SUM(t.amount) > 0
+  ),
+  latest_prices AS (
+    SELECT DISTINCT ON (asset_id)
+      asset_id,
+      close AS current_price
+    FROM api.asset_prices
+    WHERE close IS NOT NULL
+      AND asset_id IN (SELECT asset_id FROM position_summary)
+    ORDER BY asset_id, tstamp DESC
+  )
+  SELECT
+    ps.depot_id,
+    ps.asset_id,
+    a.symbol,
+    a.name,
+    a.asset_type,
+    a.description,
+    ps.current_amount,
+    ps.total_invested,
+    ps.total_sold,
+    lp.current_price,
+    ps.current_amount * lp.current_price AS market_value,
+    ps.total_sold + (ps.current_amount * lp.current_price) - ps.total_invested AS total_profit
+  FROM position_summary ps
   JOIN api.assets a ON ps.asset_id = a.id
   LEFT JOIN latest_prices lp ON ps.asset_id = lp.asset_id;
+$$;
 
--- CREATE UNIQUE INDEX idx_position_profits_unique ON depots.position_profits (depot_id, asset_id);
-
+  CREATE INDEX IF NOT EXISTS idx_asset_prices_asset_tstamp
+  ON api.asset_prices (asset_id, tstamp DESC);
 -- currently not done due to it requiring proper permission handling
 -- CREATE OR REPLACE FUNCTION refresh_position_profits ()
 --   RETURNS TRIGGER
@@ -378,28 +379,54 @@ FROM
 --   FOR EACH STATEMENT
 --   EXECUTE FUNCTION refresh_position_profits ();
 
-CREATE OR REPLACE VIEW depots.transactions_with_asset_position AS
-SELECT
-  dt.depot_id,
-  dt.user_id,
-  dt.asset_id,
-  dt.amount,
-  dt.price,
-  dt.tstamp,
-  dt.commission,
-  dt.id,
-  dp.symbol,
-  dp.description,
-  dp.asset_type,
-  dp.current_amount,
-  dp.total_invested,
-  dp.total_sold,
-  dp.total_profit,
-  dp.current_price,
-  dp.market_value,
-  dt.type
-FROM depots.transactions AS dt
-LEFT JOIN depots.position_profits AS dp ON dp.asset_id = dt.asset_id AND dp.depot_id = dt.depot_id;
+CREATE OR REPLACE FUNCTION depots.get_transactions_with_position(p_depot_id INT)
+RETURNS TABLE (
+  depot_id INT,
+  user_id UUID,
+  asset_id INT,
+  amount NUMERIC,
+  price NUMERIC,
+  tstamp TIMESTAMPTZ,
+  commission NUMERIC,
+  id INT,
+  symbol TEXT,
+  description TEXT,
+  asset_type TEXT,
+  current_amount NUMERIC,
+  total_invested NUMERIC,
+  total_sold NUMERIC,
+  total_profit NUMERIC,
+  current_price NUMERIC,
+  market_value NUMERIC,
+  type TEXT
+)
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT
+    dt.depot_id,
+    dt.user_id,
+    dt.asset_id,
+    dt.amount,
+    dt.price,
+    dt.tstamp,
+    dt.commission,
+    dt.id,
+    pp.symbol,
+    pp.description,
+    pp.asset_type,
+    pp.current_amount,
+    pp.total_invested,
+    pp.total_sold,
+    pp.total_profit,
+    pp.current_price,
+    pp.market_value,
+    dt.type
+  FROM depots.transactions dt
+  LEFT JOIN depots.get_position_profits(p_depot_id) pp
+    ON pp.asset_id = dt.asset_id
+  WHERE dt.depot_id = p_depot_id;
+$$;
 
 CREATE TYPE SavingsPeriod AS ENUM (
   'annually',
