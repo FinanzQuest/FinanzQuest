@@ -1157,44 +1157,38 @@ id,symbol,name,description,asset_type
 1162,TTWO,Take-Two Interactive Software; Inc.,Zyklus und Automobile - Unterhaltungselektronik,stock
 1163,UBI.PA,Ubisoft Entertainment SA,Zyklus und Automobile - Unterhaltungselektronik,stock
 1164,LISPZ.XC,Chocoladefabriken Lindt & Sprüngli AG,Lebensmittel - Süßwaren,stock
-1165,URTH,iShares MSCI World ETF,Exchange Traded Fund - global diversifiert,fund
-1166,STOXX50E,EURO STOXX 50 I,Exchange Traded Fund - Europa,fund
-1167,GSPC,S&P 500,Exchange Traded Funds - Nordamerika,fund
-1168,EEM,iShares MSCI Emerging Markets,Exchange Traded Fonds - Emerging Markets,fund
-1169,DAX,DAX,Exchange Traded Funds - Deutschland,fund
-1170,SXR8.DE,iShares Core S&P 500 UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core S&P 500 UCITS ETF USD Accumulating,fund
-1171,CSPX.MI,iShares Core S&P 500 UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core S&P 500 UCITS ETF USD Accumulating - Milan,fund
-1172,EUNL.DE,iShares Core MSCI World UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI World UCITS ETF USD Accumulating,fund
-1173,IWDA.AS,iShares Core MSCI World UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI World UCITS ETF USD Accumulating - Amsterdam,fund
-1174,EUNK.DE,iShares Core MSCI Europe UCITS ETF EUR (Acc),Exchange Traded Funds - iShares Core MSCI Europe UCITS ETF EUR Accumulating,fund
-1175,IMAE.AS,iShares Core MSCI Europe UCITS ETF EUR (Acc),Exchange Traded Funds - iShares Core MSCI Europe UCITS ETF EUR Accumulating - Amsterdam,fund
-1176,SMEA.MI,iShares Core MSCI Europe UCITS ETF EUR (Acc),Exchange Traded Funds - iShares Core MSCI Europe UCITS ETF EUR Accumulating - Milan,fund
-1177,EMIM.AS,iShares Core MSCI EM IMI UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI Emerging Markets IMI UCITS ETF USD Accumulating - Amsterdam,fund
-1178,IS3N.DE,iShares Core MSCI EM IMI UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI Emerging Markets IMI UCITS ETF USD Accumulating,fund
-1179,IVV,iShares Core S&P 500 ETF,Exchange Traded Funds - iShares Core S&P 500 ETF Distributing,fund
-1180,IUSA.L,iShares Core S&P 500 UCITS ETF USD (Dist),Exchange Traded Funds - iShares Core S&P 500 UCITS ETF USD Distributing - London,fund
-1181,SWDA.L,iShares Core MSCI World UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI World UCITS ETF USD Accumulating - London,fund
-1182,SWDA.MI,iShares Core MSCI World UCITS ETF USD (Acc),Exchange Traded Funds - iShares Core MSCI World UCITS ETF USD Accumulating - Milan,fund
-1183,IWRD.L,iShares MSCI World UCITS ETF USD (Dist),Exchange Traded Funds - iShares MSCI World UCITS ETF USD Distributing - London,fund
-1184,ITOT,iShares Core S&P Total U.S. Stock Market ETF,Exchange Traded Funds - iShares Core S&P Total US Stock Market ETF Distributing,fund
-1185,AGG,iShares Core U.S. Aggregate Bond ETF,Exchange Traded Funds - iShares Core US Aggregate Bond ETF Distributing,fund
-1186,HDV,iShares Core High Dividend ETF,Exchange Traded Funds - iShares Core High Dividend ETF Distributing,fund
-1187,DGRO,iShares Core Dividend Growth ETF,Exchange Traded Funds - iShares Core Dividend Growth ETF Distributing,fund
-1188,VGK,Vanguard FTSE Europe ETF,Exchange Traded Funds - Vanguard FTSE Europe Index Fund ETF,fund
-1189,VEA,Vanguard FTSE Developed Markets ETF,Exchange Traded Funds - Vanguard FTSE Developed Markets Index Fund ETF,fund
-1190,VEU,Vanguard FTSE All-World ex-US ETF,Exchange Traded Funds - Vanguard FTSE All-World ex-US Index Fund ETF,fund
-1191,VTI,Vanguard Total Stock Market ETF,Exchange Traded Funds - Vanguard Total Stock Market Index Fund ETF,fund
-1192,VWCE.DE,Vanguard FTSE All-World UCITS ETF (USD) Accumulating,Exchange Traded Funds - Vanguard FTSE All-World UCITS ETF USD Accumulating,fund
-1193,VWRA.L,Vanguard FTSE All-World UCITS ETF (USD) Accumulating,Exchange Traded Funds - Vanguard FTSE All-World UCITS ETF USD Accumulating - London,fund
-1194,VHVE.MI,Vanguard FTSE Developed World UCITS ETF (USD) Accumulating,Exchange Traded Funds - Vanguard FTSE Developed World UCITS ETF USD Accumulating - Milan,fund
-1195,VUKE.L,Vanguard FTSE 100 UCITS ETF,Exchange Traded Funds - Vanguard FTSE 100 UCITS ETF - London,fund
-1196,CW8.PA,Amundi MSCI World UCITS ETF Acc,Exchange Traded Funds - Amundi MSCI World UCITS ETF EUR Accumulating - Paris,fund
-1197,LCWD.L,Amundi MSCI World UCITS ETF Acc,Exchange Traded Funds - Amundi MSCI World UCITS ETF Accumulating - London,fund
-1198,500.PA,Amundi S&P 500 UCITS ETF Acc,Exchange Traded Funds - Amundi S&P 500 UCITS ETF EUR Accumulating - Paris,fund
-1199,A500.MI,Amundi S&P 500 UCITS ETF Acc,Exchange Traded Funds - Amundi S&P 500 UCITS ETF EUR Accumulating - Milan,fund
-1200,ANX.PA,Amundi Nasdaq-100 UCITS ETF Acc,Exchange Traded Funds - Amundi Nasdaq-100 UCITS ETF EUR Accumulating - Paris,fund
-1201,ANX.MI,Amundi Nasdaq-100 UCITS ETF Acc,Exchange Traded Funds - Amundi Nasdaq-100 UCITS ETF EUR Accumulating - Milan,fund
-1202,LYP6.DE,Amundi Stoxx Europe 600 UCITS ETF Acc,Exchange Traded Funds - Amundi Stoxx Europe 600 UCITS ETF Accumulating,fund
-1203,MEUD.PA,Amundi Stoxx Europe 600 UCITS ETF Acc,Exchange Traded Funds - Amundi Stoxx Europe 600 UCITS ETF Accumulating - Paris,fund
-1204,WEBN.DE,Amundi Prime All Country World UCITS ETF Acc,Exchange Traded Funds - Amundi Prime All Country World UCITS ETF Accumulating,fund
-1205,AEEM.MI,Amundi MSCI Emerging Markets UCITS ETF Acc,Exchange Traded Funds - Amundi MSCI Emerging Markets UCITS ETF EUR Accumulating - Milan,fund
+"1170","SXR8.DE","S&P 500 ETF (iShares)","Die 500 größten US-Unternehmen – Apple, Microsoft, Amazon & Co.","fund"
+"1171","CSPX.MI","S&P 500 ETF (iShares, Mailand)","Wie SXR8.DE, an der Mailänder Börse gelistet","fund"
+"1172","EUNL.DE","MSCI World ETF (iShares)","1.400 Unternehmen aus 23 Industrieländern weltweit","fund"
+"1173","IWDA.AS","MSCI World ETF (iShares, Amsterdam)","Wie EUNL.DE, an der Amsterdamer Börse gelistet","fund"
+"1174","EUNK.DE","MSCI Europe ETF (iShares)","Die größten Unternehmen aus Europa – Nestlé, LVMH, SAP & Co.","fund"
+"1175","IMAE.AS","MSCI Europe ETF (iShares, Amsterdam)","Wie EUNK.DE, an der Amsterdamer Börse gelistet","fund"
+"1176","SMEA.MI","MSCI Europe ETF (iShares, Mailand)","Wie EUNK.DE, an der Mailänder Börse gelistet","fund"
+"1177","EMIM.AS","Schwellenländer ETF (iShares)","Unternehmen aus Wachstumsmärkten wie China, Indien, Brasilien","fund"
+"1178","IS3N.DE","Schwellenländer ETF (iShares, Frankfurt)","Wie EMIM.AS, an der Frankfurter Börse gelistet","fund"
+"1179","IVV","S&P 500 ETF (iShares, USA)","Die 500 größten US-Unternehmen, US-gelistete Version","fund"
+"1180","IUSA.L","S&P 500 ETF (iShares, London)","Die 500 größten US-Unternehmen, an der Londoner Börse gelistet","fund"
+"1181","SWDA.L","MSCI World ETF (iShares, London)","1.400 Unternehmen weltweit, an der Londoner Börse gelistet","fund"
+"1182","SWDA.MI","MSCI World ETF (iShares, Mailand)","1.400 Unternehmen weltweit, an der Mailänder Börse gelistet","fund"
+"1183","IWRD.L","MSCI World ETF ausschüttend (iShares)","Wie SWDA.L, zahlt Gewinne regelmäßig aus statt reinvestieren","fund"
+"1184","ITOT","US-Gesamtmarkt ETF (iShares)","Fast alle börsennotierten US-Unternehmen in einem ETF","fund"
+"1185","AGG","US-Anleihen ETF (iShares)","Viele verschiedene US-Anleihen gebündelt – stabiler als Aktien","fund"
+"1186","HDV","Dividenden ETF (iShares)","US-Unternehmen die regelmäßig hohe Dividenden ausschütten","fund"
+"1187","DGRO","Dividendenwachstum ETF (iShares)","US-Unternehmen die ihre Dividende jedes Jahr steigern","fund"
+"1188","VGK","Europa ETF (Vanguard)","Die größten Unternehmen aus Europa","fund"
+"1189","VEA","Industrieländer ETF (Vanguard)","Entwickelte Märkte weltweit außer USA – Europa, Japan, Australien","fund"
+"1190","VEU","Welt ohne USA ETF (Vanguard)","Alle Industrieländer und Schwellenländer – nur ohne US-Unternehmen","fund"
+"1191","VTI","US-Gesamtmarkt ETF (Vanguard)","Fast alle börsennotierten US-Unternehmen – über 3.500 Firmen","fund"
+"1192","VWCE.DE","FTSE All-World ETF (Vanguard)","Über 3.700 Unternehmen aus aller Welt – Industrie- und Schwellenländer","fund"
+"1193","VWRA.L","FTSE All-World ETF (Vanguard, London)","Wie VWCE.DE, an der Londoner Börse gelistet","fund"
+"1194","VHVE.MI","Industrieländer ETF (Vanguard, Mailand)","Entwickelte Märkte weltweit, an der Mailänder Börse gelistet","fund"
+"1195","VUKE.L","FTSE 100 ETF (Vanguard)","Die 100 größten britischen Unternehmen – BP, HSBC, Unilever & Co.","fund"
+"1196","CW8.PA","MSCI World ETF (Amundi)","1.400 Unternehmen weltweit, besonders günstig (TER 0,12 %)","fund"
+"1198","500.PA","S&P 500 ETF (Amundi, Paris)","Die 500 größten US-Unternehmen, günstige Amundi-Version","fund"
+"1199","A500.MI","S&P 500 ETF (Amundi, Mailand)","Wie 500.PA, an der Mailänder Börse gelistet","fund"
+"1200","ANX.PA","Nasdaq-100 ETF (Amundi)","Die 100 größten Tech-Unternehmen – Apple, NVIDIA, Google & Co.","fund"
+"1201","ANX.MI","Nasdaq-100 ETF (Amundi, Mailand)","Wie ANX.PA, an der Mailänder Börse gelistet","fund"
+"1202","LYP6.DE","Stoxx Europe 600 ETF (Amundi)","Die 600 größten europäischen Unternehmen","fund"
+"1203","MEUD.PA","Stoxx Europe 600 ETF (Amundi, Paris)","Wie LYP6.DE, an der Pariser Börse gelistet","fund"
+"1204","WEBN.DE","All Country World ETF (Amundi)","Über 2.000 Unternehmen aus Industrie- und Schwellenländern weltweit","fund"
+"1205","AEEM.MI","Schwellenländer ETF (Amundi, Mailand)","Unternehmen aus Wachstumsmärkten wie China, Indien, Brasilien","fund"

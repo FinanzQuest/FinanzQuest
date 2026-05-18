@@ -54,18 +54,22 @@ pub struct Asset {
     pub symbol: String,
     pub id: i64,
     pub last_updated: Option<time::Date>,
+    pub asset_type: String,
 }
 
 impl Asset {
     pub fn is_yfinance(&self) -> bool {
-        is_symbol_yfinance(&self.symbol)
+        is_symbol_yfinance(&self.symbol) || self.asset_type == "fund"
     }
 }
 
 pub async fn fetch_assets(pool: &PgPool) -> Result<Vec<Asset>, sqlx::Error> {
-    sqlx::query_as!(Asset, r#"SELECT id, symbol, last_updated FROM api.assets;"#)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as!(
+        Asset,
+        r#"SELECT id, symbol, last_updated, asset_type as "asset_type: _" FROM api.assets;"#
+    )
+    .fetch_all(pool)
+    .await
 }
 
 pub fn symbol_list(assets: &[Asset]) -> Vec<String> {

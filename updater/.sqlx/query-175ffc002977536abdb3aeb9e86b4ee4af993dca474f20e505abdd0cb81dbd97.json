@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, symbol, last_updated, asset_type as \"asset_type: _\" FROM api.assets;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "symbol",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "last_updated",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "asset_type: _",
+        "type_info": {
+          "Custom": {
+            "name": "assettype",
+            "kind": {
+              "Enum": [
+                "commodity",
+                "crypto",
+                "fund",
+                "stock"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "175ffc002977536abdb3aeb9e86b4ee4af993dca474f20e505abdd0cb81dbd97"
+}
