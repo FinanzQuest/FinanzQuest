@@ -60,7 +60,7 @@ export default async function Page({
 		(fres.depotValues as NonNullableRow<DepotValue>[]) ?? []
 	)
 	return (
-		<main className="grid grid-cols-1 gap-3">
+		<main className="grid grid-cols-1 gap-3 max-h-screen overflow-y-scroll">
 			<Card className="overflow-hidden border-none">
 				<CardHeader>
 					<CardTitle>

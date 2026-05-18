@@ -24,7 +24,7 @@ export default function DashboardLayout({
 				<AppSidebar />
 				<Suspense fallback={<PageLoader />}>
 					{/*<SidebarTrigger />*/}
-					<div className="h-full pt-3 px-3 mx-2 mt-2 w-full overflow-hidden">
+					<div className="min-svh max-h-screen pt-0 px-3 mx-2 mt-2 w-full overflow-hidden">
 						{children}
 					</div>
 				</Suspense>

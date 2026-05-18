@@ -46,7 +46,7 @@ export default async function Page(props: {
 	const groupedTransactions = groupTransactionsPerDay(transactions)
 
 	return (
-		<main className="w-full">
+		<main className="w-full max-h-screen overflow-y-scroll">
 			<div className="flex flex-col gap-10 max-w-[1000px] mx-auto p-10 pb-0 overflow-y-scroll">
 				{groupedTransactions.map(group => (
 					<TransactionGroup key={group.day} {...group} />

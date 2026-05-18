@@ -30,7 +30,7 @@ export default function RootLayout({
 			<head>
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			</head>
-			<body className="h-full">
+			<body className="h-full max-h-screen overflow-hidden">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"

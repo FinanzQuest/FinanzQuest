@@ -8,6 +8,7 @@ import {
 	PiggyBank,
 	SearchIcon,
 	Trophy,
+	Lightbulb,
 } from "lucide-react"
 import { Suspense, useEffect, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"
@@ -49,6 +50,8 @@ export function AppSidebar() {
 			{ title: "Transaktionen", url: "/transactions", icon: ArrowLeftRight },
 			{ title: "Sparplan", url: "/savings_plan", icon: PiggyBank },
 		],
+
+		Wissen: [{ title: "Tutorial", url: "/tutorial", icon: Lightbulb }],
 		// Aktien: [{ title: "Suche", url: "/search", icon: SearchIcon }],
 		Wettbewerb: [{ title: "Leaderboard", url: "/leaderboard", icon: Trophy }],
 	}
