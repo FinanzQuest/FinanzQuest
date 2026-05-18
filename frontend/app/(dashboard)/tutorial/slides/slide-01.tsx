@@ -1,11 +1,10 @@
 "use client"
 
 import {
-	SlideLayout,
-	SlideHeader,
-	SlideSection,
 	InfoCard,
-	DataTable,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
 } from "./slide-layout"
 
 export function Slide01() {

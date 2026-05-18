@@ -417,7 +417,6 @@ export function SavingsPlanTable({
 								size="icon"
 								onClick={() => {
 									handleSave(editedData, row).then(e => {
-										console.log("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 										if (e) {
 											toast.error(e.message)
 										}

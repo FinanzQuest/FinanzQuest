@@ -27,7 +27,9 @@ export async function decodeDepotCookie(
 	encoded: string,
 	userId: string
 ): Promise<{ depotId?: number; valid: boolean }> {
-	const decoded = Buffer.from(encoded, "base64").toString("utf-8")
+	const decoded = Buffer.from(decodeURIComponent(encoded), "base64").toString(
+		"utf-8"
+	)
 	const split = decoded.split(":")
 	if (split.length !== 2) return { depotId: 0, valid: false }
 	const [depotId, originalSignature] = split

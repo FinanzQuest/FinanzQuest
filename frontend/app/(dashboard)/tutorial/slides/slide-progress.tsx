@@ -14,7 +14,7 @@ export function SlideProgress({ current, count, onGoTo }: SlideProgressProps) {
 			{Array.from({ length: count }).map((_, i) => (
 				<button
 					type="button"
-					// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+					// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 					key={i}
 					onClick={() => onGoTo(i)}
 					className={cn(

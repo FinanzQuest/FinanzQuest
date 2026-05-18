@@ -1,6 +1,12 @@
 "use client"
 
-import { SlideLayout, SlideHeader, SlideSection, InfoCard, DataTable } from "./slide-layout"
+import {
+	DataTable,
+	InfoCard,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
 
 export function Slide03() {
 	return (

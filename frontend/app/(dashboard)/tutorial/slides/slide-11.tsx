@@ -1,11 +1,10 @@
 "use client"
 
+import { CheckCircle2, XCircle } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { SlideLayout, SlideHeader, SlideSection, InfoCard } from "./slide-layout"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, XCircle } from "lucide-react"
+import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
 
 const PRINCIPLES = [
 	{
@@ -35,11 +34,7 @@ const PRINCIPLES = [
 	},
 ]
 
-const QUIZ: {
-	question: string
-	options: string[]
-	correct: number
-}[] = [
+const QUIZ: { question: string; options: string[]; correct: number }[] = [
 	{
 		question: "Was beschreibt die Rentenlücke?",
 		options: [
@@ -97,16 +92,14 @@ type QuizState = "idle" | "running" | "done"
 export function Slide11() {
 	const [quizState, setQuizState] = useState<QuizState>("idle")
 	const [currentQ, setCurrentQ] = useState(0)
-	const [answers, setAnswers] = useState<(number | null)[]>(Array(QUIZ.length).fill(null))
+	const [answers, setAnswers] = useState<(number | null)[]>(
+		Array(QUIZ.length).fill(null)
+	)
 	const [selected, setSelected] = useState<number | null>(null)
 	const [confirmed, setConfirmed] = useState(false)
 
 	const score = answers.filter((a, i) => a === QUIZ[i].correct).length
-
-	function handleSelect(idx: number) {
-		if (confirmed) return
-		setSelected(idx)
-	}
+	const q = QUIZ[currentQ]
 
 	function handleConfirm() {
 		if (selected === null) return
@@ -118,7 +111,7 @@ export function Slide11() {
 
 	function handleNext() {
 		if (currentQ < QUIZ.length - 1) {
-			setCurrentQ((q) => q + 1)
+			setCurrentQ(q => q + 1)
 			setSelected(null)
 			setConfirmed(false)
 		} else {
@@ -134,41 +127,51 @@ export function Slide11() {
 		setConfirmed(false)
 	}
 
-	const q = QUIZ[currentQ]
-
 	return (
 		<SlideLayout>
-			<SlideHeader
-				eyebrow="Zusammenfassung"
-				title="Die fünf Grundprinzipien"
-			/>
+			<SlideHeader eyebrow="Zusammenfassung" title="Die fünf Grundprinzipien" />
 
 			<div className="grid grid-cols-1 gap-2">
-				{PRINCIPLES.map((p) => (
-					<div key={p.number} className="rounded-xl border bg-muted/40 p-4 flex items-start gap-4">
-						<span className="text-emerald-500 font-bold font-mono text-lg w-8 shrink-0">{p.number}</span>
+				{PRINCIPLES.map(p => (
+					<div
+						key={p.number}
+						className="rounded-xl border bg-muted/40 p-4 flex items-start gap-4"
+					>
+						<span className="text-emerald-500 font-bold font-mono text-lg w-8 shrink-0">
+							{p.number}
+						</span>
 						<div>
-							<span className="text-foreground font-semibold text-sm">{p.title}</span>
-							<p className="text-foreground/60 text-xs mt-0.5 leading-relaxed">{p.desc}</p>
+							<span className="text-foreground font-semibold text-sm">
+								{p.title}
+							</span>
+							<p className="text-foreground/60 text-xs mt-0.5 leading-relaxed">
+								{p.desc}
+							</p>
 						</div>
 					</div>
 				))}
 			</div>
 
 			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">Abschluss-Quiz</h2>
+				<h2 className="text-foreground font-semibold text-lg">
+					Abschluss-Quiz
+				</h2>
 
 				{quizState === "idle" && (
 					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col items-center gap-4 text-center">
 						<p className="text-foreground/70 text-sm">
-							5 Fragen zu den Inhalten dieser Einheit. Teste, was du dir gemerkt hast.
+							5 Fragen zu den Inhalten dieser Einheit. Teste, was du dir gemerkt
+							hast.
 						</p>
-						<Button onClick={() => setQuizState("running")}>Quiz starten</Button>
+						<Button onClick={() => setQuizState("running")}>
+							Quiz starten
+						</Button>
 					</div>
 				)}
 
 				{quizState === "running" && (
 					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-5">
+						{/* Progress dots */}
 						<div className="flex items-center justify-between">
 							<span className="text-muted-foreground text-xs">
 								Frage {currentQ + 1} von {QUIZ.length}
@@ -176,6 +179,7 @@ export function Slide11() {
 							<div className="flex gap-1">
 								{QUIZ.map((_, i) => (
 									<div
+										// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 										key={i}
 										className={cn(
 											"w-2 h-2 rounded-full transition-all",
@@ -184,56 +188,81 @@ export function Slide11() {
 													? "bg-emerald-500"
 													: "bg-rose-500"
 												: i === currentQ
-												? "bg-foreground"
-												: "bg-muted-foreground/30"
+													? "bg-foreground"
+													: "bg-muted-foreground/30"
 										)}
 									/>
 								))}
 							</div>
 						</div>
 
+						{/* Question */}
 						<p className="text-foreground font-semibold text-sm leading-relaxed">
 							{q.question}
 						</p>
 
+						{/* Options */}
 						<div className="flex flex-col gap-2">
 							{q.options.map((opt, i) => {
 								const isSelected = selected === i
 								const isCorrect = i === q.correct
-								let style = "border bg-muted/40 hover:bg-muted/80"
+
+								let borderStyle = ""
 								if (confirmed) {
-									if (isCorrect) style = "border-emerald-500 bg-emerald-500/10"
-									else if (isSelected && !isCorrect) style = "border-rose-500 bg-rose-500/10"
-									else style = "border bg-muted/20 opacity-50"
-								} else if (isSelected) {
-									style = "border-foreground bg-muted/60"
-								}
+									if (isCorrect)
+										borderStyle = "border-emerald-500 bg-emerald-500/10"
+									else if (isSelected)
+										borderStyle = "border-rose-500 bg-rose-500/10"
+									else borderStyle = "border bg-muted/20 opacity-50"
+								} else if (isSelected)
+									borderStyle = "border-foreground bg-muted/60"
+								else borderStyle = "border-border bg-muted/40"
+
 								return (
 									<button
+										// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 										key={i}
-										onClick={() => handleSelect(i)}
+										type="button"
+										disabled={confirmed}
+										onClick={() => setSelected(i)}
 										className={cn(
-											"rounded-lg px-4 py-3 text-left text-sm transition-all flex items-center justify-between gap-2",
-											style,
-											!confirmed && "cursor-pointer"
+											"rounded-lg px-4 py-3 text-left text-sm transition-all",
+											"flex items-center justify-between gap-2 w-full",
+											"disabled:cursor-default",
+											!confirmed && "hover:bg-muted/80 cursor-pointer",
+											"border",
+											borderStyle
 										)}
 									>
-										<span className="text-foreground/80">{opt}</span>
-										{confirmed && isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
-										{confirmed && isSelected && !isCorrect && <XCircle className="w-4 h-4 text-rose-500 shrink-0" />}
+										<span className="text-foreground/80 pointer-events-none">
+											{opt}
+										</span>
+										{confirmed && isCorrect && (
+											<CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 pointer-events-none" />
+										)}
+										{confirmed && isSelected && !isCorrect && (
+											<XCircle className="w-4 h-4 text-rose-500 shrink-0 pointer-events-none" />
+										)}
 									</button>
 								)
 							})}
 						</div>
 
-						<div className="flex justify-end gap-2">
+						{/* Actions */}
+						<div className="flex justify-end">
 							{!confirmed ? (
-								<Button onClick={handleConfirm} disabled={selected === null} size="sm">
+								<Button
+									onClick={handleConfirm}
+									disabled={selected === null}
+									size="sm"
+								>
 									Antwort bestätigen
 								</Button>
 							) : (
 								<Button onClick={handleNext} size="sm">
-									{currentQ < QUIZ.length - 1 ? "Nächste Frage" : "Ergebnis anzeigen"}
+									{currentQ < QUIZ.length - 1
+										? "Nächste Frage"
+										: "Ergebnis anzeigen"}
 								</Button>
 							)}
 						</div>
@@ -242,13 +271,15 @@ export function Slide11() {
 
 				{quizState === "done" && (
 					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col items-center gap-4 text-center">
-						<span className="text-5xl font-bold text-emerald-500">{score}/{QUIZ.length}</span>
+						<span className="text-5xl font-bold text-emerald-500">
+							{score}/{QUIZ.length}
+						</span>
 						<p className="text-foreground/70 text-sm">
 							{score === 5
 								? "Perfekt! Du hast alle Fragen richtig beantwortet."
 								: score >= 3
-								? "Gut gemacht! Ein paar Konzepte kannst du nochmal nachlesen."
-								: "Schau dir die Slides nochmal an – dann klappt's beim nächsten Versuch."}
+									? "Gut gemacht! Ein paar Konzepte kannst du nochmal nachlesen."
+									: "Schau dir die Slides nochmal an – dann klappt's beim nächsten Versuch."}
 						</p>
 						<Button variant="outline" size="sm" onClick={restart}>
 							Nochmal versuchen

@@ -1,23 +1,22 @@
 "use client"
 
-import { currencyFormat } from "@/lib/cash_display_string"
 import {
-	SlideLayout,
-	SlideHeader,
-	SlideSection,
-	InfoCard,
-	DataTable,
-} from "./slide-layout"
-import {
-	AreaChart,
 	Area,
-	XAxis,
-	YAxis,
+	AreaChart,
 	CartesianGrid,
-	Tooltip,
 	Legend,
 	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
 } from "recharts"
+import { currencyFormat } from "@/lib/cash_display_string"
+import {
+	DataTable,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
 
 function calcGrowthWithTER(
 	start: number,
@@ -28,7 +27,7 @@ function calcGrowthWithTER(
 	const netRate = (grossReturn - ter) / 100
 	return Array.from({ length: years + 1 }, (_, i) => ({
 		year: i,
-		value: Math.round(start * Math.pow(1 + netRate, i)),
+		value: Math.round(start * (1 + netRate) ** i),
 	}))
 }
 

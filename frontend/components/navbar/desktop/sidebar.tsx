@@ -4,11 +4,11 @@ import {
 	ArrowLeftRight,
 	Home,
 	LayoutDashboard,
+	Lightbulb,
 	type LucideIcon,
 	PiggyBank,
 	SearchIcon,
 	Trophy,
-	Lightbulb,
 } from "lucide-react"
 import { Suspense, useEffect, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"

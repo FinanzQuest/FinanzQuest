@@ -1,22 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { Slider } from "@/components/ui/slider"
-import { SlideLayout, SlideHeader, SlideSection, InfoCard } from "./slide-layout"
 import {
-	AreaChart,
 	Area,
+	AreaChart,
+	CartesianGrid,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	ResponsiveContainer,
 } from "recharts"
+import { Slider } from "@/components/ui/slider"
+import {
+	InfoCard,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
 
 function calcPurchasingPower(startAmount: number, rate: number, years: number) {
 	return Array.from({ length: years + 1 }, (_, i) => ({
 		year: i,
-		kaufkraft: Math.round(startAmount * Math.pow(1 - rate / 100, i)),
+		kaufkraft: Math.round(startAmount * (1 - rate / 100) ** i),
 	}))
 }
 
@@ -39,7 +44,8 @@ export function Slide02() {
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					Ein Beispiel aus dem Alltag: Eine Kinokarte hat vor 20 Jahren ca. 5 €
 					gekostet, heute oft 15 €. Der Betrag auf deinem Konto bleibt gleich –
-					aber du kannst damit weniger kaufen als früher. Diesen Effekt nennt man{" "}
+					aber du kannst damit weniger kaufen als früher. Diesen Effekt nennt
+					man{" "}
 					<span className="text-foreground font-medium">Kaufkraftverlust</span>.
 				</p>
 			</SlideSection>
@@ -60,7 +66,10 @@ export function Slide02() {
 				</div>
 
 				<ResponsiveContainer width="100%" height={180}>
-					<AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+					<AreaChart
+						data={data}
+						margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+					>
 						<defs>
 							<linearGradient id="kaufkraftGrad" x1="0" y1="0" x2="0" y2="1">
 								<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
@@ -72,12 +81,19 @@ export function Slide02() {
 							dataKey="year"
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
-							label={{ value: "Jahre", position: "insideBottomRight", fill: "hsl(var(--muted-foreground))", fontSize: 11, offset: -5 }}
+							label={{
+								value: "Jahre",
+								position: "insideBottomRight",
+								fill: "hsl(var(--muted-foreground))",
+								fontSize: 11,
+								offset: -5,
+							}}
 						/>
 						<YAxis
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
-							tickFormatter={(v) => `${v} €`}
+							tickFormatter={v => `${v} €`}
+							domain={[0, 100]}
 						/>
 						<Tooltip
 							contentStyle={{
@@ -87,7 +103,7 @@ export function Slide02() {
 								fontSize: 12,
 								color: "hsl(var(--foreground))",
 							}}
-							labelFormatter={(v) => `Jahr ${v}`}
+							labelFormatter={v => `Jahr ${v}`}
 							formatter={(v: number) => [`${v} €`, "Kaufkraft"]}
 						/>
 						<Area
@@ -104,10 +120,14 @@ export function Slide02() {
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Inflationsrate</span>
-							<span className="text-foreground font-mono">{rate.toFixed(1)} %</span>
+							<span className="text-foreground font-mono">
+								{rate.toFixed(1)} %
+							</span>
 						</div>
 						<Slider
-							min={1} max={5} step={0.1}
+							min={1}
+							max={5}
+							step={0.1}
 							value={[rate]}
 							onValueChange={([v]) => setRate(v)}
 						/>
@@ -118,7 +138,9 @@ export function Slide02() {
 							<span className="text-foreground font-mono">{years} Jahre</span>
 						</div>
 						<Slider
-							min={1} max={50} step={1}
+							min={1}
+							max={50}
+							step={1}
 							value={[years]}
 							onValueChange={([v]) => setYears(v)}
 						/>

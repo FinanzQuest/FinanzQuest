@@ -1,19 +1,30 @@
 "use client"
 
 import { useState } from "react"
-import { Slider } from "@/components/ui/slider"
-import { SlideLayout, SlideHeader, SlideSection, InfoCard } from "./slide-layout"
 import {
-	LineChart,
+	CartesianGrid,
+	Legend,
 	Line,
+	LineChart,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
-	ReferenceLine,
 } from "recharts"
+import { Slider } from "@/components/ui/slider"
+import {
+	InfoCard,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
+
+const Y_MAX = (() => {
+	const months = (65 - 18) * 12
+	let value = 0
+	for (let m = 0; m < months; m++) value = (value + 500) * (1 + 7 / 100 / 12)
+	return Math.round(value)
+})()
 
 function calcSparplan(startAge: number, monthlyRate: number, rate: number) {
 	const months = (65 - startAge) * 12
@@ -22,7 +33,10 @@ function calcSparplan(startAge: number, monthlyRate: number, rate: number) {
 	for (let m = 0; m < months; m++) {
 		value = (value + monthlyRate) * (1 + rate / 100 / 12)
 		if (m % 12 === 11) {
-			yearlyData.push({ age: startAge + Math.floor(m / 12) + 1, value: Math.round(value) })
+			yearlyData.push({
+				age: startAge + Math.floor(m / 12) + 1,
+				value: Math.round(value),
+			})
 		}
 	}
 	return yearlyData
@@ -44,11 +58,13 @@ export function Slide05() {
 	const endB = dataB[dataB.length - 1]?.value ?? 0
 
 	// Merge into one array keyed by age for the chart
-	const allAges = Array.from(new Set([...dataA.map((d) => d.age), ...dataB.map((d) => d.age)])).sort((a, b) => a - b)
-	const chartData = allAges.map((age) => ({
+	const allAges = Array.from(
+		new Set([...dataA.map(d => d.age), ...dataB.map(d => d.age)])
+	).sort((a, b) => a - b)
+	const chartData = allAges.map(age => ({
 		age,
-		A: dataA.find((d) => d.age === age)?.value ?? null,
-		B: dataB.find((d) => d.age === age)?.value ?? null,
+		A: dataA.find(d => d.age === age)?.value ?? null,
+		B: dataB.find(d => d.age === age)?.value ?? null,
 	}))
 
 	return (
@@ -71,31 +87,53 @@ export function Slide05() {
 			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6">
 				<div className="grid grid-cols-2 gap-4">
 					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">Start mit {ageA}</span>
-						<span className="text-2xl font-bold text-emerald-500">{endA.toLocaleString("de-DE")} €</span>
-						<span className="text-xs text-foreground/60">{65 - ageA} Jahre Anlagezeit</span>
+						<span className="text-xs text-muted-foreground">
+							Start mit {ageA}
+						</span>
+						<span className="text-2xl font-bold text-emerald-500">
+							{endA.toLocaleString("de-DE")} €
+						</span>
+						<span className="text-xs text-foreground/60">
+							{65 - ageA} Jahre Anlagezeit
+						</span>
 					</div>
 					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">Start mit {ageB}</span>
-						<span className="text-2xl font-bold text-foreground/70">{endB.toLocaleString("de-DE")} €</span>
-						<span className="text-xs text-foreground/60">{65 - ageB} Jahre Anlagezeit</span>
+						<span className="text-xs text-muted-foreground">
+							Start mit {ageB}
+						</span>
+						<span className="text-2xl font-bold text-foreground/70">
+							{endB.toLocaleString("de-DE")} €
+						</span>
+						<span className="text-xs text-foreground/60">
+							{65 - ageB} Jahre Anlagezeit
+						</span>
 					</div>
 				</div>
 
 				<ResponsiveContainer width="100%" height={200}>
-					<LineChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+					<LineChart
+						data={chartData}
+						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
+					>
 						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 						<XAxis
 							dataKey="age"
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
-							label={{ value: "Alter", position: "insideBottomRight", fill: "hsl(var(--muted-foreground))", fontSize: 11, offset: -5 }}
+							label={{
+								value: "Alter",
+								position: "insideBottomRight",
+								fill: "hsl(var(--muted-foreground))",
+								fontSize: 11,
+								offset: -5,
+							}}
 						/>
 						<YAxis
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={55}
+							domain={[0, Y_MAX]}
 						/>
 						<Tooltip
 							contentStyle={{
@@ -105,18 +143,38 @@ export function Slide05() {
 								fontSize: 12,
 								color: "hsl(var(--foreground))",
 							}}
-							labelFormatter={(v) => `Alter ${v}`}
+							labelFormatter={v => `Alter ${v}`}
 							formatter={(v: number, name: string) => [
 								`${v.toLocaleString("de-DE")} €`,
 								name === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`,
 							]}
 						/>
 						<Legend
-							formatter={(v) => v === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`}
-							wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}
+							formatter={v =>
+								v === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`
+							}
+							wrapperStyle={{
+								fontSize: 12,
+								color: "hsl(var(--muted-foreground))",
+							}}
 						/>
-						<Line type="monotone" dataKey="A" stroke="#10b981" strokeWidth={2.5} dot={false} connectNulls={false} />
-						<Line type="monotone" dataKey="B" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} strokeDasharray="5 5" connectNulls={false} />
+						<Line
+							type="monotone"
+							dataKey="A"
+							stroke="#10b981"
+							strokeWidth={2.5}
+							dot={false}
+							connectNulls={false}
+						/>
+						<Line
+							type="monotone"
+							dataKey="B"
+							stroke="hsl(var(--muted-foreground))"
+							strokeWidth={2}
+							dot={false}
+							strokeDasharray="5 5"
+							connectNulls={false}
+						/>
 					</LineChart>
 				</ResponsiveContainer>
 
@@ -126,21 +184,39 @@ export function Slide05() {
 							<span className="text-foreground/70">Startalter A</span>
 							<span className="text-foreground font-mono">{ageA} Jahre</span>
 						</div>
-						<Slider min={18} max={50} step={1} value={[ageA]} onValueChange={([v]) => setAgeA(Math.min(v, ageB - 1))} />
+						<Slider
+							min={18}
+							max={50}
+							step={1}
+							value={[ageA]}
+							onValueChange={([v]) => setAgeA(Math.min(v, ageB - 1))}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Startalter B</span>
 							<span className="text-foreground font-mono">{ageB} Jahre</span>
 						</div>
-						<Slider min={18} max={60} step={1} value={[ageB]} onValueChange={([v]) => setAgeB(Math.max(v, ageA + 1))} />
+						<Slider
+							min={18}
+							max={60}
+							step={1}
+							value={[ageB]}
+							onValueChange={([v]) => setAgeB(Math.max(v, ageA + 1))}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Monatliche Rate</span>
 							<span className="text-foreground font-mono">{monthly} €</span>
 						</div>
-						<Slider min={25} max={500} step={25} value={[monthly]} onValueChange={([v]) => setMonthly(v)} />
+						<Slider
+							min={25}
+							max={500}
+							step={25}
+							value={[monthly]}
+							onValueChange={([v]) => setMonthly(v)}
+						/>
 					</div>
 				</div>
 			</div>

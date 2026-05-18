@@ -1,23 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { Slider } from "@/components/ui/slider"
-import { SlideLayout, SlideHeader, SlideSection, InfoCard } from "./slide-layout"
 import {
-	LineChart,
+	CartesianGrid,
+	Legend,
 	Line,
+	LineChart,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
 } from "recharts"
+import { Slider } from "@/components/ui/slider"
+import {
+	InfoCard,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
 
 function calcGrowth(startCapital: number, rate: number, years: number) {
 	return Array.from({ length: years + 1 }, (_, i) => ({
 		year: i,
-		mitZinseszins: Math.round(startCapital * Math.pow(1 + rate / 100, i)),
+		mitZinseszins: Math.round(startCapital * (1 + rate / 100) ** i),
 		ohneZinseszins: Math.round(startCapital + startCapital * (rate / 100) * i),
 	}))
 }
@@ -51,7 +56,10 @@ export function Slide04() {
 					<span className="text-foreground font-medium">1.070 €</span>, also
 					74,90 €. Im dritten Jahr wieder 7 % auf den gewachsenen Betrag, und so
 					weiter. Du bekommst also{" "}
-					<span className="text-foreground font-medium">Zinsen auf deine Zinsen</span>.
+					<span className="text-foreground font-medium">
+						Zinsen auf deine Zinsen
+					</span>
+					.
 				</p>
 			</SlideSection>
 
@@ -62,30 +70,48 @@ export function Slide04() {
 					</span>
 					<div className="flex gap-6">
 						<div className="flex flex-col items-end">
-							<span className="text-muted-foreground text-xs">ohne Zinseszins</span>
-							<span className="font-bold text-foreground/60">{formatEur(withoutCompound)}</span>
+							<span className="text-muted-foreground text-xs">
+								ohne Zinseszins
+							</span>
+							<span className="font-bold text-foreground/60">
+								{formatEur(withoutCompound)}
+							</span>
 						</div>
 						<div className="flex flex-col items-end">
-							<span className="text-muted-foreground text-xs">mit Zinseszins</span>
-							<span className="font-bold text-emerald-500 text-xl">{formatEur(withCompound)}</span>
+							<span className="text-muted-foreground text-xs">
+								mit Zinseszins
+							</span>
+							<span className="font-bold text-emerald-500 text-xl">
+								{formatEur(withCompound)}
+							</span>
 						</div>
 					</div>
 				</div>
 
 				<ResponsiveContainer width="100%" height={200}>
-					<LineChart data={data} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+					<LineChart
+						data={data}
+						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
+					>
 						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 						<XAxis
 							dataKey="year"
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
-							label={{ value: "Jahre", position: "insideBottomRight", fill: "hsl(var(--muted-foreground))", fontSize: 11, offset: -5 }}
+							label={{
+								value: "Jahre",
+								position: "insideBottomRight",
+								fill: "hsl(var(--muted-foreground))",
+								fontSize: 11,
+								offset: -5,
+							}}
 						/>
 						<YAxis
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={55}
+							// domain={[0, Y_MAX]}
 						/>
 						<Tooltip
 							contentStyle={{
@@ -95,18 +121,38 @@ export function Slide04() {
 								fontSize: 12,
 								color: "hsl(var(--foreground))",
 							}}
-							labelFormatter={(v) => `Jahr ${v}`}
+							labelFormatter={v => `Jahr ${v}`}
 							formatter={(v: number, name: string) => [
 								`${v.toLocaleString("de-DE")} €`,
 								name === "mitZinseszins" ? "Mit Zinseszins" : "Ohne Zinseszins",
 							]}
 						/>
 						<Legend
-							formatter={(v) => v === "mitZinseszins" ? "Mit Zinseszins" : "Ohne Zinseszins"}
-							wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}
+							formatter={v =>
+								v === "mitZinseszins" ? "Mit Zinseszins" : "Ohne Zinseszins"
+							}
+							wrapperStyle={{
+								fontSize: 12,
+								color: "hsl(var(--muted-foreground))",
+							}}
 						/>
-						<Line type="monotone" dataKey="ohneZinseszins" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} strokeDasharray="5 5" />
-						<Line type="monotone" dataKey="mitZinseszins" stroke="#10b981" strokeWidth={2.5} dot={false} />
+						<Line
+							isAnimationActive={false}
+							type="monotone"
+							dataKey="ohneZinseszins"
+							stroke="hsl(var(--muted-foreground))"
+							strokeWidth={2}
+							dot={false}
+							strokeDasharray="5 5"
+						/>
+						<Line
+							isAnimationActive={false}
+							type="monotone"
+							dataKey="mitZinseszins"
+							stroke="#10b981"
+							strokeWidth={2.5}
+							dot={false}
+						/>
 					</LineChart>
 				</ResponsiveContainer>
 
@@ -114,23 +160,43 @@ export function Slide04() {
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Startkapital</span>
-							<span className="text-foreground font-mono">{startCapital.toLocaleString("de-DE")} €</span>
+							<span className="text-foreground font-mono">
+								{startCapital.toLocaleString("de-DE")} €
+							</span>
 						</div>
-						<Slider min={100} max={10000} step={100} value={[startCapital]} onValueChange={([v]) => setStartCapital(v)} />
+						<Slider
+							min={100}
+							max={10000}
+							step={100}
+							value={[startCapital]}
+							onValueChange={([v]) => setStartCapital(v)}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Rendite</span>
 							<span className="text-foreground font-mono">{rate} %</span>
 						</div>
-						<Slider min={1} max={12} step={0.5} value={[rate]} onValueChange={([v]) => setRate(v)} />
+						<Slider
+							min={1}
+							max={12}
+							step={0.5}
+							value={[rate]}
+							onValueChange={([v]) => setRate(v)}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Zeitraum</span>
 							<span className="text-foreground font-mono">{years} Jahre</span>
 						</div>
-						<Slider min={5} max={50} step={1} value={[years]} onValueChange={([v]) => setYears(v)} />
+						<Slider
+							min={5}
+							max={50}
+							step={1}
+							value={[years]}
+							onValueChange={([v]) => setYears(v)}
+						/>
 					</div>
 				</div>
 			</div>

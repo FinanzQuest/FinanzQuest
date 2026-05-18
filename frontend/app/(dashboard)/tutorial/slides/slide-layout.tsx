@@ -94,7 +94,7 @@ export function DataTable({ headers, rows }: DataTableProps) {
 				<tbody>
 					{rows.map((row, i) => (
 						<tr
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+							// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 							key={i}
 							className={cn(
 								"border-b border-zinc-800/60 last:border-0",
@@ -102,7 +102,7 @@ export function DataTable({ headers, rows }: DataTableProps) {
 							)}
 						>
 							{row.map((cell, j) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+								// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 								<td key={j} className="px-4 py-3 text-zinc-300">
 									{cell}
 								</td>

@@ -3,7 +3,6 @@ import type { SearchParams } from "@/database/custom_types"
 import { createClient } from "@/utils/supabase/server"
 import { getDepotDefaultId } from "./db"
 import { getActiveDepotId } from "./depot_cookie/server"
-import { nullable, nullish } from "zod"
 
 export async function getDepotIdWithInspect(params: SearchParams) {
 	const client = await createClient()
@@ -11,7 +10,6 @@ export async function getDepotIdWithInspect(params: SearchParams) {
 	if (params.inspect_depot) {
 		const parsedDepotId = parseInt(params.inspect_depot, 10)
 		if (!Number.isNaN(parsedDepotId)) {
-			console.log("parse failed")
 			return {
 				depotId: parsedDepotId,
 				error: null,
@@ -38,7 +36,6 @@ export async function getDepotIdWithInspect(params: SearchParams) {
 	if (userId) {
 		const depotId = await getActiveDepotId(userId)
 		if (depotId) {
-			console.log("found depot")
 			return {
 				depotId,
 				error: null,

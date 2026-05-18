@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import type { Client } from "@/database/custom_types"
 import { decodeDepotCookie, encodeDepotCookie } from "./encode"
-import { Client } from "@/database/custom_types"
 
 // lib/store.ts
 
@@ -37,7 +37,8 @@ export async function getActiveDepotId(
 		return parsed
 	}
 
-	return await getDepotCookie(userId)
+	const cookie = await getDepotCookie(userId)
+	return cookie
 }
 
 export function useActiveDepotId(client: Client) {

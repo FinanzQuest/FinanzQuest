@@ -1,5 +1,6 @@
 "use server"
 import { LineChart as LinechartIcon, TableCellsMerge } from "lucide-react"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
 import AreaChart from "@/components/charts/area"
@@ -24,6 +25,8 @@ export default async function Page({
 }: {
 	searchParams: Promise<SearchParams>
 }) {
+	const cookieStore = await cookies()
+	console.log("activeDepotId", cookieStore.get("activeDepotId")?.value)
 	const params = await searchParams
 	const res = await getDepotIdWithInspect(params)
 	console.log("get_depot_response:", res)

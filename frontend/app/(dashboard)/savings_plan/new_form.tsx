@@ -19,7 +19,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useActiveDepotId } from "@/lib/depot_cookie/client"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
-import { useMemo } from "react"
 
 type Props = {
 	limit?: number

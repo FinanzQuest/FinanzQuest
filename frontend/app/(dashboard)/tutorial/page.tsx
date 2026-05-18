@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useState } from "react"
 import {
 	Carousel,
+	type CarouselApi,
 	CarouselContent,
 	CarouselItem,
-	type CarouselApi,
 } from "@/components/ui/carousel"
 import { slides } from "./slides"
-import { SlideProgress } from "./slides/slide-progress"
 import { SlideNavigation } from "./slides/slide-navigation"
+import { SlideProgress } from "./slides/slide-progress"
 
 export default function Page() {
 	const [api, setApi] = useState<CarouselApi>()

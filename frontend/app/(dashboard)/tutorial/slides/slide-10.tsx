@@ -1,19 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Slider } from "@/components/ui/slider"
-import { SlideLayout, SlideHeader, SlideSection, InfoCard } from "./slide-layout"
 import {
-	BarChart,
 	Bar,
-	XAxis,
-	YAxis,
+	BarChart,
 	CartesianGrid,
-	Tooltip,
 	Legend,
 	ResponsiveContainer,
-	Cell,
+	Tooltip,
+	XAxis,
+	YAxis,
 } from "recharts"
+import { Slider } from "@/components/ui/slider"
+import {
+	InfoCard,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+} from "./slide-layout"
 
 function calcSparplan(monthly: number, rate: number, years: number) {
 	// Returns yearly snapshots: { year, eingezahlt, zinseszins }
@@ -48,7 +52,7 @@ export function Slide10() {
 	const totalIn = last.Eingezahlt
 
 	// Show every 5th year on chart to avoid clutter
-	const chartData = data.filter((d) => d.year % 5 === 0 || d.year === years)
+	const chartData = data.filter(d => d.year % 5 === 0 || d.year === years)
 
 	return (
 		<SlideLayout>
@@ -63,42 +67,50 @@ export function Slide10() {
 					Die wenigsten haben gleich zu Beginn mehrere Tausend Euro zur
 					Verfügung. Das ist auch gar nicht nötig: Ein{" "}
 					<span className="text-foreground font-medium">Sparplan</span> legt
-					automatisch jeden Monat einen festen Betrag in einen ETF an – z. B.
-					50 € oder 150 € aus dem Gehalt.
-				</p>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Durch den{" "}
-					<span className="text-foreground font-medium">Cost-Average-Effekt</span>{" "}
-					kaufst du bei niedrigen Kursen automatisch mehr Anteile und bei hohen
-					Kursen weniger. Das senkt deinen durchschnittlichen Einkaufspreis über
-					die Zeit – ohne dass du aktiv eingreifen musst.
+					automatisch jeden Monat einen festen Betrag in einen ETF an – z. B. 50
+					€ oder 150 € aus dem Gehalt.
 				</p>
 			</SlideSection>
 
 			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6">
 				<div className="grid grid-cols-3 gap-4">
 					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">Endwert nach {years} Jahren</span>
-						<span className="text-xl font-bold text-emerald-500">{endValue.toLocaleString("de-DE")} €</span>
+						<span className="text-xs text-muted-foreground">
+							Endwert nach {years} Jahren
+						</span>
+						<span className="text-xl font-bold text-emerald-500">
+							{endValue.toLocaleString("de-DE")} €
+						</span>
 					</div>
 					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">Eigene Einzahlungen</span>
-						<span className="text-xl font-bold text-foreground/70">{totalIn.toLocaleString("de-DE")} €</span>
+						<span className="text-xs text-muted-foreground">
+							Eigene Einzahlungen
+						</span>
+						<span className="text-xl font-bold text-foreground/70">
+							{totalIn.toLocaleString("de-DE")} €
+						</span>
 					</div>
 					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">Zinseszins-Gewinn</span>
-						<span className="text-xl font-bold text-blue-400">{last.Zinseszins.toLocaleString("de-DE")} €</span>
+						<span className="text-xs text-muted-foreground">
+							Zinseszins-Gewinn
+						</span>
+						<span className="text-xl font-bold text-blue-400">
+							{last.Zinseszins.toLocaleString("de-DE")} €
+						</span>
 					</div>
 				</div>
 
 				<ResponsiveContainer width="100%" height={200}>
-					<BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+					<BarChart
+						data={chartData}
+						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
+					>
 						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 						<XAxis
 							dataKey="year"
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
 							tickLine={false}
-							tickFormatter={(v) => `J. ${v}`}
+							tickFormatter={v => `J. ${v}`}
 						/>
 						<YAxis
 							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
@@ -107,13 +119,38 @@ export function Slide10() {
 							width={55}
 						/>
 						<Tooltip
-							contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, color: "hsl(var(--foreground))" }}
-							labelFormatter={(v) => `Nach ${v} Jahren`}
-							formatter={(v: number, name: string) => [`${v.toLocaleString("de-DE")} €`, name]}
+							contentStyle={{
+								background: "hsl(var(--card))",
+								border: "1px solid hsl(var(--border))",
+								borderRadius: 8,
+								fontSize: 12,
+								color: "hsl(var(--foreground))",
+							}}
+							labelFormatter={v => `Nach ${v} Jahren`}
+							formatter={(v: number, name: string) => [
+								`${v.toLocaleString("de-DE")} €`,
+								name,
+							]}
 						/>
-						<Legend wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }} />
-						<Bar dataKey="Eingezahlt" stackId="a" fill="hsl(var(--muted-foreground))" opacity={0.7} radius={[0, 0, 4, 4]} />
-						<Bar dataKey="Zinseszins" stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} />
+						<Legend
+							wrapperStyle={{
+								fontSize: 12,
+								color: "hsl(var(--muted-foreground))",
+							}}
+						/>
+						<Bar
+							dataKey="Eingezahlt"
+							stackId="a"
+							fill="hsl(var(--muted-foreground))"
+							opacity={0.7}
+							radius={[0, 0, 4, 4]}
+						/>
+						<Bar
+							dataKey="Zinseszins"
+							stackId="a"
+							fill="#10b981"
+							radius={[4, 4, 0, 0]}
+						/>
 					</BarChart>
 				</ResponsiveContainer>
 
@@ -123,21 +160,39 @@ export function Slide10() {
 							<span className="text-foreground/70">Monatliche Rate</span>
 							<span className="text-foreground font-mono">{monthly} €</span>
 						</div>
-						<Slider min={25} max={500} step={25} value={[monthly]} onValueChange={([v]) => setMonthly(v)} />
+						<Slider
+							min={25}
+							max={500}
+							step={25}
+							value={[monthly]}
+							onValueChange={([v]) => setMonthly(v)}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Rendite</span>
 							<span className="text-foreground font-mono">{rate} %</span>
 						</div>
-						<Slider min={1} max={12} step={0.5} value={[rate]} onValueChange={([v]) => setRate(v)} />
+						<Slider
+							min={1}
+							max={12}
+							step={0.5}
+							value={[rate]}
+							onValueChange={([v]) => setRate(v)}
+						/>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-foreground/70">Laufzeit</span>
 							<span className="text-foreground font-mono">{years} Jahre</span>
 						</div>
-						<Slider min={5} max={45} step={1} value={[years]} onValueChange={([v]) => setYears(v)} />
+						<Slider
+							min={5}
+							max={45}
+							step={1}
+							value={[years]}
+							onValueChange={([v]) => setYears(v)}
+						/>
 					</div>
 				</div>
 			</div>
