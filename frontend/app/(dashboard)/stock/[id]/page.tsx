@@ -115,68 +115,35 @@ const fetchStockDataCached = cache(async (id: number) => {
 })
 
 const dataFetcher = async (stockId: number, depotId: number) => {
-	const client = await createClient()
+  const client = await createClient()
+  const user = (await client.auth.getUser()).data.user
+  if (!user) redirect("/auth/login")
 
-	const user = (await client.auth.getUser()).data.user
+  const { data: depot, error: depotError } = await client
+    .schema("depots")
+    .from("depots")
+    .select()
+    .eq("id", depotId)
+    .contains("users", [user.id])
+    .limit(1)
+    .maybeSingle()
 
-	if (!user) {
-		redirect("/auth/login")
-	}
-	const { data: depot, error: depotError } = await client
-		.schema("depots")
-		.from("depots")
-		.select()
-		.eq("id", depotId)
-		.contains("users", [user.id])
-		.limit(1)
-		.maybeSingle()
+  if (depotError) return { depot: null, error: depotError, positions: null, commission: null }
+  if (!depot) redirect("/new_depot")
 
-	if (depotError) {
-		return {
-			depot: null,
-			error: depotError,
-			positions: null,
-			commission: null,
-		}
-	}
+  // parallel statt sequentiell
+  const [
+    { data: positions, error: positionError },
+    { data: commission, error: commissionError },
+  ] = await Promise.all([
+    client.schema("depots").from("positions").select("*")
+      .eq("depot_id", depot.id)
+      .eq("asset_id", stockId),
+    client.schema("depots").rpc("get_commission"),
+  ])
 
-	if (!depot) {
-		redirect("/new_depot")
-	}
+  if (positionError) return { depot, error: positionError, positions: null, commission: null }
+  if (commissionError) return { depot, error: commissionError, positions, commission: null }
 
-	const { data: positions, error: positionError } = await client
-		.schema("depots")
-		.from("positions")
-		.select("*")
-		.eq("depot_id", depot.id)
-		.eq("asset_id", stockId)
-
-	if (positionError) {
-		return {
-			depot: depot,
-			error: positionError,
-			positions: null,
-			commission: null,
-		}
-	}
-
-	const { data: commission, error: commissionError } = await client
-		.schema("depots")
-		.rpc("get_commission")
-
-	if (commissionError) {
-		return {
-			depot: depot,
-			error: commissionError,
-			positions: positions,
-			commission: null,
-		}
-	}
-
-	return {
-		depot: depot,
-		error: null,
-		positions,
-		commission,
-	}
+  return { depot, error: null, positions, commission }
 }
