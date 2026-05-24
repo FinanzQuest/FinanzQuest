@@ -66,7 +66,7 @@ impl Asset {
 pub async fn fetch_assets(pool: &PgPool) -> Result<Vec<Asset>, sqlx::Error> {
     sqlx::query_as!(
         Asset,
-        r#"SELECT id, symbol, last_updated, asset_type as "asset_type: _" FROM api.assets;"#
+        r#"SELECT id, symbol, last_updated, asset_type::TEXT as "asset_type!" FROM api.assets;"#
     )
     .fetch_all(pool)
     .await
