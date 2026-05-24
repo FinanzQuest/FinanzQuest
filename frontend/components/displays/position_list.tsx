@@ -72,11 +72,11 @@ export function PositionRow({
 						iconURL={iconURL}
 					/>
 					<span className="text-2xl self-end font-bold hover:underline-offset-4 transition-all no-underline hover:underline">
-						{symbol}
+						{name}
 					</span>
 				</div>
 				<div className="mb-[.1lh] text-ellipsis whitespace-nowrap overflow-hidden max-w-full text-muted-foreground">
-					{name}
+					{symbol}
 				</div>
 				{/*<div className="text-muted-foreground text-sm hidden md:block text-ellipsis max-w-full overflow-hidden whitespace-nowrap">
           {description}

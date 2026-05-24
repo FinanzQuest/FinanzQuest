@@ -3,3 +3,4 @@
 .pgpass
 /secrets
 .env
+.env.*
