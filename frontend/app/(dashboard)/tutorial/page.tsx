@@ -48,7 +48,7 @@ export default function Page() {
 					opts={{
 						loop: false,
 						align: "start",
-						watchDrag: (emblaApi, event) => {
+						watchDrag: (_emblaApi, event) => {
 							const target = event.target as HTMLElement
 							// Nicht draggen wenn der Klick von einem Slider kommt
 							return !target.closest("[data-no-swipe]")

@@ -1,8 +1,8 @@
 "use server"
+import type { SearchParams } from "@/database/custom_types"
 import { createClient } from "@/utils/supabase/server"
 import { getDepotDefaultId } from "./db"
 import { getActiveDepotId } from "./depot_cookie/server"
-import type { SearchParams } from "@/database/custom_types"
 
 export async function getDepotIdWithInspect(params: SearchParams) {
 	const client = await createClient()

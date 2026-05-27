@@ -12,10 +12,12 @@ import {
 	SearchIcon,
 	Trophy,
 } from "lucide-react"
+import Image from "next/image"
 import { Suspense, useEffect, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"
 import { SearchBarPopOut } from "@/components/search_bar"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
 	Sidebar,
@@ -32,13 +34,11 @@ import {
 } from "@/components/ui/sidebar"
 import type { Database } from "@/database/types"
 import { hasSpecialRoles } from "@/lib/db"
+import { cn } from "@/lib/utils"
+import logo from "@/public/logo.svg"
 import { createClient } from "@/utils/supabase/client"
 import User from "./user"
-import { cn } from "@/lib/utils"
-import { Separator } from "@/components/ui/separator"
 
-import logo from "@/public/logo.svg"
-import Image from "next/image"
 interface ItemT {
 	title: string
 	url: string

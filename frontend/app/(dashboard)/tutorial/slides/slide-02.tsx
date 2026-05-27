@@ -13,7 +13,6 @@ import {
 import { Slider } from "@/components/ui/slider"
 import {
 	InfoCard,
-	NoSwipe,
 	SlideHeader,
 	SlideLayout,
 	SlideSection,

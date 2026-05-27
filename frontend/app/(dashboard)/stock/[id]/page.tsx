@@ -6,9 +6,6 @@ import {
 	StockPositionCard,
 } from "@/components/cards/cards"
 import { ChartCard } from "@/components/cards/client"
-import PriceTable from "@/components/prices/table/table"
-import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { fetchStockData } from "@/database/fetch_stock_data"
 import { formatter as formatPrices } from "@/lib/data/formatter"
 import { getDepotId } from "@/lib/get_depot_id"

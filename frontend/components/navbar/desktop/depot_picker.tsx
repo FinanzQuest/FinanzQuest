@@ -1,4 +1,5 @@
 "use client"
+import { Briefcase } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import {
@@ -12,7 +13,6 @@ import type { Depot } from "@/database/custom_types"
 import { getUserId } from "@/lib/db"
 import { getActiveDepotId, setDepotCookie } from "@/lib/depot_cookie/client"
 import { createClient } from "@/utils/supabase/client"
-import { Briefcase } from "lucide-react"
 
 async function fetchDepots() {
 	const client = createClient()

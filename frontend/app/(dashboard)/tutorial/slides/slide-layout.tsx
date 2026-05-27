@@ -118,15 +118,3 @@ export function DataTable({ headers, rows }: DataTableProps) {
 		</div>
 	)
 }
-export function NoSwipe({ children }: { children: React.ReactNode }) {
-	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: needed to prevent carousel swipe
-		<div
-			role="presentation"
-			onMouseDown={e => e.stopPropagation()}
-			onTouchStart={e => e.stopPropagation()}
-		>
-			{children}
-		</div>
-	)
-}
