@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
-import { LogOut } from "lucide-react"
+import { LogOut, UserIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { logout } from "@/app/(auth)/actions"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -24,7 +24,7 @@ function getInitials(name: string) {
 	return `${first}${last}`
 }
 
-export default function User() {
+export default function User({ collapsed }: { collapsed?: boolean }) {
 	const client = createClient()
 	const [userData, setUserData] = useState<
 		Awaited<ReturnType<typeof dataFetcher>>["data"] | null
@@ -40,16 +40,24 @@ export default function User() {
 		})
 	}, [client])
 
+	const trigger = collapsed ? (
+		<DropdownMenuTrigger className="aspect-square rounded-lg border flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
+			<UserIcon className="size-6 mx-auto my-auto" />
+		</DropdownMenuTrigger>
+	) : (
+		<DropdownMenuTrigger className="rounded-t-md border flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
+			<div className="flex flex-col items-start overflow-hidden px-3 p-2">
+				<div className="text-sm">{userData?.name}</div>
+				<div className="text-muted-foreground text-xs font-normal text-ellipsis w-full overflow-hidden">
+					{userData?.email}
+				</div>
+			</div>
+		</DropdownMenuTrigger>
+	)
+
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger className="rounded-t-md border flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
-				<div className="flex flex-col items-start overflow-hidden px-3 p-2">
-					<div className="text-sm">{userData?.name}</div>
-					<div className="text-muted-foreground text-xs font-normal text-ellipsis w-full overflow-hidden">
-						{userData?.email}
-					</div>
-				</div>
-			</DropdownMenuTrigger>
+			{trigger}
 			<DropdownMenuContent side="right" align="start" sideOffset={10}>
 				<DropdownMenuLabel className="flex flex-row gap-3 items-center">
 					<Avatar className="rounded-lg size-12 ">

@@ -12,6 +12,7 @@ import type { Depot } from "@/database/custom_types"
 import { getUserId } from "@/lib/db"
 import { getActiveDepotId, setDepotCookie } from "@/lib/depot_cookie/client"
 import { createClient } from "@/utils/supabase/client"
+import { Briefcase } from "lucide-react"
 
 async function fetchDepots() {
 	const client = createClient()
@@ -26,7 +27,7 @@ async function fetchDepots() {
 		.contains("users", [userId])
 }
 
-export default function DepotPicker() {
+export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const [activeDepotId, setActiveDepotId] = useState<number | null>(null)
@@ -63,6 +64,16 @@ export default function DepotPicker() {
 		})()
 	}, [searchParams])
 
+	const trigger = collapsed ? (
+		<SelectTrigger className="aspect-square! focus:!ring-transparent flex flex-row py-2 h-fit">
+			<Briefcase className="shrink-0 size-6" />
+		</SelectTrigger>
+	) : (
+		<SelectTrigger className="!rounded-t-none focus:!ring-transparent">
+			<SelectValue placeholder="Select a depot" />
+		</SelectTrigger>
+	)
+
 	return (
 		<Select
 			value={activeDepotId?.toString()}
@@ -76,9 +87,7 @@ export default function DepotPicker() {
 				}
 			}}
 		>
-			<SelectTrigger className="!rounded-t-none focus:!ring-transparent">
-				<SelectValue placeholder="Select a depot" />
-			</SelectTrigger>
+			{trigger}
 			<SelectContent align="start" side="right" sideOffset={10}>
 				{depots?.map(depot => (
 					<SelectItem key={depot.id} value={depot.id.toString()}>
