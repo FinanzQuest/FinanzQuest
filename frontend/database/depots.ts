@@ -34,7 +34,7 @@ export function processDepotValues(edges: DepotValue[]) {
 		maxValue = Math.max(maxValue, total)
 	}
 
-	startValue = Math.min(50000, startValue)
+	startValue = Math.min(startValue, minValue)
 
 	const offset =
 		Math.abs(maxValue - (startValue ?? 0)) / Math.abs(maxValue - minValue)

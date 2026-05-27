@@ -45,7 +45,15 @@ export default function Page() {
 			<div className="flex-1 min-h-0 max-h-full overflow-scroll">
 				<Carousel
 					setApi={setApi}
-					opts={{ loop: false, align: "start" }}
+					opts={{
+						loop: false,
+						align: "start",
+						watchDrag: (emblaApi, event) => {
+							const target = event.target as HTMLElement
+							// Nicht draggen wenn der Klick von einem Slider kommt
+							return !target.closest("[data-no-swipe]")
+						},
+					}}
 					className="h-full w-full"
 				>
 					<CarouselContent className="h-full ml-0">

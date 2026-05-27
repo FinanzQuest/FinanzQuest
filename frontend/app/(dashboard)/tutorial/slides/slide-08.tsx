@@ -111,7 +111,10 @@ export function Slide08() {
 				</div>
 			</div>
 
-			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-4">
+			<div
+				data-no-swipe
+				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-4"
+			>
 				<div className="flex items-center justify-between">
 					<span className="text-foreground font-semibold text-sm">
 						Simulation: 36 Monate Kursverlauf

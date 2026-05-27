@@ -84,7 +84,10 @@ export function Slide05() {
 				</p>
 			</SlideSection>
 
-			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6">
+			<div
+				data-no-swipe
+				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
+			>
 				<div className="grid grid-cols-2 gap-4">
 					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
 						<span className="text-xs text-muted-foreground">

@@ -274,7 +274,7 @@ export function Slide06() {
 						Einblenden.
 					</p>
 				</div>
-				<div className="rounded-xl border bg-muted/40 p-4">
+				<div data-no-swipe className="rounded-xl border bg-muted/40 p-4">
 					<ResponsiveContainer width="100%" height={200}>
 						<LineChart
 							data={HISTORICAL_DATA}

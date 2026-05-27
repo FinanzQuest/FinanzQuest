@@ -33,9 +33,13 @@ export function SlideHeader({ eyebrow, title, subtitle }: SlideHeaderProps) {
 					{eyebrow}
 				</span>
 			)}
-			<h1 className="text-3xl font-bold text-zinc-50 leading-tight">{title}</h1>
+			<h1 className="text-3xl font-bold text-foreground leading-tight">
+				{title}
+			</h1>
 			{subtitle && (
-				<p className="text-zinc-400 text-base leading-relaxed">{subtitle}</p>
+				<p className="text-foreground/70 text-base leading-relaxed">
+					{subtitle}
+				</p>
 			)}
 		</div>
 	)
@@ -61,8 +65,8 @@ export function InfoCard({ children, accent }: InfoCardProps) {
 			className={cn(
 				"rounded-xl border p-5 text-sm leading-relaxed",
 				accent
-					? "border-emerald-500/30 bg-emerald-500/5 text-emerald-200"
-					: "border-zinc-800 bg-zinc-900 text-zinc-300"
+					? " dark:border-emerald-500/30 dark:bg-emerald-500/5 dark:text-emerald-200 bg-emerald-500/20 border-emerald-500/50 text-emerald-700"
+					: "border border-border bg-card text-foreground/75"
 			)}
 		>
 			{children}
@@ -77,14 +81,14 @@ interface DataTableProps {
 
 export function DataTable({ headers, rows }: DataTableProps) {
 	return (
-		<div className="rounded-xl border border-zinc-800 overflow-hidden">
+		<div className="rounded-xl border border-border overflow-hidden">
 			<table className="w-full text-sm">
 				<thead>
-					<tr className="border-b border-zinc-800 bg-zinc-900">
+					<tr className="border-b border-border bg-card">
 						{headers.map(h => (
 							<th
 								key={h}
-								className="text-left px-4 py-3 text-zinc-400 font-semibold text-xs uppercase tracking-wider"
+								className="text-left px-4 py-3 text-muted-foreground font-semibold text-xs uppercase tracking-wider"
 							>
 								{h}
 							</th>
@@ -97,13 +101,13 @@ export function DataTable({ headers, rows }: DataTableProps) {
 							// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 							key={i}
 							className={cn(
-								"border-b border-zinc-800/60 last:border-0",
-								i % 2 === 0 ? "bg-zinc-950" : "bg-zinc-900/40"
+								"border-b border-border last:border-0",
+								i % 2 === 0 ? "bg-muted/50" : "bg-card"
 							)}
 						>
 							{row.map((cell, j) => (
 								// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
-								<td key={j} className="px-4 py-3 text-zinc-300">
+								<td key={j} className="px-4 py-3 text-foreground/75">
 									{cell}
 								</td>
 							))}
@@ -111,6 +115,18 @@ export function DataTable({ headers, rows }: DataTableProps) {
 					))}
 				</tbody>
 			</table>
+		</div>
+	)
+}
+export function NoSwipe({ children }: { children: React.ReactNode }) {
+	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: needed to prevent carousel swipe
+		<div
+			role="presentation"
+			onMouseDown={e => e.stopPropagation()}
+			onTouchStart={e => e.stopPropagation()}
+		>
+			{children}
 		</div>
 	)
 }

@@ -13,6 +13,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import {
 	InfoCard,
+	NoSwipe,
 	SlideHeader,
 	SlideLayout,
 	SlideSection,
@@ -50,7 +51,10 @@ export function Slide02() {
 				</p>
 			</SlideSection>
 
-			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6">
+			<div
+				data-no-swipe
+				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
+			>
 				<div className="flex items-center justify-between flex-wrap gap-2">
 					<span className="text-foreground font-semibold text-sm">
 						Kaufkraft von 100 € über die Zeit

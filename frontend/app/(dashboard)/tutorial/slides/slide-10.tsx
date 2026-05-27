@@ -72,7 +72,10 @@ export function Slide10() {
 				</p>
 			</SlideSection>
 
-			<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6">
+			<div
+				data-no-swipe
+				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
+			>
 				<div className="grid grid-cols-3 gap-4">
 					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
 						<span className="text-xs text-muted-foreground">
