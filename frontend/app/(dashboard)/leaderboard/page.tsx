@@ -81,7 +81,7 @@ export default async function Page(props: {
 					</div>
 				)}
 			</div>
-			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px, max)] w-full border rounded-xl overflow-hidden shadow gap-x-4">
+			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px, max)] w-full border rounded-xl overflow-y-scroll shadow gap-x-4">
 				{leaderboard.data.map(row => (
 					<LeaderboardEntry key={row.id} row={row} />
 				))}

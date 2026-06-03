@@ -18,7 +18,7 @@ services:
       - ./dbinit/stocks.sql:/docker-entrypoint-initdb.d/03_stocks.sql
       - ./dbinit/assets.csv:/docker-entrypoint-initdb.d/data/assets.csv
     ports:
-      - 0.0.0.0:5432:5432
+      - 127.0.0.1:5432:5432
     networks:
       - postgres
     restart: unless-stopped
