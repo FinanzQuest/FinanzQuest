@@ -38,10 +38,10 @@ impl Uploader {
     }
 
     /// Flush remaining rows and wait for the task to finish
-    pub async fn finish(self) -> Result<(), sqlx::Error> {
+    pub async fn finish(self) -> anyhow::Result<()> {
         let _ = self.tx.send(UploaderMsg::Flush).await;
         drop(self.tx); // close channel so task exits loop
-        self.handle.await.expect("uploader task panicked")
+        Ok(self.handle.await??)
     }
 }
 

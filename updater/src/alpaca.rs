@@ -5,6 +5,7 @@ pub use params::*;
 pub mod params {
     #[derive(strum_macros::Display, strum_macros::EnumString, Copy, Clone, Debug)]
     #[strum(serialize_all = "lowercase")]
+    #[allow(unused)]
     pub enum Feed {
         Sip,
         Iex,
@@ -12,6 +13,7 @@ pub mod params {
     }
 
     #[derive(Clone, Debug)]
+    #[allow(unused)]
     pub enum Currency {
         EUR,
         USD,
@@ -52,6 +54,7 @@ pub mod params {
     }
 
     #[derive(Copy, Clone, Debug)]
+    #[allow(unused)]
     pub enum Timeframe {
         Minutes(u8),
         Hours(u8),
@@ -73,6 +76,7 @@ pub mod params {
     }
 
     #[derive(Clone, Debug)]
+    #[allow(unused)]
     pub enum DateTime {
         Date(time::Date),
         DateTime(time::OffsetDateTime),
@@ -129,7 +133,7 @@ impl Default for QueryParams {
 }
 
 impl QueryParams {
-    pub fn to_params_list(&self) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
+    pub fn to_params_list(&self) -> anyhow::Result<Vec<(String, String)>> {
         macro_rules! param {
             ($list:expr, $key:expr, $val:expr) => {
                 $list.push(($key.to_string(), $val.to_string()))
@@ -177,16 +181,8 @@ pub struct AlpacaRequest {
     pub query: QueryParams,
 }
 
-impl AlpacaRequest {
-    pub fn new(symbols: impl IntoIterator<Item = impl Into<String>>, query: QueryParams) -> Self {
-        Self {
-            symbols: symbols.into_iter().map(Into::into).collect(),
-            query,
-        }
-    }
-}
-
 #[derive(Debug, serde::Deserialize)]
+#[allow(unused)]
 pub struct Bar {
     pub t: String, // timestamp
     pub o: f64,    // open
@@ -220,10 +216,7 @@ impl AlpacaClient {
         }
     }
 
-    pub async fn fetch_bars(
-        &self,
-        request: AlpacaRequest,
-    ) -> Result<BarsResponse, Box<dyn std::error::Error>> {
+    pub async fn fetch_bars(&self, request: AlpacaRequest) -> anyhow::Result<BarsResponse> {
         let mut params = request.query.to_params_list()?;
         params.push(("symbols".into(), request.symbols.join(",")));
 
@@ -247,7 +240,7 @@ impl AlpacaClient {
         &self,
         symbols: Vec<String>,
         query: QueryParams,
-    ) -> Result<HashMap<String, Vec<Bar>>, Box<dyn std::error::Error>> {
+    ) -> anyhow::Result<HashMap<String, Vec<Bar>>> {
         let mut all_bars: HashMap<String, Vec<Bar>> = HashMap::new();
         let mut page_token = query.page_token;
 
@@ -289,9 +282,7 @@ impl AlpacaClient {
         &self,
         symbols: Vec<String>,
         query: QueryParams,
-    ) -> impl tokio_stream::Stream<
-        Item = Result<HashMap<String, Vec<Bar>>, Box<dyn std::error::Error>>,
-    > + '_ {
+    ) -> impl tokio_stream::Stream<Item = anyhow::Result<HashMap<String, Vec<Bar>>>> {
         async_stream::stream! {
 
             let mut page_token = query.page_token;
@@ -333,9 +324,7 @@ impl AlpacaClient {
         symbols: Vec<String>,
         query: QueryParams,
         chunk_size: usize,
-    ) -> impl tokio_stream::Stream<
-        Item = Result<HashMap<String, Vec<Bar>>, Box<dyn std::error::Error>>,
-    > + '_ {
+    ) -> impl tokio_stream::Stream<Item = anyhow::Result<HashMap<String, Vec<Bar>>>> {
         async_stream::stream! {
 
             let mut page_token = query.page_token;

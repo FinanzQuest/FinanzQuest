@@ -1,7 +1,7 @@
 use async_stream::stream;
 use rand::seq::IndexedRandom;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -67,6 +67,7 @@ impl Error {
 }
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct SymbolResult {
     pub symbol: String,
     pub asset_id: i64,
@@ -110,7 +111,7 @@ fn uts_to_datetime(u: &i64) -> time::OffsetDateTime {
     time::OffsetDateTime::from_unix_timestamp(*u).unwrap()
 }
 
-fn filter_null_data(mut timestamps: Vec<i64>, mut quote: Quote) -> (Vec<i64>, NonNullQuote) {
+fn filter_null_data(mut timestamps: Vec<i64>, quote: Quote) -> (Vec<i64>, NonNullQuote) {
     let valid_indices: Vec<usize> = quote
         .close
         .iter()
@@ -148,7 +149,7 @@ async fn fetch_once(
     range: Option<&(time::OffsetDateTime, time::OffsetDateTime)>,
 ) -> Result<PriceFrame, Error> {
     let url = mk_url(symbol, range, "1d");
-    let mut response: Value = client.get(&url).send().await?.json().await?;
+    let response: Value = client.get(&url).send().await?.json().await?;
 
     // classify errors
     match response.pointer("/chart/error") {
@@ -279,7 +280,7 @@ pub fn stream_prices(
                 };
 
                 match fetch_once(&client, &req.symbol, req.range.as_ref()).await {
-                    Ok(mut frame) => {
+                    Ok(frame) => {
                         last_err = None;
                         yield SymbolResult {
                             symbol: req.symbol.clone(),

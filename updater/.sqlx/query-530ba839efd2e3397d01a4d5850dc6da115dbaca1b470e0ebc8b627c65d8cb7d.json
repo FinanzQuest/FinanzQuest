@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "REFRESH MATERIALIZED VIEW depots.aggregated_transactions_mat",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "530ba839efd2e3397d01a4d5850dc6da115dbaca1b470e0ebc8b627c65d8cb7d"
+}

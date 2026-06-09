@@ -35,7 +35,7 @@ struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> anyhow::Result<()> {
     let Args {
         db_url,
         alpaca_secret_key,
@@ -118,6 +118,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
         tokio::time::sleep(yf_timeout).await;
     }
+    uploader.finish().await?;
+
+    let pool = sqlx::postgres::PgPoolOptions::new()
+        .max_connections(4)
+        .connect(db_url.as_str())
+        .await?;
+
+    sqlx::query!("REFRESH MATERIALIZED VIEW depots.aggregated_transactions_mat")
+        .execute(&pool)
+        .await
+        .map_err(|e| {
+            anyhow::Error::from(e).context("Error updating aggregated transactions mat view")
+        })?;
+    sqlx::query!("REFRESH MATERIALIZED VIEW depots.position_values_mat")
+        .execute(&pool)
+        .await
+        .map_err(|e| anyhow::Error::from(e).context("Error updating position values mat view"))?;
 
     Ok(())
 }
