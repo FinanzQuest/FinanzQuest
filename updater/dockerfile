@@ -17,7 +17,7 @@ COPY run_updater.sh /usr/local/bin/run_updater.sh
 COPY startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/run_updater.sh /usr/local/bin/startup.sh
 
-RUN echo '0 1 * * * root /usr/local/bin/run_updater.sh' > /etc/crontabs/root && \
+RUN echo '0 1 * * * /usr/local/bin/run_updater.sh' > /etc/crontabs/root && \
     chmod 0644 /etc/crontabs/root
 
 CMD ["/usr/local/bin/startup.sh"]
