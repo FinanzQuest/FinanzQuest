@@ -31,7 +31,6 @@
         # packages.default = pkgs.callPackage ./. {};
         devShells.default = pkgs.mkShell {
           shellHook = ''
-            export
 
           '';
           packages = with pkgs; [
