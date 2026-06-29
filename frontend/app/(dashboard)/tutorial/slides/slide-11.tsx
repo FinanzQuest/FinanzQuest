@@ -30,7 +30,7 @@ const PRINCIPLES = [
 	{
 		number: "05",
 		title: "Langfristig denken",
-		desc: "Kursschwankungen gehören dazu – wer nicht voreilig verkauft, profitiert langfristig.",
+		desc: "Kursschwankungen gehören dazu - wer nicht voreilig verkauft, profitiert langfristig.",
 	},
 ]
 
@@ -279,7 +279,7 @@ export function Slide11() {
 								? "Perfekt! Du hast alle Fragen richtig beantwortet."
 								: score >= 3
 									? "Gut gemacht! Ein paar Konzepte kannst du nochmal nachlesen."
-									: "Schau dir die Slides nochmal an – dann klappt's beim nächsten Versuch."}
+									: "Schau dir die Slides nochmal an - dann klappt's beim nächsten Versuch."}
 						</p>
 						<Button variant="outline" size="sm" onClick={restart}>
 							Nochmal versuchen

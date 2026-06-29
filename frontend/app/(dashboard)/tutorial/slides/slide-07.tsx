@@ -11,26 +11,26 @@ const riskItems = [
 	{
 		label: "Tagesgeld",
 		risk: 1,
-		rendite: "1–2 %",
+		rendite: "1-2 %",
 		desc: "Keine Schwankungen, aber oft unter der Inflation.",
 	},
 	{
 		label: "Staatsanleihen",
 		risk: 2,
-		rendite: "2–3 %",
+		rendite: "2-3 %",
 		desc: "Geringe Schwankungen, stabile Zinszahlungen.",
 	},
 	{
 		label: "ETFs (z. B. MSCI World)",
 		risk: 3,
-		rendite: "7–9 %",
-		desc: "Spürbare Schwankungen – der MSCI World hat 2008 knapp 40 % verloren. Durch Streuung über hunderte Unternehmen aber deutlich stabiler als Einzelaktien, und historisch immer erholt.",
+		rendite: "7-9 %",
+		desc: "Spürbare Schwankungen - der MSCI World hat 2008 knapp 40 % verloren. Durch Streuung über hunderte Unternehmen aber deutlich stabiler als Einzelaktien, und historisch immer erholt.",
 	},
 	{
 		label: "Einzelaktien",
 		risk: 4,
 		rendite: "sehr unterschiedlich",
-		desc: "Hängt komplett am Schicksal eines einzigen Unternehmens. Kann sehr gut laufen – oder alles verloren gehen.",
+		desc: "Hängt komplett am Schicksal eines einzigen Unternehmens. Kann sehr gut laufen - oder alles verloren gehen.",
 	},
 	{
 		label: "Kryptowährungen",
@@ -51,7 +51,7 @@ const riskColor: Record<number, string> = {
 const riskLabel: Record<number, string> = {
 	1: "sehr gering",
 	2: "gering",
-	3: "mittel–hoch",
+	3: "mittel-hoch",
 	4: "hoch",
 	5: "sehr hoch",
 }
@@ -60,8 +60,7 @@ export function Slide07() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="Risiko & Rendite"
-				title="Mehr Rendite – aber zu welchem Preis?"
+				title="Mehr Rendite - aber zu welchem Preis?"
 				subtitle="Rendite und Risiko sind untrennbar verbunden. Wer mehr Rendite möchte, muss größere Schwankungen in Kauf nehmen."
 			/>
 
@@ -69,7 +68,7 @@ export function Slide07() {
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					<span className="text-foreground font-medium">Volatilität</span>{" "}
 					beschreibt, wie stark der Kurs eines Wertpapiers schwankt. Ein
-					Aktienkurs kann innerhalb eines Jahres um 30 % steigen – aber auch um
+					Aktienkurs kann innerhalb eines Jahres um 30 % steigen - aber auch um
 					40 % fallen. Wer 2008 während der Finanzkrise Aktien hatte, sah seinen
 					Depotwert zeitweise halbiert.
 				</p>
@@ -110,8 +109,8 @@ export function Slide07() {
 			<InfoCard>
 				<span className="font-medium text-foreground">Wichtig:</span> Wer
 				kurzfristig auf sein Geld angewiesen ist, kann sich starke Schwankungen
-				nicht leisten. Wer aber einen langen Anlagehorizont hat – z. B. 30 Jahre
-				bis zur Rente – kann Kursschwankungen aussitzen. Historisch haben sich
+				nicht leisten. Wer aber einen langen Anlagehorizont hat - z. B. 30 Jahre
+				bis zur Rente - kann Kursschwankungen aussitzen. Historisch haben sich
 				Aktienmärkte nach jedem Einbruch erholt und sind langfristig gestiegen.
 			</InfoCard>
 		</SlideLayout>

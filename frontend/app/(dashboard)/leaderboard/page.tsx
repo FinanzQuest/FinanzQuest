@@ -40,9 +40,7 @@ export default async function Page(props: {
 
 	const rankIndicator = (() => {
 		if (rankChange === null || rankChange === 0)
-			return (
-				<span className="text-muted-foreground font-mono font-bold">—</span>
-			)
+			return <Minus className="size-5 text-muted-foreground self-center" />
 
 		return (
 			<div className="flex flex-row items-baseline gap-1">
@@ -81,7 +79,7 @@ export default async function Page(props: {
 					</div>
 				)}
 			</div>
-			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px, max)] w-full border rounded-xl overflow-y-scroll shadow gap-x-4">
+			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,_max-content)] w-full border rounded-xl overflow-y-scroll shadow gap-x-4">
 				{leaderboard.data.map(row => (
 					<LeaderboardEntry key={row.id} row={row} />
 				))}
@@ -122,7 +120,7 @@ function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
 	return (
 		<div
 			className={cn(
-				"grid grid-cols-subgrid col-span-5 w-0 items-baseline pl-4 even:bg-muted/50"
+				"grid grid-cols-subgrid col-span-5 items-baseline pl-4 even:bg-muted/50"
 			)}
 		>
 			<div className="grid grid-cols-subgrid py-4 col-span-4 self-center">

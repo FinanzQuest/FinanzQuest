@@ -1,4 +1,4 @@
-import { Geist_Mono as FontMono, Inter as FontSans } from "next/font/google"
+import { Geist as FontSans, Geist_Mono as FontMono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
@@ -6,7 +6,6 @@ import type React from "react"
 import { cn } from "@/lib/utils"
 
 const fontSans = FontSans({
-	weight: "400",
 	subsets: ["latin"],
 	variable: "--font-sans",
 })

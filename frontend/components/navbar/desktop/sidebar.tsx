@@ -13,6 +13,7 @@ import {
 	Trophy,
 } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { Suspense, useEffect, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"
 import { SearchBarPopOut } from "@/components/search_bar"
@@ -94,12 +95,12 @@ function NavItems({
 										tooltip={item.title}
 										size="default"
 									>
-										<a href={item.url}>
+										<Link href={item.url}>
 											<item.icon
 												className={cn(collapsed ? "size-6" : "size-6")}
 											/>
 											{!collapsed && <span>{item.title}</span>}
-										</a>
+										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}
@@ -120,11 +121,14 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 	return (
 		<Sidebar
 			collapsible="icon"
-			className={cn("bg-sidebar hidden md:flex", collapsed ? "" : "px-3")}
+			className={cn(
+				"bg-sidebar hidden rounded-xl m-2 h-auto overflow-hidden md:flex",
+				collapsed ? "" : "px-1"
+			)}
 		>
 			<SidebarHeader>
 				{!collapsed && (
-					<div className="flex flex-row items-center gap-2 pb-2">
+					<div className="flex flex-row items-center gap-2 pb-2 pt-1">
 						<Image
 							src={logo}
 							alt="FinanzQuest"
@@ -132,7 +136,9 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 							width={32}
 							height={32}
 						/>
-						<span className="text-2xl font-extrabold">FinanzQuest</span>
+						<span className="text-2xl font-semibold text-foreground/90">
+							FinanzQuest
+						</span>
 					</div>
 				)}
 				{collapsed && (
@@ -234,7 +240,7 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 											{label}
 										</p>
 										{items.map(item => (
-											<a
+											<Link
 												key={item.title}
 												href={item.url}
 												onClick={() => setOpen(false)}
@@ -242,7 +248,7 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 											>
 												<item.icon className="size-5 shrink-0" />
 												<span>{item.title}</span>
-											</a>
+											</Link>
 										))}
 									</div>
 								))}
@@ -262,7 +268,7 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 }
 
 // ── iPad landscape: icon-only sidebar (collapsed by default) ─────────────────
-// This reuses DesktopSidebar – on md+ it shows, on portrait it's hidden via CSS.
+// This reuses DesktopSidebar - on md+ it shows, on portrait it's hidden via CSS.
 // We control "landscape only" via a media query wrapper in the layout instead.
 
 // ── Main export ──────────────────────────────────────────────────────────────

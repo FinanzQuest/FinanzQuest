@@ -21,7 +21,7 @@ export function Slide01() {
 					Das gesetzliche Rentensystem im Wandel
 				</h2>
 				<p className="text-foreground/75 text-sm leading-relaxed">
-					Wenn du in Rente gehst, erhältst du monatlich Geld vom Staat – die
+					Wenn du in Rente gehst, erhältst du monatlich Geld vom Staat - die
 					gesetzliche Rente. Sie wird von den Menschen finanziert, die zu diesem
 					Zeitpunkt noch arbeiten. Das funktioniert solange gut, wie genug
 					Erwerbstätige genug Rentner finanzieren können.
@@ -56,12 +56,12 @@ export function Slide01() {
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					Als Rentenlücke bezeichnet man die Differenz zwischen dem letzten
 					Gehalt und der zu erwartenden gesetzlichen Rente. Sie beträgt heute
-					häufig <span className="text-foreground font-medium">30–40 %</span>.
+					häufig <span className="text-foreground font-medium">30-40 %</span>.
 				</p>
 				<InfoCard>
 					<span className="font-medium text-foreground">Beispiel:</span> Wer
 					zuletzt 3.000 € netto verdient hat, bekommt im Alter womöglich nur
-					1.800–2.100 € – obwohl die Lebenshaltungskosten kaum sinken.
+					1.800-2.100 € - obwohl die Lebenshaltungskosten kaum sinken.
 				</InfoCard>
 				<InfoCard accent>
 					Wer frühzeitig privat vorsorgt, kann diese Lücke durch eigenes

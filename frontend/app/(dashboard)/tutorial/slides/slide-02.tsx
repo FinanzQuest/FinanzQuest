@@ -37,13 +37,13 @@ export function Slide02() {
 			<SlideHeader
 				eyebrow="Grundlagen"
 				title="Inflation und Kaufkraft"
-				subtitle="Inflation bedeutet: Preise steigen – und dein Geld wird dadurch Jahr für Jahr weniger wert."
+				subtitle="Inflation bedeutet: Preise steigen - und dein Geld wird dadurch Jahr für Jahr weniger wert."
 			/>
 
 			<SlideSection>
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					Ein Beispiel aus dem Alltag: Eine Kinokarte hat vor 20 Jahren ca. 5 €
-					gekostet, heute oft 15 €. Der Betrag auf deinem Konto bleibt gleich –
+					gekostet, heute oft 15 €. Der Betrag auf deinem Konto bleibt gleich -
 					aber du kannst damit weniger kaufen als früher. Diesen Effekt nennt
 					man{" "}
 					<span className="text-foreground font-medium">Kaufkraftverlust</span>.
@@ -153,7 +153,7 @@ export function Slide02() {
 
 			<InfoCard accent>
 				Geld auf einem niedrig verzinsten Konto zu lassen ist keine neutrale
-				Entscheidung – real bedeutet es einen schleichenden Wertverlust von Jahr
+				Entscheidung - real bedeutet es einen schleichenden Wertverlust von Jahr
 				zu Jahr. Die Lösung: Geld so anlegen, dass es mehr wächst als die
 				Inflation steigt.
 			</InfoCard>

@@ -14,7 +14,6 @@
    inkscape:export-ydpi="36"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
@@ -29,9 +28,9 @@
      inkscape:document-units="px"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="3.0078126"
-     inkscape:cx="-48.207791"
-     inkscape:cy="41.225973"
+     inkscape:zoom="4"
+     inkscape:cx="39.375"
+     inkscape:cy="57.5"
      inkscape:window-width="1854"
      inkscape:window-height="1054"
      inkscape:window-x="0"
@@ -57,22 +56,6 @@
   </sodipodi:namedview>
   <defs
      id="defs1">
-    <linearGradient
-       id="linearGradient1"
-       inkscape:collect="always">
-      <stop
-         style="stop-color:#db6080;stop-opacity:0;"
-         offset="0"
-         id="stop3" />
-      <stop
-         style="stop-color:#db6080;stop-opacity:1;"
-         offset="0.5"
-         id="stop1" />
-      <stop
-         style="stop-color:#db6080;stop-opacity:0;"
-         offset="1"
-         id="stop2" />
-    </linearGradient>
     <inkscape:path-effect
        effect="tiling"
        id="path-effect20"
@@ -140,18 +123,6 @@
        apply_with_radius="true"
        only_selected="false"
        hide_knots="false" />
-    <linearGradient
-       id="linearGradient17"
-       inkscape:collect="always">
-      <stop
-         style="stop-color:#32ffa9;stop-opacity:1;"
-         offset="0"
-         id="stop17" />
-      <stop
-         style="stop-color:#32ffa9;stop-opacity:0;"
-         offset="1"
-         id="stop18" />
-    </linearGradient>
     <inkscape:path-effect
        effect="fillet_chamfer"
        id="path-effect9"
@@ -237,41 +208,22 @@
        apply_with_radius="true"
        only_selected="false"
        hide_knots="false" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient17"
-       id="linearGradient16"
-       x1="12.699999"
-       y1="12.699999"
-       x2="12.699999"
-       y2="33.866665"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(1.5e-7,0.41740001)" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient1"
-       id="linearGradient2"
-       x1="17.925182"
-       y1="-5.2240324e-05"
-       x2="17.925182"
-       y2="33.866718"
-       gradientUnits="userSpaceOnUse" />
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#1a1a1a;stroke-width:0.04919917;fill-opacity:1"
+       style="fill:#0a0a0a;fill-opacity:1;stroke-width:0.0491992"
        id="rect1"
        width="33.866665"
        height="33.866665"
        x="0"
-       y="3.5527137e-15"
+       y="0"
        ry="6.614583" />
     <path
        d="m 33.866665,8.884066 -9.27758,9.27758 a 2.3650988,2.3650988 172.98188 0 1 -2.889211,0.355678 l -7.416417,-4.44985 a 2.5999109,2.5999109 175.57909 0 0 -3.002066,0.232098 L 1.5e-7,23.700732 l 0.012919,4.222482 c 0.1335864,3.544929 3.02290295,6.360852 6.60166405,6.360852 H 27.252083 c 3.664475,0 6.614583,-2.950108 6.614583,-6.614583 z"
-       style="fill:url(#linearGradient16);fill-opacity:1;stroke:none;stroke-width:1.37213;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#227459;fill-opacity:1;stroke:none;stroke-width:1.37213;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="path15"
        sodipodi:nodetypes="cccccsssc"
        transform="translate(0,-0.4174)"
@@ -282,7 +234,7 @@
        style="fill:#ffffff;fill-opacity:1;stroke-width:0.0491992"
        id="path22" />
     <path
-       style="color:#000000;fill:url(#linearGradient2);stroke:#1a1a1a;stroke-width:1.30995206;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers;fill-opacity:1"
+       style="color:#000000;fill:#cb354f;stroke:#0a0a0a;stroke-width:1.30995206;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers;fill-opacity:1"
        d="M 16.596982,0.65492377 V 33.211742 h 0.673224 V 0.65492377 Z"
        id="path21" />
     <path

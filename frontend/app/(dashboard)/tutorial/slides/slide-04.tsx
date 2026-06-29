@@ -43,15 +43,14 @@ export function Slide04() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="Grundlagen"
 				title="Der Zinseszinseffekt"
-				subtitle="Zinsen auf Zinsen – über Jahrzehnte führt das zu exponentiellem Wachstum."
+				subtitle="Zinsen auf Zinsen - über Jahrzehnte führt das zu exponentiellem Wachstum."
 			/>
 
 			<SlideSection>
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					Stell dir vor, du legst 1.000 € bei 7 % Rendite an. Nach einem Jahr
-					hast du 1.070 €. Im zweiten Jahr bekommst du nicht nochmal 70 € –
+					hast du 1.070 €. Im zweiten Jahr bekommst du nicht nochmal 70 € -
 					sondern 7 % auf{" "}
 					<span className="text-foreground font-medium">1.070 €</span>, also
 					74,90 €. Im dritten Jahr wieder 7 % auf den gewachsenen Betrag, und so
@@ -205,7 +204,7 @@ export function Slide04() {
 			</div>
 
 			<InfoCard accent>
-				Je früher du anfängst, desto länger kann der Zinseszinseffekt wirken –
+				Je früher du anfängst, desto länger kann der Zinseszinseffekt wirken -
 				und desto größer wird der Unterschied zwischen den beiden Kurven.
 			</InfoCard>
 		</SlideLayout>

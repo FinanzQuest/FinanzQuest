@@ -56,8 +56,7 @@ export function PositionRow({
 		<Card
 			className={cn(
 				className,
-				"flex overflow-hidden flex-row flex-wrap rounded-xl max-w-[800px]",
-
+				"flex overflow-hidden flex-row flex-wrap rounded-xl max-w-[800px] transition-shadow duration-150 hover:shadow-md",
 				indicatorClass
 			)}
 		>

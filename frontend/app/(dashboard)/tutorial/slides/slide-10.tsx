@@ -57,8 +57,7 @@ export function Slide10() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="Praxis"
-				title="Der Sparplan – regelmäßig investieren"
+				title="Der Sparplan - regelmäßig investieren"
 				subtitle="Vermögensaufbau beginnt nicht mit einem großen Einmalbetrag, sondern mit einem Teil des monatlichen Gehalts."
 			/>
 
@@ -67,7 +66,7 @@ export function Slide10() {
 					Die wenigsten haben gleich zu Beginn mehrere Tausend Euro zur
 					Verfügung. Das ist auch gar nicht nötig: Ein{" "}
 					<span className="text-foreground font-medium">Sparplan</span> legt
-					automatisch jeden Monat einen festen Betrag in einen ETF an – z. B. 50
+					automatisch jeden Monat einen festen Betrag in einen ETF an - z. B. 50
 					€ oder 150 € aus dem Gehalt.
 				</p>
 			</SlideSection>

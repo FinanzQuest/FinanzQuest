@@ -51,9 +51,8 @@ export function Slide09() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="ETFs"
 				title="ETFs genauer betrachtet"
-				subtitle="ETFs kombinieren breite Risikostreuung mit sehr geringen Kosten – und genau das macht über Jahrzehnte einen enormen Unterschied."
+				subtitle="ETFs kombinieren breite Risikostreuung mit sehr geringen Kosten - und genau das macht über Jahrzehnte einen enormen Unterschied."
 			/>
 
 			<SlideSection>
@@ -66,7 +65,7 @@ export function Slide09() {
 						TER (Total Expense Ratio)
 					</span>{" "}
 					ist die jährliche Gebühr, die ein Fonds für seine Verwaltung erhebt.
-					Sie wird automatisch vom Fondsvermögen abgezogen – du siehst sie nicht
+					Sie wird automatisch vom Fondsvermögen abgezogen - du siehst sie nicht
 					als separate Zahlung, aber sie schmälert deine Rendite jedes Jahr.
 				</p>
 				<p className="text-foreground/75 text-sm leading-relaxed">
@@ -183,7 +182,7 @@ export function Slide09() {
 					<span className="text-foreground font-medium">
 						{(etfEnd - fundEnd).toLocaleString("de-DE")} €
 					</span>{" "}
-					– allein durch den Kostenunterschied.
+					- allein durch den Kostenunterschied.
 				</p>
 			</div>
 
@@ -200,7 +199,7 @@ export function Slide09() {
 						],
 						[
 							"Ausschüttend",
-							"Erträge werden regelmäßig ausgezahlt – müssen selbst reinvestiert werden",
+							"Erträge werden regelmäßig ausgezahlt - müssen selbst reinvestiert werden",
 						],
 						[
 							"MSCI World",

@@ -70,16 +70,15 @@ export function Slide05() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="Grundlagen"
 				title="Der Faktor Zeit"
-				subtitle="Zehn Jahre früher zu beginnen kann das Endergebnis mehr als verdoppeln – bei gleicher monatlicher Rate."
+				subtitle="Zehn Jahre früher zu beginnen kann das Endergebnis mehr als verdoppeln - bei gleicher monatlicher Rate."
 			/>
 
 			<SlideSection>
 				<p className="text-foreground/75 text-sm leading-relaxed">
 					Der Zinseszinseffekt braucht eines vor allem:{" "}
 					<span className="text-foreground font-medium">Zeit</span>. Je früher
-					du anfängst, desto länger kann dein Geld wachsen – und desto größer
+					du anfängst, desto länger kann dein Geld wachsen - und desto größer
 					wird der Unterschied.
 				</p>
 			</SlideSection>
@@ -231,7 +230,7 @@ export function Slide05() {
 						<span className="font-semibold">
 							{(endA - endB).toLocaleString("de-DE")} € mehr
 						</span>{" "}
-						– obwohl in diesem Zeitraum nur{" "}
+						- obwohl in diesem Zeitraum nur{" "}
 						{((ageB - ageA) * 12 * monthly).toLocaleString("de-DE")} € mehr
 						eingezahlt wurden. Den Rest erledigt der Zinseszins.
 					</>

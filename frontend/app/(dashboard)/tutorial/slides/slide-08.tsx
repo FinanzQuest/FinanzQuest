@@ -75,8 +75,7 @@ export function Slide08() {
 	return (
 		<SlideLayout>
 			<SlideHeader
-				eyebrow="Risikomanagement"
-				title="Diversifikation – Risikostreuung"
+				title="Diversifikation - Risikostreuung"
 				subtitle="Nicht alles auf eine Karte setzen: Das Verteilen von Kapital auf viele Anlagen senkt das Risiko erheblich."
 			/>
 
@@ -93,7 +92,7 @@ export function Slide08() {
 			<div className="grid grid-cols-2 gap-4">
 				<div className="rounded-xl border bg-muted/40 p-4 flex flex-col gap-1">
 					<span className="text-foreground font-semibold text-sm">
-						1.000 € – eine Aktie
+						1.000 € - eine Aktie
 					</span>
 					<p className="text-foreground/60 text-xs leading-relaxed">
 						Unternehmen geht pleite → vollständiger Verlust
@@ -102,7 +101,7 @@ export function Slide08() {
 				</div>
 				<div className="rounded-xl border bg-muted/40 p-4 flex flex-col gap-1">
 					<span className="text-foreground font-semibold text-sm">
-						1.000 € – 1.000 Aktien
+						1.000 € - 1.000 Aktien
 					</span>
 					<p className="text-foreground/60 text-xs leading-relaxed">
 						Ein Unternehmen geht pleite → Verlust von ca. 1 €
@@ -184,7 +183,7 @@ export function Slide08() {
 					</LineChart>
 				</ResponsiveContainer>
 				<p className="text-muted-foreground text-xs">
-					Beide Linien starten bei 1.000 €. Die Einzelaktie schwankt stark – das
+					Beide Linien starten bei 1.000 €. Die Einzelaktie schwankt stark - das
 					Portfolio aus 20 Aktien ist deutlich stabiler.
 				</p>
 			</div>

@@ -15,7 +15,7 @@ import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
 
 // Quellen:
 // MSCI World:  chart.csv (Jahresendwerte, Dez), Basis Jan 2004 = 100
-// Tagesgeld:   EONIA 2004–2018 (bekannte EZB-Phasen) + €STR 2019–2024 (bbk.csv), kumuliert
+// Tagesgeld:   EONIA 2004-2018 (bekannte EZB-Phasen) + €STR 2019-2024 (bbk.csv), kumuliert
 // Anleihen:    Bloomberg Global Aggregate Bond Index, bekannte Jahresrenditen, kumuliert
 // Bitcoin:     btc-usd-max.csv (Jahresdurchschnitt), Basis 2014 = 100, null vor 2014
 
@@ -196,7 +196,7 @@ export function Slide06() {
 			<SlideHeader
 				eyebrow="Wertpapiere"
 				title="Anlageklassen im Überblick"
-				subtitle="Es gibt verschiedene Arten, Geld anzulegen – von sicheren Konten bis zu spekulativen Investments."
+				subtitle="Es gibt verschiedene Arten, Geld anzulegen - von sicheren Konten bis zu spekulativen Investments."
 			/>
 
 			<div className="grid grid-cols-2 gap-3">
@@ -204,7 +204,7 @@ export function Slide06() {
 					{
 						title: "Tagesgeld",
 						color: "text-zinc-400",
-						desc: "Ein Sparkonto bei einer Bank, auf das du täglich zugreifen kannst. Die Bank zahlt dir dafür Zinsen – den Tagesgeldzins, der sich am Leitzins der EZB orientiert. Kein Verlustrisiko, aber die Rendite liegt oft unter der Inflation.",
+						desc: "Ein Sparkonto bei einer Bank, auf das du täglich zugreifen kannst. Die Bank zahlt dir dafür Zinsen - den Tagesgeldzins, der sich am Leitzins der EZB orientiert. Kein Verlustrisiko, aber die Rendite liegt oft unter der Inflation.",
 						example: "z. B. bei DKB, ING, Consorsbank",
 					},
 					{
@@ -216,7 +216,7 @@ export function Slide06() {
 					{
 						title: "Aktien & ETFs",
 						color: "text-emerald-500",
-						desc: "Eine Aktie ist ein Anteil an einem Unternehmen. Ein ETF bündelt viele Aktien automatisch – z. B. den MSCI World mit 1.400 Unternehmen weltweit. Historisch hohe Rendite, aber mit Kursschwankungen.",
+						desc: "Eine Aktie ist ein Anteil an einem Unternehmen. Ein ETF bündelt viele Aktien automatisch - z. B. den MSCI World mit 1.400 Unternehmen weltweit. Historisch hohe Rendite, aber mit Kursschwankungen.",
 						example: "z. B. iShares MSCI World, S&P 500 ETF",
 					},
 					{
@@ -246,7 +246,7 @@ export function Slide06() {
 			<SlideSection>
 				<div className="flex items-center justify-between flex-wrap gap-2">
 					<span className="text-foreground font-semibold text-sm">
-						Historische Wertentwicklung 2004–2024 (Index: 100)
+						Historische Wertentwicklung 2004-2024 (Index: 100)
 					</span>
 					<div className="flex gap-2 flex-wrap">
 						{SERIES.map(s => (
