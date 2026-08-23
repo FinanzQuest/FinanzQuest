@@ -33,7 +33,7 @@ function CustomContent(props: ContentProps) {
 
 	if (position !== undefined && position !== null) {
 		prof = (position.total_profit as number) / (position.market_value as number)
-		color = prof > 0 ? "oklch(var(--win))" : "oklch(var(--loss))"
+		color = prof > 0 ? "var(--win)" : "var(--loss)"
 	}
 
 	const opacity = depth > 0 ? calculateOpacity(prof) : 0
@@ -60,7 +60,7 @@ function CustomContent(props: ContentProps) {
 				<text
 					x={x + width / 2}
 					y={y + height / 2 + 7}
-					fill={`color-mix(in oklch, ${color} ${mix_factor * 100}%, hsl(var(--foreground)) ${100 - mix_factor * 100}%)`}
+					fill={`color-mix(in oklch, ${color} ${mix_factor * 100}%, var(--foreground) ${100 - mix_factor * 100}%)`}
 					className="text-ellipsis"
 					textAnchor="middle"
 					fontSize={14}
@@ -72,7 +72,7 @@ function CustomContent(props: ContentProps) {
 				<text
 					x={x + 6}
 					y={y + 20}
-					fill={`color-mix(in oklch, ${color} ${mix_factor * 100}%, hsl(var(--foreground)) ${100 - mix_factor * 100}%)`}
+					fill={`color-mix(in oklch, ${color} ${mix_factor * 100}%, var(--foreground) ${100 - mix_factor * 100}%)`}
 					fontSize={16}
 					fillOpacity={0.9}
 				>

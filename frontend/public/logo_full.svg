@@ -2,12 +2,12 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="312mm"
-   height="64mm"
-   viewBox="0 0 312 64"
+   width="3275.106"
+   height="558"
+   viewBox="0 0 866.5384 147.6375"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
    sodipodi:docname="logo_full.svg"
    inkscape:export-filename="logo_full.png"
    inkscape:export-xdpi="96"
@@ -18,107 +18,102 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
      id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#999999"
-     borderopacity="0"
+     pagecolor="#000000"
+     bordercolor="#ffffff"
+     borderopacity="1"
      inkscape:showpageshadow="2"
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#ffffff"
-     inkscape:document-units="mm"
-     inkscape:zoom="1.0885159"
-     inkscape:cx="456.12563"
-     inkscape:cy="100.13634"
-     inkscape:window-width="1854"
-     inkscape:window-height="1054"
+     inkscape:deskcolor="#000000"
+     inkscape:document-units="px"
+     inkscape:zoom="0.19242424"
+     inkscape:cx="-166.29921"
+     inkscape:cy="1844.8819"
+     inkscape:window-width="1920"
+     inkscape:window-height="1080"
      inkscape:window-x="0"
      inkscape:window-y="0"
-     inkscape:window-maximized="0"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
      id="defs1">
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect19"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,1,1,0,1.8466134,0,1 @ F,0,0,1,0,1.8466134,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
-       radius="0"
-       unit="px"
-       method="auto"
-       mode="F"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect19-7"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,1,1,0,1.8466134,0,1 @ F,0,0,1,0,1.8466134,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
-       radius="0"
-       unit="px"
-       method="auto"
-       mode="F"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1">
+      <rect
+         style="fill:#ff2a2a;fill-opacity:1;stroke-width:1.26371;stroke-linecap:round;stroke-linejoin:bevel"
+         id="rect2"
+         width="62.189987"
+         height="62.189999"
+         x="30.919401"
+         y="218.32376"
+         ry="20.73" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1-1">
+      <rect
+         style="fill:#ff2a2a;fill-opacity:1;stroke-width:1.26371;stroke-linecap:round;stroke-linejoin:bevel"
+         id="rect2-8"
+         width="62.189987"
+         height="62.189999"
+         x="30.919401"
+         y="218.32376"
+         ry="20.73" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1-1-6">
+      <rect
+         style="fill:#ff2a2a;fill-opacity:1;stroke-width:1.26371;stroke-linecap:round;stroke-linejoin:bevel"
+         id="rect2-8-4"
+         width="62.189987"
+         height="62.189999"
+         x="30.919401"
+         y="218.32376"
+         ry="20.73" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1-1-2">
+      <rect
+         style="fill:#ff2a2a;fill-opacity:1;stroke-width:1.26371;stroke-linecap:round;stroke-linejoin:bevel"
+         id="rect2-8-2"
+         width="62.189987"
+         height="62.189999"
+         x="30.919401"
+         y="218.32376"
+         ry="20.73" />
+    </clipPath>
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <g
+       id="g32-4-3"
+       style="fill:#40d978;fill-opacity:1"
+       transform="matrix(2.3739755,0,0,2.3739749,-73.401898,-518.29512)"
+       clip-path="url(#clipPath1-1-6)">
+      <path
+         d="m 93.109384,218.32376 -9.32883,18.65719 c -0.672785,1.34554 -1.763903,2.43669 -3.109452,3.10945 l -11.156495,5.57813 c -1.420452,0.71022 -2.317796,2.16212 -2.317796,3.75023 0,2.86216 -2.320257,5.18242 -5.182419,5.18242 -1.588147,0 -3.039986,0.89732 -3.750227,2.3178 l -5.578366,11.15673 c -0.672772,1.34555 -1.76391,2.43668 -3.109452,3.10945 l -18.656948,9.3286 h 62.189985 z"
+         style="opacity:1;fill:#40d978;fill-opacity:1;stroke:none;stroke-width:0.121465;stroke-linecap:round;stroke-linejoin:bevel"
+         id="path32-3-0" />
+      <path
+         d="m 30.919399,218.32376 v 62.19 l 9.328593,-18.65695 c 0.672778,-1.34554 1.763907,-2.43668 3.109452,-3.10946 l 11.156733,-5.57836 c 1.420481,-0.71024 2.317794,-2.16208 2.317795,-3.75023 2e-6,-2.86216 2.320257,-5.18242 5.18242,-5.18242 1.588108,0 3.04001,-0.89734 3.750226,-2.3178 l 5.578129,-11.15649 c 0.672765,-1.34555 1.763913,-2.43667 3.109452,-3.10946 l 18.657185,-9.32883 z"
+         style="display:inline;opacity:1;fill:#40d978;fill-opacity:1;stroke:none;stroke-width:0.121465;stroke-linecap:round;stroke-linejoin:bevel"
+         id="path31-3-9" />
+    </g>
     <text
        xml:space="preserve"
-       style="font-size:38.1px;line-height:0.8;font-family:Inter;-inkscape-font-specification:Inter;writing-mode:lr-tb;direction:ltr;white-space:pre;inline-size:429.464;display:inline;fill:#0a0a0a;fill-opacity:1;stroke-width:0.740833;stroke-linecap:round;stroke-linejoin:round"
-       x="61.73037"
-       y="28.630865"
-       id="text1"
-       transform="translate(15.39915,18.817612)"><tspan
-         x="61.73037"
-         y="28.630865"
-         id="tspan3"><tspan
-           style="font-weight:bold;-inkscape-font-specification:'Inter Bold'"
-           id="tspan1">FinanzQuest</tspan></tspan></text>
-    <g
-       id="g2"
-       transform="matrix(1.8897638,0,0,1.8897555,-107.28937,-120.9444)">
-      <rect
-         style="fill:#0a0a0a;fill-opacity:1;stroke-width:0.0491992"
-         id="rect1-6"
-         width="33.866665"
-         height="33.866665"
-         x="56.77396"
-         y="64.000053"
-         ry="6.614583" />
-      <path
-         d="m 33.866665,8.884066 -9.27758,9.27758 a 2.3650988,2.3650988 172.98188 0 1 -2.889211,0.355678 l -7.416417,-4.44985 a 2.5999109,2.5999109 175.57909 0 0 -3.002066,0.232098 L 1.5e-7,23.700732 l 0.012919,4.222482 c 0.1335864,3.544929 3.02290295,6.360852 6.60166405,6.360852 H 27.252083 c 3.664475,0 6.614583,-2.950108 6.614583,-6.614583 z"
-         style="fill:#227459;fill-opacity:1;stroke:none;stroke-width:1.37213;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="path15-2"
-         sodipodi:nodetypes="cccccsssc"
-         transform="translate(56.773959,63.582655)"
-         inkscape:original-d="M 33.866665,8.884066 23.283332,19.467399 c -3.527778,-2.116667 -7.055555,-4.233333 -10.583333,-6.35 L 1.5e-7,23.700732 l 0.012919,4.222482 c 0.1335864,3.544929 3.02290295,6.360852 6.60166405,6.360852 H 27.252083 c 3.664475,0 6.614583,-2.950108 6.614583,-6.614583 z"
-         inkscape:path-effect="#path-effect19-7" />
-      <path
-         d="m 90.640625,72.061065 -0.468188,0.46612 -9.087818,9.08988 c -0.666229,0.66623 -1.692184,0.7912 -2.500105,0.30644 l -6.957198,-4.17339 c -1.324614,-0.79476 -3.014067,-0.66491 -4.200777,0.32402 l -10.65258,8.877494 v 1.72238 l 0.423747,-0.35399 11.076326,-9.230444 c 0.758145,-0.63179 1.825425,-0.71239 2.671672,-0.20464 l 6.959265,4.17339 c 1.322618,0.793574 3.024334,0.584754 4.114994,-0.50591 l 8.620662,-8.62222 z"
-         style="fill:#ffffff;fill-opacity:1;stroke-width:0.0491992"
-         id="path22-9" />
-      <path
-         style="color:#000000;fill:#cb354f;fill-opacity:1;stroke:#0a0a0a;stroke-width:1.30995;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
-         d="m 73.370941,64.654975 v 32.556824 h 0.673224 V 64.654975 Z"
-         id="path21-1" />
-      <path
-         style="fill:none;stroke:none;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1"
-         d="M 90.640625,74.583385 V 97.866729 H 56.773959 v -8.46667"
-         id="path13-2" />
-    </g>
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:129.377px;line-height:0.8;font-family:'Space Grotesk';-inkscape-font-specification:'Space Grotesk';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#f9f9f9;fill-opacity:1;stroke-width:29.8726;stroke-linecap:round;stroke-linejoin:bevel"
+       x="175.91113"
+       y="120.94434"
+       id="text2-3-5"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:129.377px;font-family:Newsreader;-inkscape-font-specification:'Newsreader Medium';fill:#f9f9f9;stroke-width:29.8726"
+         x="175.91113"
+         y="120.94434"
+         id="tspan3-6-94">finanzquest </tspan></text>
   </g>
 </svg>

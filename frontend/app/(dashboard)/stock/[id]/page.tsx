@@ -51,7 +51,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 	)
 
 	return (
-		<main className="w-full h-full overflow-hidden grid sm:grid-cols-2 md:grid-cols-[repeat(3,fit-content)] gap-5">
+		<main className="w-full max-w-[1200px] mx-auto h-full overflow-hidden grid sm:grid-cols-2 md:grid-cols-[repeat(3,fit-content)] gap-5">
 			<StatCard
 				className="col-span-3 md:col-span-2"
 				currentPrice={pricesFiltered.at(-1) ?? pricesFiltered?.at(0)}

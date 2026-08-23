@@ -65,11 +65,11 @@ export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
 	}, [searchParams])
 
 	const trigger = collapsed ? (
-		<SelectTrigger className="aspect-square! focus:!ring-transparent flex flex-row py-2 h-fit">
-			<Briefcase className="shrink-0 size-6" />
+		<SelectTrigger className="aspect-square! focus:ring-transparent! flex flex-row py-2 h-fit p-0">
+				<Briefcase className="shrink-0 size-6" />
 		</SelectTrigger>
 	) : (
-		<SelectTrigger className="!rounded-t-none focus:!ring-transparent">
+		<SelectTrigger className="rounded-t-none! focus:ring-transparent! w-full">
 			<SelectValue placeholder="Select a depot" />
 		</SelectTrigger>
 	)

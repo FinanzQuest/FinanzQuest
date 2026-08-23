@@ -41,11 +41,11 @@ export default function User({ collapsed }: { collapsed?: boolean }) {
 	}, [client])
 
 	const trigger = collapsed ? (
-		<DropdownMenuTrigger className="aspect-square rounded-lg border flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
+		<DropdownMenuTrigger className="aspect-square rounded-lg flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
 			<UserIcon className="size-6 mx-auto my-auto" />
 		</DropdownMenuTrigger>
 	) : (
-		<DropdownMenuTrigger className="rounded-t-md border flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
+		<DropdownMenuTrigger className="rounded-t-2xl border-b flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
 			<div className="flex flex-col items-start overflow-hidden px-3 p-2">
 				<div className="text-sm">{userData?.name}</div>
 				<div className="text-muted-foreground text-xs font-normal text-ellipsis w-full overflow-hidden">

@@ -29,7 +29,7 @@
         biome = prev.biome;
         nodejs = prev.nodejs;
         supabase-cli = prev.supabase-cli;
-        yarn = (prev.yarn.override { inherit nodejs; });
+        yarn-berry = (prev.yarn-berry.override { inherit nodejs; });
       };
 
       devShells = forEachSupportedSystem (
@@ -44,7 +44,7 @@
               tailwindcss-language-server
               nodejs
               pnpm
-              yarn
+              yarn-berry
               supabase-cli
               biome
               postgresql

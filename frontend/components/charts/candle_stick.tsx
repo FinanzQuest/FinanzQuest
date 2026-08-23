@@ -72,7 +72,7 @@ export default function CandleStickChart<T extends BarDataT>({
 					interval={tickInterval || "preserveEnd"}
 				/>
 				<YAxis hide domain={["min", "max"]} />
-				<Bar maxBarSize={20} dataKey={barKey} fill="oklch(var(--win))">
+				<Bar maxBarSize={20} dataKey={barKey} fill="var(--win)">
 					{chartData.map(entry => {
 						const win = entry[winKey]
 						return (
@@ -81,8 +81,8 @@ export default function CandleStickChart<T extends BarDataT>({
 								key={entry[xKey] as string}
 								radius={4}
 								fillOpacity={0.6}
-								stroke={win ? "oklch(var(--win))" : "oklch(var(--loss))"}
-								fill={win ? "oklch(var(--win))" : "oklch(var(--loss))"}
+								stroke={win ? "var(--win)" : "var(--loss)"}
+								fill={win ? "var(--win)" : "var(--loss)"}
 							/>
 						)
 					})}
@@ -91,7 +91,8 @@ export default function CandleStickChart<T extends BarDataT>({
 						dataKey={errorKey}
 						width={0}
 						strokeWidth={1}
-						stroke="hsl(var(--foreground)/.7)"
+						stroke="var(--foreground)"
+						strokeOpacity={0.5}
 					></ErrorBar>
 				</Bar>
 				<Line
@@ -99,11 +100,15 @@ export default function CandleStickChart<T extends BarDataT>({
 					dataKey={lineKey}
 					strokeWidth={1}
 					type="linear"
-					stroke="hsl(var(--muted-foreground))"
+					stroke="var(--muted-foreground)"
 					connectNulls
 					strokeOpacity={0.5}
 				/>
-				<ChartTooltip filterNull content={<CustomTooltip />} />
+				<ChartTooltip
+					isAnimationActive={false}
+					filterNull
+					content={<CustomTooltip />}
+				/>
 			</ComposedChart>
 		</ChartContainer>
 	)

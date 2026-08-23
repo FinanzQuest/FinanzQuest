@@ -64,61 +64,52 @@ export default async function Page({
 	)
 	return (
 		<main className="grid grid-cols-1 gap-3 max-h-screen overflow-y-scroll">
-			<Card className="overflow-hidden border-none">
-				<CardHeader>
-					<CardTitle>
-						<HeaderStat
-							className="justify-start"
-							displays={{
-								Depotwert: { value: d?.total ?? 0 },
-								Heute: { value: d?.diff_1d ?? 0 },
-								Monat: { value: d?.diff_1m ?? 0 },
-								Jahr: { value: d?.diff_1y ?? 0 },
-								Cash: { value: d?.cash ?? 0 },
-							}}
-						/>
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="m-0 px-0 pb-0">
-					<ChartContainer
-						className="rounded-xl border overflow-hidden"
-						defaultTab="line"
-						tabs={[
-							{
-								name: "line",
-								icon: (
-									<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
-								),
-								content: (
-									<AreaChart
-										className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
-										startValue={areaData?.start ?? 50000}
-										offset={areaData?.offset ?? 0}
-										data={areaData?.data ?? []}
-										dataKey="total"
-										xKey="timestamp"
-										yKey="total"
-									/>
-								),
-							},
-							{
-								name: "tree",
-								icon: (
-									<TableCellsMerge className="size-7 md:size-5 stroke-muted-foreground" />
-								),
-								content: (
-									<TreeChart
-										className="max-h-[500px] w-full"
-										data={treeData as PositionSummary[]}
-										dataKey="market_value"
-									/>
-								),
-							},
-						]}
-					/>{" "}
-				</CardContent>
-			</Card>
-
+			<HeaderStat
+				className="justify-start"
+				displays={{
+					Depotwert: { value: d?.total ?? 0 },
+					Heute: { value: d?.diff_1d ?? 0 },
+					Monat: { value: d?.diff_1m ?? 0 },
+					Jahr: { value: d?.diff_1y ?? 0 },
+					Cash: { value: d?.cash ?? 0 },
+				}}
+			/>
+			<ChartContainer
+				className="overflow-hidden"
+				defaultTab="line"
+				tabs={[
+					{
+						name: "line",
+						icon: (
+							<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
+						),
+						content: (
+							<AreaChart
+								className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
+								startValue={areaData?.start ?? 50000}
+								offset={areaData?.offset ?? 0}
+								data={areaData?.data ?? []}
+								dataKey="total"
+								xKey="timestamp"
+								yKey="total"
+							/>
+						),
+					},
+					{
+						name: "tree",
+						icon: (
+							<TableCellsMerge className="size-7 md:size-5 stroke-muted-foreground" />
+						),
+						content: (
+							<TreeChart
+								className="max-h-[500px] w-full"
+								data={treeData as PositionSummary[]}
+								dataKey="market_value"
+							/>
+						),
+					},
+				]}
+			/>{" "}
 			{!fres.positions || fres.positions?.length === 0 ? (
 				fres.ownedByUser && <PositionsEmpty />
 			) : (

@@ -167,7 +167,7 @@ export default function PositionTabView({
 
 	return (
 		<Tabs defaultValue="all">
-			<div className="flex flex-row gap-4 w-full border rounded-lg p-1 bg-muted/50">
+			<div className="flex flex-row gap-4 w-full border rounded-full p-2 bg-muted/50">
 				<TabsList className="p-0 bg-transparent">
 					<TabsTrigger className="h-full" value="all">
 						All {Object.values(sortedStocks).flat().length}

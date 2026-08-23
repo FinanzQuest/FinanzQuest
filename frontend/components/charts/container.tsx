@@ -68,13 +68,12 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 			toolbar={[
 				<IntervallPickerControlled
 					key={0}
-					className="py-2"
 					value={selectedIntervall}
 					onValueChange={setSelectedIntervall}
 				/>,
 			]}
 			defaultTab="line"
-			className="w-full border rounded-md bg-muted/20 shadow overflow-hidden"
+			className="w-full"
 			tabs={[
 				{
 					name: "candlestick",
@@ -83,7 +82,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 					),
 					content: (
 						<CandleStickChart
-							className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
+							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
 							data={candleData}
 							xKey="date"
 							barKey="open_close"
@@ -101,7 +100,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 					),
 					content: (
 						<AreaChart
-							className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
+							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
 							data={data}
 							dataKey="close"
 							xKey="tstamp"

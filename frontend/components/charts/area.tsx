@@ -58,47 +58,34 @@ export default function AreaChart<T extends Record<string, number | string>>({
 			<RechartsAreaChart accessibilityLayer data={data}>
 				<defs>
 					<linearGradient id={"fill"} x1="0" y1="0" x2="0" y2="1">
-						<stop
-							offset="0"
-							stopColor={"oklch(var(--win))"}
-							stopOpacity={0.7}
-						/>
+						<stop offset="0" stopColor={"var(--win)"} stopOpacity={0.7} />
 						<stop
 							offset={`${offset * 100}%`}
-							stopColor={"oklch(var(--win))"}
+							stopColor={"var(--win)"}
 							stopOpacity={0.1}
 						/>
 						<stop
 							offset={`${offset * 100}%`}
-							stopColor={"oklch(var(--loss))"}
+							stopColor={"var(--loss)"}
 							stopOpacity={0.1}
 						/>
-						<stop
-							offset="100%"
-							stopColor={"oklch(var(--loss))"}
-							stopOpacity={0.7}
-						/>
+						<stop offset="100%" stopColor={"var(--loss)"} stopOpacity={0.7} />
 					</linearGradient>
 					<linearGradient id={"stroke"} x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0%" stopColor={"oklch(var(--win))"} stopOpacity={1} />
+						<stop offset="0%" stopColor={"var(--win)"} stopOpacity={1} />
 						<stop
 							offset={`${offset * 100}%`}
-							stopColor={"oklch(var(--win))"}
+							stopColor={"var(--win)"}
 							stopOpacity={1}
 						/>
 						<stop
 							offset={`${offset * 100}%`}
-							stopColor={"oklch(var(--loss))"}
+							stopColor={"var(--loss)"}
 							stopOpacity={1}
 						/>
-						<stop
-							offset="100%"
-							stopColor={"oklch(var(--loss))"}
-							stopOpacity={1}
-						/>
+						<stop offset="100%" stopColor={"var(--loss)"} stopOpacity={1} />
 					</linearGradient>
 				</defs>
-
 				<XAxis
 					className="number"
 					dataKey={xKey}
@@ -116,14 +103,12 @@ export default function AreaChart<T extends Record<string, number | string>>({
 				<ReferenceLine
 					y={startValue}
 					strokeWidth={0.5}
-					isFront
 					stroke="hsl(var(--foreground)/50)"
 					strokeDasharray="6 3"
 				/>
 				<Area
 					baseValue={startValue}
 					connectNulls={true}
-					data={[]}
 					dataKey={dataKey}
 					fillOpacity={1}
 					type="linear"

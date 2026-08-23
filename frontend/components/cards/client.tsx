@@ -22,14 +22,8 @@ export function ChartCard({ prices, pricesWeekly, className }: ChartCardProps) {
 	"use client"
 
 	return (
-		<Card className={cn(className)}>
-			<CardHeader className="flex-col gap-2">
-				<CardDescription>Chart</CardDescription>
-			</CardHeader>
-
-			<CardContent className="grid grid-cols-1 gap-3">
-				<StockChartContainer prices={prices} pricesWeekly={pricesWeekly} />
-			</CardContent>
-		</Card>
+		<div className={cn(className)}>
+			<StockChartContainer prices={prices} pricesWeekly={pricesWeekly} />
+		</div>
 	)
 }

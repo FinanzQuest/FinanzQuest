@@ -37,6 +37,7 @@ import type { Database } from "@/database/types"
 import { hasSpecialRoles } from "@/lib/db"
 import { cn } from "@/lib/utils"
 import logo from "@/public/logo.svg"
+import logo_full from "@/public/logo_full.svg"
 import { createClient } from "@/utils/supabase/client"
 import User from "./user"
 
@@ -72,45 +73,32 @@ function NavItems({
 	tree: Record<string, Array<ItemT>>
 	collapsed?: boolean
 }) {
-	return (
-		<>
-			{Object.entries(tree).map(([label, items]) => (
-				<>
-					<SidebarGroup
-						className={cn(collapsed && "px-auto flex flex-col justify-center")}
-						key={label}
-					>
-						{!collapsed && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
-						<SidebarMenu className="gap-2">
-							{items.map(item => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										className={cn(
-											"rounded-lg",
-											collapsed &&
-												"flex flex-row items-center justify-center w-full"
-										)}
-										variant={collapsed ? "outline" : "default"}
-										asChild={!collapsed}
-										tooltip={item.title}
-										size="default"
-									>
-										<Link href={item.url}>
-											<item.icon
-												className={cn(collapsed ? "size-6" : "size-6")}
-											/>
-											{!collapsed && <span>{item.title}</span>}
-										</Link>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroup>
-					{collapsed && <Separator className="w-[calc(100%-1rem)] mx-auto" />}
-				</>
-			))}
-		</>
-	)
+	return Object.entries(tree).map(([label, items]) => (
+		<div key={label}>
+			<SidebarGroup
+				className={cn(collapsed && "px-auto flex flex-col justify-center")}
+				key={label}
+			>
+				{!collapsed && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+				<SidebarMenu className="gap-2">
+					{items.map(item => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton
+								variant={collapsed ? "outline" : "default"}
+								render={<a href={item.url} />}
+								tooltip={item.title}
+								size="default"
+							>
+								<item.icon className={cn(collapsed ? "size-6" : "size-6")} />
+								{!collapsed && <span>{item.title}</span>}
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
+			</SidebarGroup>
+			{collapsed && <Separator className="w-[calc(90%-1rem)] mx-auto" />}
+		</div>
+	))
 }
 
 // ── Desktop sidebar (collapsible icon) ───────────────────────────────────────
@@ -122,32 +110,26 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 		<Sidebar
 			collapsible="icon"
 			className={cn(
-				"bg-sidebar hidden rounded-xl m-2 h-auto overflow-hidden md:flex",
+				"bg-sidebar hidden rounded-2xl m-2 h-auto border overflow-hidden md:flex",
 				collapsed ? "" : "px-1"
 			)}
 		>
-			<SidebarHeader>
+			<SidebarHeader className={cn(" mb-3", !collapsed && "mx-1 mt-2")}>
 				{!collapsed && (
-					<div className="flex flex-row items-center gap-2 pb-2 pt-1">
-						<Image
-							src={logo}
-							alt="FinanzQuest"
-							className="aspect-square shrink-0 grow-0 border rounded-lg overflow-hidden"
-							width={32}
-							height={32}
-						/>
-						<span className="text-2xl font-semibold text-foreground/90">
-							FinanzQuest
-						</span>
-					</div>
+					<Image
+						src={logo_full}
+						alt="FinanzQuest"
+						className="shrink-0 grow-0 overflow-hidden"
+						height={64}
+					/>
 				)}
 				{collapsed && (
 					<Image
 						src={logo}
 						alt="FinanzQuest"
-						className="aspect-square w-full border rounded-lg overflow-hidden mb-2"
-						width={64}
-						height={64}
+						className="aspect-square w-full border rounded-[33%] bg-background *:fill-win overflow-hidden mb-2"
+						width={100}
+						height={100}
 					/>
 				)}
 			</SidebarHeader>
@@ -156,16 +138,18 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 				{!collapsed && (
 					<SidebarMenu>
 						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<SearchBarPopOut doRedirect>
-									<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
-										<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
-										<span className="text-muted-foreground shrink truncate">
-											Wertpapiersuche...
-										</span>
-									</div>
-								</SearchBarPopOut>
-							</SidebarMenuButton>
+							<SidebarMenuButton
+								render={
+									<SearchBarPopOut doRedirect>
+										<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
+											<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
+											<span className="text-muted-foreground shrink truncate">
+												Wertpapiersuche...
+											</span>
+										</div>
+									</SearchBarPopOut>
+								}
+							/>
 						</SidebarMenuItem>
 					</SidebarMenu>
 				)}
@@ -211,16 +195,30 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 	const [open, setOpen] = useState(false)
 
 	return (
-		<div className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-sidebar">
-			<h1 className="font-bold text-xl">FinanzQuest</h1>
+		<div className="md:hidden w-full flex items-center justify-between flex-row px-4 py-3 border-b bg-sidebar ">
+			<Link href="/">
+				<Image src={logo} className="rounded-[33%]" alt="FinanzQuest" height={32} />
+			</Link>
 
-			<div className="flex items-center gap-2">
-				<SearchBarPopOut doRedirect>
-					<Button variant="ghost" size="icon">
-						<SearchIcon className="size-5 stroke-muted-foreground" />
+			<SearchBarPopOut
+				doRedirect
+				triggerRender={({ onClick }) => (
+					<Button
+						onClick={onClick}
+						variant="ghost"
+						className="w-[300px]"
+						size="icon"
+					>
+						<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
+							<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
+							<span className="text-muted-foreground shrink truncate">
+								Wertpapiersuche...
+							</span>
+						</div>
 					</Button>
-				</SearchBarPopOut>
-
+				)}
+			/>
+			<div className="flex items-center gap-2 flex-row justify-between">
 				<Sheet open={open} onOpenChange={setOpen}>
 					<SheetTrigger asChild>
 						<Button variant="ghost" size="icon">

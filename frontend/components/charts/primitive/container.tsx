@@ -27,17 +27,13 @@ export default function ChartContainer({
 	toolbar,
 }: ChartContainerProps) {
 	const tabsContent: React.ReactNode[] = tabs.map(tab => (
-		<TabsContent key={tab.key ?? tab.name} value={tab.name}>
+		<TabsContent className="" key={tab.key ?? tab.name} value={tab.name}>
 			{tab.content}
 		</TabsContent>
 	))
 
 	const tabsTrigger = tabs.map(tab => (
-		<TabsTrigger
-			className="grow-0 h-max py-1 px-1 data-[state=active]:bg-secondary *:data-[state=active]:stroke-foreground *:hover:stroke-foreground hover:bg-secondary/50 transition-colors *:transition-colors"
-			key={tab.key ?? tab.name}
-			value={tab.name}
-		>
+		<TabsTrigger className="" key={tab.key ?? tab.name} value={tab.name}>
 			<Tooltip className="w-full h-full px-2 py-1 box-content" name={tab.name}>
 				{tab.icon}
 			</Tooltip>
@@ -46,13 +42,11 @@ export default function ChartContainer({
 
 	return (
 		<Suspense fallback={<PageLoader />}>
-			<Tabs defaultValue={defaultName} className={cn(className, "px-1")}>
+			<Tabs defaultValue={defaultName} className={cn(className)}>
 				{tabsContent}
-				<div className="w-full h-15 p-2 md:px-1 md:py-0 bg-background border-t flex flex-row">
-					<TabsList className="bg-transparent flex flex-row gap-2 h-15 items-center justify-around justify-items-stretch md:justify-start">
-						{tabsTrigger}
-					</TabsList>
-					<div className="grow justify-end flex flex-row items-center gap-3 pr-1">
+				<div className="w-full bg-muted/50 px-2 border py-2 rounded-full flex flex-row items-center">
+					<TabsList className="h-max md:justify-start">{tabsTrigger}</TabsList>
+					<div className="grow justify-end flex flex-row items-center ">
 						{toolbar}
 						{/* <IntervalControls className="grow justify-end p-2" intervals={Intervals} /> */}
 					</div>
