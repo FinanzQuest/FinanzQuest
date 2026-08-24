@@ -166,30 +166,34 @@ export default function PositionTabView({
 	const types = Object.keys(sortedStocks)
 
 	return (
-		<Tabs defaultValue="all">
-			<div className="flex flex-row gap-4 w-full border rounded-full p-2 bg-muted/50">
-				<TabsList className="p-0 bg-transparent">
-					<TabsTrigger className="h-full" value="all">
-						All {Object.values(sortedStocks).flat().length}
-					</TabsTrigger>
-					{types.map(asset_type => {
-						const count = counts.get(asset_type as AssetTypeWithOther) ?? 0
-						const name =
-							displays.get(asset_type as AssetTypeWithOther) ?? asset_type
-						return (
-							<TabsTrigger
-								className="h-full"
-								key={asset_type}
-								value={asset_type}
-							>
-								{name} {count}
-							</TabsTrigger>
-						)
-					})}
-				</TabsList>
+		<Tabs defaultValue="all" className="rounded">
+			<div className="flex flex-row gap-4 w-full">
+				<div className="border rounded-full p-2 bg-muted/50">
+					<TabsList className="p-0 bg-transparent">
+						<TabsTrigger className="h-full" value="all">
+							All {Object.values(sortedStocks).flat().length}
+						</TabsTrigger>
+						{types.map(asset_type => {
+							const count = counts.get(asset_type as AssetTypeWithOther) ?? 0
+							const name =
+								displays.get(asset_type as AssetTypeWithOther) ?? asset_type
+							return (
+								<TabsTrigger
+									className="h-full"
+									key={asset_type}
+									value={asset_type}
+								>
+									{name} {count}
+								</TabsTrigger>
+							)
+						})}
+					</TabsList>
+				</div>
 				<div className="grow" />
 
-				<ToolBar value={modes} onValueChange={setModes} />
+				<div className="border rounded-full p-2 bg-muted/50">
+					<ToolBar value={modes} onValueChange={setModes} />
+				</div>
 			</div>
 			<TabsContent value="all">
 				<PositionList positions={Object.values(sortedStocks).flat()} />

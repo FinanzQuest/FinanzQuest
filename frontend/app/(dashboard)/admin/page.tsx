@@ -22,30 +22,34 @@ export default async function Page() {
 	}
 
 	return (
-		<main className="w-full h-full flex flex-col items-start gap-6">
-			<div className="flex flex-row gap-3 *:px-6 *:py-5 *:rounded-lg *:bg-muted/50 *:shadow *:border">
-				<div className="flex flex-col gap-1">
-					<div>Nutzerzahl</div>
-					<div className="text-3xl font-semibold number">
+		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-2">
+					<span className="text-sm text-muted-foreground">Nutzerzahl</span>
+					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
 						{numberFormat.format(stats.user_count)}
-					</div>
+					</span>
 				</div>
-				<div className="grid grid-rows-2 grid-cols-[auto,auto] gap-x-2 gap-y-1 *:grid *:col-span-2 *:grid-cols-subgrid *:items-center">
-					<div>
-						<span className="font-semibold text-2xl">
+				<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+					<div className="flex flex-col gap-1">
+						<span className="text-sm uppercase tracking-wide text-muted-foreground">
+							Schüler
+						</span>
+						<span className="text-xl font-semibold number tabular-nums">
 							{numberFormat.format(stats.student_count)}
 						</span>
-						<span>Schüler</span>
 					</div>
-					<div>
-						<span className="font-semibold text-2xl">
+					<div className="flex flex-col gap-1">
+						<span className="text-sm uppercase tracking-wide text-muted-foreground">
+							Lehrer
+						</span>
+						<span className="text-xl font-semibold number tabular-nums">
 							{numberFormat.format(stats.teacher_count)}
 						</span>
-						<span>Lehrer</span>
 					</div>
 				</div>
 			</div>
-			<div className="p-2 border rounded-xl bg-muted/25 w-full">
+			<div className="flex flex-col gap-4 w-full grow">
 				<AdminUsersTable className="bg-background rounded-lg" data={users} />
 			</div>
 		</main>

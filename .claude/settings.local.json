@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\('tailwind:', require\\('tailwindcss/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\('shadcn:', require\\('shadcn/package.json'\\).version\\)\")",
+      "Bash(node -p \"require\\('./node_modules/shadcn/package.json'\\).version\")",
+      "Bash(node_modules/.bin/tailwindcss -c tailwind.config.ts -i app/globals.css -o /tmp/out.css)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(node --input-type=module /tmp/tw-build.mjs)",
+      "Bash(curl -sL http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"final:%{url_effective} code:%{http_code}\\\\n\" -L http://localhost:3000)",
+      "Bash(awk '/position_profits/,/^[[:space:]]*}/' /home/johannes/FinanzQuest/frontend/database/types.ts)",
+      "Bash(biome check *)",
+      "Bash(node_modules/.bin/tsc --noEmit)"
+    ]
+  }
+}

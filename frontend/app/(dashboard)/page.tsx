@@ -1,14 +1,18 @@
 "use server"
-import { LineChart as LinechartIcon, TableCellsMerge } from "lucide-react"
+import {
+	LineChart as LinechartIcon,
+	PieChart as PieChartIcon,
+	TableCellsMerge,
+} from "lucide-react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
 import AreaChart from "@/components/charts/area"
+import PieChart from "@/components/charts/pie"
 import ChartContainer from "@/components/charts/primitive/container"
 import TreeChart from "@/components/charts/tree"
 import PositionTabView, { PositionsEmpty } from "@/components/displays/tab_view"
-import HeaderStat from "@/components/stat/header_stat"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import ChangeStat from "@/components/stat/change_stat"
 import type {
 	DepotValue,
 	NonNullableRow,
@@ -16,6 +20,7 @@ import type {
 	SearchParams,
 } from "@/database/custom_types"
 import { processDepotValues } from "@/database/depots"
+import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo, toISODateOnly } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
@@ -63,17 +68,33 @@ export default async function Page({
 		(fres.depotValues as NonNullableRow<DepotValue>[]) ?? []
 	)
 	return (
-		<main className="grid grid-cols-1 gap-3 max-h-screen overflow-y-scroll">
-			<HeaderStat
-				className="justify-start"
-				displays={{
-					Depotwert: { value: d?.total ?? 0 },
-					Heute: { value: d?.diff_1d ?? 0 },
-					Monat: { value: d?.diff_1m ?? 0 },
-					Jahr: { value: d?.diff_1y ?? 0 },
-					Cash: { value: d?.cash ?? 0 },
-				}}
-			/>
+		<main className="grid grid-cols-1 gap-8 max-h-screen overflow-y-scroll px-4 md:px-8 py-6">
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-2">
+					<span className="text-sm text-muted-foreground">Depotwert</span>
+					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+						{currencyFormat.format(d?.total ?? 0)}
+					</span>
+				</div>
+				<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+					<ChangeStat
+						label="Heute"
+						value={d?.diff_1d ?? 0}
+						prev={d?.prev_1d_total}
+					/>
+					<ChangeStat
+						label="Monat"
+						value={d?.diff_1m ?? 0}
+						prev={d?.prev_1m_total}
+					/>
+					<ChangeStat
+						label="Jahr"
+						value={d?.diff_1y ?? 0}
+						prev={d?.prev_1y_total}
+					/>
+					<ChangeStat label="Cash" value={d?.cash ?? 0} neutral />
+				</div>
+			</div>
 			<ChartContainer
 				className="overflow-hidden"
 				defaultTab="line"
@@ -102,6 +123,19 @@ export default async function Page({
 						),
 						content: (
 							<TreeChart
+								className="max-h-[500px] w-full"
+								data={treeData as PositionSummary[]}
+								dataKey="market_value"
+							/>
+						),
+					},
+					{
+						name: "pie",
+						icon: (
+							<PieChartIcon className="size-7 md:size-5 stroke-muted-foreground" />
+						),
+						content: (
+							<PieChart
 								className="max-h-[500px] w-full"
 								data={treeData as PositionSummary[]}
 								dataKey="market_value"

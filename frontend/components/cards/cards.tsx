@@ -15,25 +15,27 @@ import type {
 	DepotPosition,
 	StockPrice,
 } from "@/database/custom_types"
-import { to_display_string } from "@/lib/cash_display_string"
+import { currencyFormat, to_display_string } from "@/lib/cash_display_string"
 import { getIconURL } from "@/lib/icon_url"
-import { numberFormat, toAbsoluteTimeString } from "@/lib/util"
+import { toAbsoluteTimeString } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import URLIcon from "../icon"
-import HeaderStat from "../stat/header_stat"
+import ChangeStat from "../stat/change_stat"
 import BuyStockDialog from "../transaction_dialogs/buy_stock_dialog"
-import type { TStock } from "../transaction_dialogs/primitive_dialog"
 import SellStockDialog from "../transaction_dialogs/sell_stock_dialog"
 
 type CardProps = ComponentPropsWithoutRef<"div">
 
 type Price = Omit<StockPrice, "asset_id">
 
-interface StatCardProps extends CardProps {
+interface StockHeaderProps extends CardProps {
 	stock: Asset
 	currentPrice?: Price
 	referencePrice?: Price
 	dateString?: string
+	depot?: Depot | null
+	position?: DepotPosition
+	commission: number
 }
 
 function calculateChange(currentPrice?: Price, referencePrice?: Price) {
@@ -46,78 +48,92 @@ function calculateChange(currentPrice?: Price, referencePrice?: Price) {
 	return { change24h, absoluteChange, relativeChange }
 }
 
-export function StatCard({
+export function StockHeader({
 	className,
 	stock: asset,
 	currentPrice,
 	referencePrice,
 	dateString,
-}: StatCardProps) {
+	depot,
+	position,
+	commission,
+}: StockHeaderProps) {
 	const stats = calculateChange(currentPrice, referencePrice)
 	const lastUpdated = dateString ?? currentPrice?.tstamp
+	const close = currentPrice?.close ?? null
+	const buyLimit = Math.max(0, (depot?.cash ?? 0) - commission)
+	const sellLimit = position?.worth ?? 0
+
 	return (
-		<Card className={cn(className)}>
-			<CardHeader className="w-full flex flex-row h-fit">
-				<CardTitle className="w-full flex flex-row gap-4 h-fit items-center">
+		<header className={cn("flex flex-col gap-4", className)}>
+			<div className="flex flex-row flex-wrap items-center justify-between gap-x-6 gap-y-4">
+				<div className="flex flex-row gap-4 items-center">
 					<URLIcon
-						className="size-[4lh] rounded-lg shadow"
+						className="size-[4lh] rounded-lg"
 						size={100}
 						iconURL={getIconURL(asset.symbol, asset.asset_type, 128)}
 					/>
-					<div className="">
-						<span className="text-3xl font-extrabold mr-4">{asset.symbol}</span>
-						<span>{asset.name}</span>
-						<br />
-						<span className="text-muted-foreground font-normal w-fit mt-2">
+					<div className="flex flex-col gap-0.5">
+						<span className="text-3xl font-extrabold tracking-tight">
+							{asset.symbol}
+						</span>
+						<span className="text-muted-foreground">{asset.name}</span>
+						<span className="text-sm text-muted-foreground">
 							{asset.description}
 						</span>
 					</div>
-				</CardTitle>
-			</CardHeader>
-
-			<CardContent className="flex flex-col gap-3 pb-0 h-auto">
-				<HeaderStat
-					subClassName="text-sm"
-					className="text-base gap-1 px- text-2xl3"
-					headerClassName="text-2xl font-semibold"
-					displays={{
-						"Aktueller Wert": { value: currentPrice?.close ?? null },
-						"Änderung 24h": { value: stats.change24h },
-						"Änderung Heute": { value: stats.absoluteChange },
-						"Rel. Änderung": {
-							value: stats.relativeChange,
-							formatFunction: value =>
-								value ? `${numberFormat.format(value)} %` : "-",
-						},
-					}}
-				/>
-				<div className="grow" />
-				{/*<AdditionalContent
-					className="bg-card"
-					buttonTitle="mehr Information ..."
-				>
-					<StockStats
-            className="pt-3"
-            structure={{
-              close: "Close",
-              open: "Open",
-              high: "High",
-              low: "Low",
-              volume: "Volume",
-            }}
-            current={currentPrice}
-            reference={referencePrice}
-          />
-				</AdditionalContent>*/}
-			</CardContent>
-			<CardFooter className="h-min">
-				<span className="text-xs w-full text-muted-foreground">
-					{lastUpdated
-						? `Stand des ${toAbsoluteTimeString(new Date(lastUpdated))}`
-						: ""}
+				</div>
+				{depot && close != null && (
+					<div className="flex flex-row gap-3">
+						<BuyStockDialog
+							stock={{
+								name: asset.name,
+								id: asset.id,
+								price: close,
+							}}
+							depot={{ id: depot.id, monetaryAssets: depot.cash }}
+							commission={commission}
+							limit={buyLimit}
+							triggerSize="lg"
+						/>
+						<SellStockDialog
+							stock={{
+								name: asset.name,
+								id: asset.id,
+								price: close,
+							}}
+							depot={{ id: depot.id, monetaryAssets: depot.cash }}
+							commission={commission}
+							limit={sellLimit}
+							triggerSize="lg"
+						/>
+					</div>
+				)}
+			</div>
+			<div className="flex flex-col gap-1">
+				<span className="text-sm text-muted-foreground">Aktueller Wert</span>
+				<span className="text-[clamp(2rem,4vw,3.5rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+					{currencyFormat.format(close ?? 0)}
 				</span>
-			</CardFooter>
-		</Card>
+			</div>
+			<div className="flex flex-row gap-x-8 gap-y-3 flex-wrap">
+				<ChangeStat
+					label="24h"
+					value={stats.change24h ?? 0}
+					prev={referencePrice?.close ?? null}
+				/>
+				<ChangeStat
+					label="Heute"
+					value={stats.absoluteChange ?? 0}
+					prev={currentPrice?.open ?? null}
+				/>
+			</div>
+			<span className="text-xs text-muted-foreground">
+				{lastUpdated
+					? `Stand des ${toAbsoluteTimeString(new Date(lastUpdated))}`
+					: ""}
+			</span>
+		</header>
 	)
 }
 
@@ -145,38 +161,24 @@ export function ErrorCard({ error, className }: ErrorCardProps) {
 }
 
 interface StockPositionCardProps extends CardProps {
-	stock: { name: string; id: number; price: number | null }
-	depot?: Depot | null
 	position?: DepotPosition
-	hidden?: boolean
-	commission: number
 }
 export function StockPositionCard({
 	className,
-	hidden,
-	stock,
-	depot,
 	position,
-	commission,
 }: StockPositionCardProps) {
-	if (hidden || !depot) {
-		return
-	}
-	const buyLimit = Math.max(0, depot.cash - commission)
-	const sellLimit = position?.worth ?? 0
-
 	return (
 		<Card className={cn(className)}>
 			<CardHeader className="flex-row flex-wrap justify-left gap-x-4 gap-y-1">
 				<CardDescription className="">Deine Positionen</CardDescription>
 			</CardHeader>
-			<CardContent className="flex flex-col gap-3 ">
-				<div className="flex flex-row flex-wrap gap-3 w-full *:flex-grow mb-3 h-fit">
+			<CardContent className="flex flex-col gap-3">
+				<div className="flex flex-row flex-wrap gap-3 w-full *:flex-grow h-fit">
 					<div className="px-4 py-2 flex flex-col flex-nowrap bg-background border border-border/20 rounded shadow-sm">
-						<span className=" text-muted-foreground text-sm">Wert</span>
+						<span className="text-muted-foreground text-sm">Wert</span>
 
 						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl font-mono font-normal text-foreground">
+							<span className="text-2xl number font-normal tabular-nums text-foreground">
 								{position?.worth ? to_display_string(position.worth) : 0}
 							</span>
 						</span>
@@ -185,30 +187,12 @@ export function StockPositionCard({
 						<span className="text-sm text-muted-foreground">Anzahl</span>
 
 						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl font-mono font-normal text-foreground">
+							<span className="text-2xl number font-normal tabular-nums text-foreground">
 								{position?.amount.toFixed(2) ?? 0}
 							</span>
 						</span>
 					</div>
 				</div>
-				{stock.price && buyLimit !== undefined && buyLimit !== null ? (
-					<div className="grid grid-cols-2 gap-3 grow">
-						<BuyStockDialog
-							stock={stock as TStock}
-							commission={commission}
-							depot={{ id: depot.id, monetaryAssets: depot.cash }}
-							limit={buyLimit}
-						/>
-						<SellStockDialog
-							stock={stock as TStock}
-							commission={commission}
-							depot={{ id: depot.id, monetaryAssets: depot.cash }}
-							limit={sellLimit}
-						/>
-					</div>
-				) : (
-					""
-				)}
 			</CardContent>
 		</Card>
 	)

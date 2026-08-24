@@ -1,11 +1,9 @@
 import { Minus, TriangleIcon } from "lucide-react"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
+import ChangeStat from "@/components/stat/change_stat"
 import type { LeaderboardRow, SearchParams } from "@/database/custom_types"
-import {
-	currencyFormat,
-	currencyFormatFixedLength,
-} from "@/lib/cash_display_string"
+import { currencyFormatFixedLength } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/server"
@@ -40,46 +38,47 @@ export default async function Page(props: {
 
 	const rankIndicator = (() => {
 		if (rankChange === null || rankChange === 0)
-			return <Minus className="size-5 text-muted-foreground self-center" />
+			return <Minus className="size-4 text-muted-foreground self-center" />
 
 		return (
-			<div className="flex flex-row items-baseline gap-1">
+			<div className="flex flex-row items-center gap-1.5">
 				<TriangleIcon
 					className={cn(
-						"size-4 fill-current self-center",
+						"size-3.5 fill-current self-center",
 						isRising ? "text-win" : "text-loss rotate-180"
 					)}
 				/>
-				<div className={cn("font-semibold text-2xl tabular-nums")}>
+				<span className="text-xl font-semibold number tabular-nums">
 					{rankChange !== null && Math.abs(rankChange)}
-				</div>
+				</span>
 			</div>
 		)
 	})()
 
 	return (
-		<main className="w-full h-full flex flex-col gap-6 items-start">
-			<div className="*:border items-stretch *:rounded-lg *:bg-muted/50 *:shadow *:px-6 *:py-5 flex flex-row gap-3 r">
-				<div className="flex flex-col gap-1">
-					<div className="text-muted-foreground">Deine Position</div>
-					<div className="text-3xl font-semibold number">
+		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-2">
+					<span className="text-sm text-muted-foreground">Deine Position</span>
+					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
 						#{depot.data?.rank}
-					</div>
+					</span>
 				</div>
-				<div className="flex flex-col gap-1">
-					<span className="text-muted-foreground">Veränderung</span>
-					{rankIndicator}
-				</div>
-				{depot.data?.value && (
+				<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+					<ChangeStat
+						label="Depotwert"
+						value={depot.data?.value ?? 0}
+						neutral
+					/>
 					<div className="flex flex-col gap-1">
-						<div className="text-muted-foreground">Depotwert</div>
-						<div className="text-3xl font-semibold number">
-							{currencyFormat.format(depot.data?.value)}
-						</div>
+						<span className="text-sm uppercase tracking-wide text-muted-foreground">
+							Veränderung
+						</span>
+						{rankIndicator}
 					</div>
-				)}
+				</div>
 			</div>
-			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,_max-content)] w-full border rounded-xl overflow-y-scroll shadow gap-x-4">
+			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,_max-content)] w-full border rounded-2xl divide-y divide-border/50 gap-x-6">
 				{leaderboard.data.map(row => (
 					<LeaderboardEntry key={row.id} row={row} />
 				))}
@@ -120,25 +119,25 @@ function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
 	return (
 		<div
 			className={cn(
-				"grid grid-cols-subgrid col-span-5 items-baseline pl-4 even:bg-muted/50"
+				"grid grid-cols-subgrid col-span-5 items-center px-4 hover:bg-muted/40"
 			)}
 		>
-			<div className="grid grid-cols-subgrid py-4 col-span-4 self-center">
-				<div className="flex flex-row items-baseline gap-2">
+			<div className="grid grid-cols-subgrid py-4 col-span-4 self-stretch">
+				<div className="flex flex-row items-center gap-2">
 					{rankIndicator}
-					<span className="text-md text-muted-foreground font-mono">
+					<span className="text-sm text-muted-foreground number">
 						#{row.rank}
 					</span>
 				</div>
 				<div>Depot {row.id}</div>
 				<div>{userNames}</div>
-				<div className="font-mono text-right tabular-nums">
+				<div className="number text-right tabular-nums">
 					{row.value && currencyFormatFixedLength.format(row.value)}
-				</div>{" "}
+				</div>
 			</div>
 			{row.sparkline && (
 				<Sparkline
-					className="self-center "
+					className="self-center"
 					data={row.sparkline}
 					startValue={row.cash_start as number}
 				/>

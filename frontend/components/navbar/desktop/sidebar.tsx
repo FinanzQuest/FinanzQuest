@@ -107,86 +107,94 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 	const collapsed = state === "collapsed"
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			className={cn(
-				"bg-sidebar hidden rounded-2xl m-2 h-auto border overflow-hidden md:flex",
-				collapsed ? "" : "px-1"
-			)}
-		>
-			<SidebarHeader className={cn(" mb-3", !collapsed && "mx-1 mt-2")}>
-				{!collapsed && (
-					<Image
-						src={logo_full}
-						alt="FinanzQuest"
-						className="shrink-0 grow-0 overflow-hidden"
-						height={64}
-					/>
-				)}
-				{collapsed && (
-					<Image
-						src={logo}
-						alt="FinanzQuest"
-						className="aspect-square w-full border rounded-[33%] bg-background *:fill-win overflow-hidden mb-2"
-						width={100}
-						height={100}
-					/>
-				)}
-			</SidebarHeader>
-
-			<SidebarContent className="gap-1">
-				{!collapsed && (
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton
-								render={
-									<SearchBarPopOut doRedirect>
-										<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
-											<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
-											<span className="text-muted-foreground shrink truncate">
-												Wertpapiersuche...
-											</span>
-										</div>
-									</SearchBarPopOut>
-								}
-							/>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				)}
-
-				{collapsed && (
-					<SidebarMenu>
-						<SidebarMenuItem className="mx-auto">
-							<SidebarMenuButton
-								variant="outline"
-								className="rounded-lg"
-								tooltip="Suche"
-								size="lg"
-							>
-								<SearchBarPopOut className="mx-auto" doRedirect>
-									<SearchIcon className="size-6 shrink-0" />
-								</SearchBarPopOut>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				)}
-
-				<NavItems tree={tree} collapsed={collapsed} />
-			</SidebarContent>
-
-			<SidebarFooter
+		<>
+			<SidebarTrigger
 				className={cn(
-					"flex flex-col *:bg-background/50",
-					collapsed ? "gap-2" : "gap-0"
+					"absolute top-2 z-30 hidden rounded-full border bg-background shadow-md md:inline-flex",
+					collapsed ? "left-16" : "left-[17rem]"
+				)}
+				size="icon"
+			/>
+			<Sidebar
+				collapsible="icon"
+				className={cn(
+					"bg-sidebar hidden rounded-2xl m-2 h-auto border overflow-hidden md:flex",
+					collapsed ? "" : "px-1"
 				)}
 			>
-				<Suspense fallback={<div>Loading...</div>}>
-					<User collapsed={collapsed} />
-					<DepotPicker collapsed={collapsed} />
-				</Suspense>
-				<SidebarTrigger className="w-full mt-1" />
-			</SidebarFooter>
-		</Sidebar>
+				<SidebarHeader className={cn(" mb-3", !collapsed && "mx-1 mt-2")}>
+					{!collapsed && (
+						<Image
+							src={logo_full}
+							alt="FinanzQuest"
+							className="shrink-0 grow-0 overflow-hidden"
+							height={64}
+						/>
+					)}
+					{collapsed && (
+						<Image
+							src={logo}
+							alt="FinanzQuest"
+							className="aspect-square w-full border rounded-[33%] bg-background *:fill-win overflow-hidden mb-2"
+							width={100}
+							height={100}
+						/>
+					)}
+				</SidebarHeader>
+
+				<SidebarContent className="gap-1">
+					{!collapsed && (
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton
+									render={
+										<SearchBarPopOut doRedirect>
+											<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
+												<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
+												<span className="text-muted-foreground shrink truncate">
+													Wertpapiersuche...
+												</span>
+											</div>
+										</SearchBarPopOut>
+									}
+								/>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					)}
+
+					{collapsed && (
+						<SidebarMenu>
+							<SidebarMenuItem className="mx-auto">
+								<SidebarMenuButton
+									variant="outline"
+									className="rounded-lg"
+									tooltip="Suche"
+									size="lg"
+								>
+									<SearchBarPopOut className="mx-auto" doRedirect>
+										<SearchIcon className="size-6 shrink-0" />
+									</SearchBarPopOut>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					)}
+
+					<NavItems tree={tree} collapsed={collapsed} />
+				</SidebarContent>
+
+				<SidebarFooter
+					className={cn(
+						"flex flex-col *:bg-background/50",
+						collapsed ? "gap-2" : "gap-0"
+					)}
+				>
+					<Suspense fallback={<div>Loading...</div>}>
+						<User collapsed={collapsed} />
+						<DepotPicker collapsed={collapsed} />
+					</Suspense>
+				</SidebarFooter>
+			</Sidebar>
+		</>
 	)
 }
 
@@ -197,7 +205,12 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 	return (
 		<div className="md:hidden w-full flex items-center justify-between flex-row px-4 py-3 border-b bg-sidebar ">
 			<Link href="/">
-				<Image src={logo} className="rounded-[33%]" alt="FinanzQuest" height={32} />
+				<Image
+					src={logo}
+					className="rounded-[33%]"
+					alt="FinanzQuest"
+					height={32}
+				/>
 			</Link>
 
 			<SearchBarPopOut

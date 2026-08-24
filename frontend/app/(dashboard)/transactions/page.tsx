@@ -2,7 +2,10 @@ import { MoveRight } from "lucide-react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
-import { PositionRow } from "@/components/displays/position_list"
+import {
+	PositionRow,
+	positionColumns,
+} from "@/components/displays/position_list"
 import URLIcon from "@/components/icon"
 import {
 	HoverCard,
@@ -46,8 +49,8 @@ export default async function Page(props: {
 	const groupedTransactions = groupTransactionsPerDay(transactions)
 
 	return (
-		<main className="w-full max-h-screen overflow-y-scroll">
-			<div className="flex flex-col gap-10 max-w-[1000px] mx-auto p-10 pb-0 overflow-y-scroll">
+		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6">
+			<div className="flex flex-col gap-8 max-w-[1000px] mx-auto">
 				{groupedTransactions.map(group => (
 					<TransactionGroup key={group.day} {...group} />
 				))}
@@ -112,7 +115,7 @@ function TransactionGroup({
 					{date ? relativeDateString(date, "never") : "No Date"}
 				</span>
 			</div>
-			<div className="flex flex-col border rounded-xl overflow-hidden bg-muted/50 shadow">
+			<div className="flex flex-col border rounded-2xl overflow-hidden divide-y divide-border/50">
 				{transactions.map(transaction => (
 					<TransactionItem key={transaction.id} transaction={transaction} />
 				))}
@@ -139,17 +142,17 @@ function Description({
 		<div className={cn(buy ? "flex-row" : "flex-row-reverse", "flex gap-3")}>
 			<HoverCard openDelay={100}>
 				<HoverCardTrigger asChild>
-					<span className="font-mono bg-background border border-border/70 px-2 rounded-lg cursor-pointer">
+					<span className="number tabular-nums bg-background border border-border/70 px-2 rounded-lg cursor-pointer">
 						${Math.abs(worth).toFixed(2)}
 					</span>
 				</HoverCardTrigger>
 				<HoverCardContent className="w-fit rounded-lg overflow-hidden">
 					<div className="flex flex-row gap-2">
-						<span className="font-mono">
+						<span className="number tabular-nums">
 							${Math.abs(transaction.amount * transaction.price).toFixed(2)}
 						</span>
 						<span>{buy ? "+" : "-"}</span>
-						<span className="font-mono">
+						<span className="number tabular-nums">
 							${Math.abs(transaction.commission).toFixed(2)}
 						</span>
 						<span className="text-muted-foreground">(Gebühren)</span>
@@ -169,16 +172,18 @@ function Description({
 							iconURL={iconURL}
 						/>
 						{transaction.symbol}
-						<span className="font-mono text-muted-foreground">
+						<span className="number tabular-nums text-muted-foreground">
 							x{Math.abs(transaction.amount).toFixed(2)}
 						</span>
 					</Link>
 				</HoverCardTrigger>
-				<HoverCardContent className="p-0 rounded-lg overflow-hidden w-min max-w-[400px]">
-					<PositionRow
-						className="m-0 !rounded-none border-none w-300px *:!rounded-none"
-						position={transaction}
-					></PositionRow>
+				<HoverCardContent
+					className={cn(
+						"grid gap-x-6 px-3 rounded-lg overflow-hidden w-[420px]",
+						positionColumns
+					)}
+				>
+					<PositionRow position={transaction} />
 				</HoverCardContent>
 			</HoverCard>
 		</div>
@@ -202,11 +207,7 @@ function TransactionItem({
 	const date = new Date(transaction.tstamp)
 
 	return (
-		<div
-			className={cn(
-				"pr-7 pl-3 py-4 flex flex-row gap-3 shadow even:bg-muted/50 even:shadow border-b last:border-none"
-			)}
-		>
+		<div className={cn("px-4 py-4 flex flex-row gap-3 hover:bg-muted/40")}>
 			<span
 				className={cn(bg, "inline-block w-1 flex-shrink-0 h-[1lh] rounded-xl")}
 			/>

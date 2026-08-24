@@ -1,5 +1,6 @@
-import { CircleSlash2, PiggyBank } from "lucide-react"
+import { PiggyBank } from "lucide-react"
 import { ErrorCard } from "@/components/cards/cards"
+import ChangeStat from "@/components/stat/change_stat"
 import { Button } from "@/components/ui/button"
 import {
 	Empty,
@@ -13,7 +14,6 @@ import type { SearchParams } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { formatDateString } from "@/lib/util"
-import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/server"
 import NewEntryDialog from "./new_dialog"
 import { SavingsPlanTable } from "./table"
@@ -41,52 +41,36 @@ export default async function Page(props: {
 	}
 
 	return (
-		<main className="w-full flex flex-col gap-6 items-start">
+		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
 			{budget && (
-				<div className="grid grid-cols-3 gap-3 grid-rows-1 *:bg-muted/50 *:border *:rounded-lg *:shadow *:px-6 *:py-5">
-					<div className="gap-2 flex flex-col justify-start">
-						<div>Monatliches Budget</div>
-						<div className="text-2xl font-semibold number">
-							{budget.budget && currencyFormat.format(budget.budget)}
-						</div>
-						<div className="text-sm text-muted-foreground">
-							{budget.last_changed && formatDateString(budget.last_changed)}
-						</div>
-					</div>
+				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
-						<div>Restbudget</div>
-						<div className="text-2xl font-semibold number flex flex-row items-center gap-2">
-							{budget.remaining_budget && (
-								<>
-									<span
-										className={cn(
-											"font-bold",
-											budget.remaining_budget > 0 ? "text-win" : "text-loss"
-										)}
-									>
-										{budget.remaining_budget > 0 ? "+" : "-"}
-									</span>
-									{currencyFormat.format(Math.abs(budget.remaining_budget))}
-								</>
-							)}
-						</div>
-						<div className="text-sm text-muted-foreground">
-							<CircleSlash2 className="inline-block size-4" /> pro Monat
-						</div>
+						<span className="text-sm text-muted-foreground">
+							Monatliches Budget
+						</span>
+						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+							{currencyFormat.format(budget.budget ?? 0)}
+						</span>
+						{budget.last_changed && (
+							<span className="text-sm text-muted-foreground">
+								{formatDateString(budget.last_changed)}
+							</span>
+						)}
 					</div>
-					<div className="flex flex-col gap-2">
-						<div>Ausgaben</div>
-						<div className="text-2xl font-semibold number flex flex-row items-center gap-2">
-							{budget.monthly_expenses &&
-								currencyFormat.format(budget.monthly_expenses)}
-						</div>
-						<div className="text-sm text-muted-foreground">
-							<CircleSlash2 className="inline-block size-4" /> pro Monat
-						</div>
+					<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+						<ChangeStat
+							label="Restbudget"
+							value={budget.remaining_budget ?? 0}
+						/>
+						<ChangeStat
+							label="Ausgaben"
+							value={budget.monthly_expenses ?? 0}
+							neutral
+						/>
 					</div>
 				</div>
 			)}
-			<div className="flex flex-col gap-4 w-full p-2 border grow rounded-xl bg-muted/25">
+			<div className="flex flex-col gap-4 w-full grow">
 				{data.length === 0 ? (
 					<Empty>
 						<EmptyHeader>

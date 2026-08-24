@@ -35,6 +35,7 @@ export default function SellStockDialog(props: {
 	depot: TDepot
 	commission: number
 	limit: number
+	triggerSize?: "xs" | "sm" | "default" | "lg"
 }) {
 	return (
 		<PrimitiveDialog

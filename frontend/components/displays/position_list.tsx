@@ -1,22 +1,28 @@
 import Link from "next/link"
 import type React from "react"
-import { getStockPagePath } from "@/lib/get_stock_path"
-import { Card } from "../ui/card"
-import "./style.css"
 import type { PositionSummary } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
+import { getStockPagePath } from "@/lib/get_stock_path"
 import { getIconURL } from "@/lib/icon_url"
 import { cn } from "@/lib/utils"
 import URLIcon from "../icon"
+
+// Shared column template so the subgrid rows align with their container.
+export const positionColumns =
+	"grid-cols-[max-content_minmax(0,1fr)_max-content_max-content_max-content]"
 
 export default function PositionList({
 	positions,
 }: {
 	positions: PositionSummary[]
 }) {
-	// "grid  p-3 gap-3 rounded-xl"
 	return (
-		<div className="pt-3 pb-6 gap-4 grid grid-cols-3">
+		<div
+			className={cn(
+				"grid gap-x-6 py-2 divide-y divide-border/50 gap-y-2",
+				positionColumns
+			)}
+		>
 			{positions.map(position => (
 				<PositionRow key={position.asset_id} position={position} />
 			))}
@@ -24,7 +30,7 @@ export default function PositionList({
 	)
 }
 
-interface PositionRowProps extends React.ComponentPropsWithoutRef<"div"> {
+interface PositionRowProps extends React.ComponentPropsWithoutRef<"a"> {
 	position: PositionSummary
 }
 
@@ -32,6 +38,7 @@ export function PositionRow({
 	position: {
 		market_value,
 		total_profit,
+		total_invested,
 		current_price,
 		name,
 		asset_type,
@@ -41,53 +48,57 @@ export function PositionRow({
 	},
 	className,
 }: PositionRowProps) {
-	// "p-3 flex flex-row gap-3 border-b w-max"
-
 	const iconURL = symbol ? getIconURL(symbol, asset_type ?? "stock", 40) : null
 
+	const profit = total_profit ?? 0
+	const invested = total_invested ?? 0
+	const profitPercent = invested > 0 ? (profit / invested) * 100 : 0
+	const profitSign = profit > 0 ? "+" : ""
+	const profitClass = profit >= 0 ? "text-win" : "text-loss"
+
 	return (
-		<div className={cn(className)}>
-			<Link
-				href={asset_id ? getStockPagePath(asset_id) : ""}
-				className="flex flex-col px-8 pt-3 pb-3 gap-1 items-start overflow-hidden"
-			>
-				<div className="flex flex-row gap-2">
-					<URLIcon
-						className="h-[1.4lh] aspect-square w-auto self-center rounded"
-						size={100}
-						iconURL={iconURL}
-					/>
-					<span className="text-2xl self-end font-bold hover:underline-offset-4 transition-all no-underline hover:underline">
-						{name}
+		<Link
+			href={asset_id ? getStockPagePath(asset_id) : ""}
+			className={cn(
+				"grid grid-cols-subgrid col-span-full items-center gap-x-6 px-5 py-3 hover:bg-muted/40 rounded-2xl border",
+
+				className
+			)}
+		>
+			<URLIcon
+				className="h-[1.6lh] aspect-square w-auto rounded"
+				size={100}
+				iconURL={iconURL}
+			/>
+			<div className="flex flex-col justify-center min-w-0 gap-0.5">
+				<span className="font-semibold text-lg truncate">{name ?? symbol}</span>
+				{(symbol || description) && (
+					<span className="text-sm text-muted-foreground truncate">
+						{symbol}
+						{symbol && description ? " · " : ""}
+						{description}
 					</span>
-				</div>
-				<div className="mb-[.1lh] text-ellipsis whitespace-nowrap overflow-hidden max-w-full text-muted-foreground">
-					{symbol}
-				</div>
-				<div className="text-muted-foreground text-sm hidden md:block text-ellipsis max-w-full overflow-hidden whitespace-nowrap">
-					{description}
-				</div>
-			</Link>
-			<div className="border-t row-span-1 row-start-2 self-end px-3 py-3 *:rounded-none col-start-1 h-fit gap-3 justify-evenly w-full flex flex-row overflow-hidden shadow bg-muted">
-				<div>
-					<div className="text-sm text-muted-foreground">Marktwert</div>
-					<div className="text-lg number">
-						{currencyFormat.format(market_value ?? 0)}
-					</div>
-				</div>
-				<div>
-					<div className="text-sm text-muted-foreground">Performance</div>
-					<div className="text-lg number">
-						{currencyFormat.format(total_profit ?? 0)}
-					</div>
-				</div>
-				<div>
-					<div className="text-sm text-muted-foreground">Aktueller Preis</div>
-					<div className="text-lg number">
-						{currencyFormat.format(current_price ?? 0)}
-					</div>
-				</div>
+				)}
 			</div>
-		</div>
+			<div className="flex items-center justify-end text-lg number tabular-nums">
+				{currencyFormat.format(market_value ?? 0)}
+			</div>
+			<div
+				className={cn(
+					"flex items-center justify-end gap-1 self-stretch border-l border-border/50 pl-6 text-lg number tabular-nums",
+					profitClass
+				)}
+			>
+				{profitSign}
+				{currencyFormat.format(profit)}
+				<span className="text-md">
+					({profitSign}
+					{Math.abs(profitPercent).toFixed(2)} %)
+				</span>
+			</div>
+			<div className="flex items-center justify-end self-stretch border-l border-border/50 pl-6 text-lg number tabular-nums">
+				{currencyFormat.format(current_price ?? 0)}
+			</div>
+		</Link>
 	)
 }
