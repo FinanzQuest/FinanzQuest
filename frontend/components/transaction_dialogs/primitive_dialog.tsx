@@ -85,18 +85,20 @@ export default function PrimitiveDialog({
 
 	return (
 		<Dialog onOpenChange={open => setOpen(open)} open={isOpen}>
-			<DialogTrigger asChild>
-				<Button
-					variant={triggerVariant}
-					size={triggerSize}
-					disabled={limit === 0}
-					onClick={() => {
-						setOpen(true)
-					}}
-				>
-					{action}
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button
+						variant={triggerVariant}
+						size={triggerSize}
+						disabled={limit === 0}
+						onClick={() => {
+							setOpen(true)
+						}}
+					>
+						{action}
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>

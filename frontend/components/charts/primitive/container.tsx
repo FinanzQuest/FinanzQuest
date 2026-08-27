@@ -33,10 +33,12 @@ export default function ChartContainer({
 	))
 
 	const tabsTrigger = tabs.map(tab => (
-		<TabsTrigger className="" key={tab.key ?? tab.name} value={tab.name}>
-			<Tooltip className="w-full h-full px-2 py-1 box-content" name={tab.name}>
-				{tab.icon}
-			</Tooltip>
+		<TabsTrigger
+			className="box-content h-full w-full py-1 px-2"
+			key={tab.key ?? tab.name}
+			value={tab.name}
+		>
+			{tab.icon}
 		</TabsTrigger>
 	))
 
@@ -45,7 +47,7 @@ export default function ChartContainer({
 			<Tabs defaultValue={defaultName} className={cn(className)}>
 				{tabsContent}
 				<div className="w-full bg-muted/50 px-2 border py-2 rounded-full flex flex-row items-center">
-					<TabsList className="h-max md:justify-start">{tabsTrigger}</TabsList>
+					<TabsList className={"py-2"}>{tabsTrigger}</TabsList>
 					<div className="grow justify-end flex flex-row items-center ">
 						{toolbar}
 						{/* <IntervalControls className="grow justify-end p-2" intervals={Intervals} /> */}

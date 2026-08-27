@@ -1,0 +1,174 @@
+# =============================================================================
+# FinanzQuest DB init manifest — SINGLE SOURCE OF TRUTH for any runner script.
+# One relative path per line; execute strictly in listed order. Lines starting
+# with '#' are comments (runner must skip them). Do NOT rely on find | sort or
+# alphabetical traversal anywhere.
+#
+# Execution is TWO phases:
+#   Phase 1 (PRE-GoTrue):  00-preauth/01_auth_admin.sql
+#     The only block GoTrue needs before it starts.
+#   Phase 2 (POST-GoTrue): everything from 01-schema onward, then seed/.
+#     Run after the auth service is healthy (it creates auth.users etc.).
+#
+# Ordering inside each phase is dependency-ordered, NOT alphabetical.
+# Key within-folder orderings that differ from plain sort:
+#   - 03-tables/api/: assets.sql BEFORE asset_prices.sql (asset_prices FK -> assets)
+#   - 06-views/depots/: values.sql BEFORE aggregated_values.sql, and
+#     leaderboard.sql AFTER values.sql + users/profile.sql
+#   - 04-functions/: leaf helpers before their callers; users/ before depots/
+#     so depots functions that call users.has_any_role come after it
+#   - 08-roles/: every CREATE ROLE before any GRANT <role> TO <role> that
+#     references it (authenticator -> anon -> authenticated -> service_worker
+#     -> view_refresher)
+# Cross-phase (documented): depots.get_depot_overview reads users.profile (a
+# 06-view) and users.has_any_role; both are resolved at CALL time (plpgsql
+# bodies are not validated at CREATE), so it is safe to create the function in
+# phase 2 before the view exists.
+# =============================================================================
+
+dbinit/00-preauth/01_auth_admin.sql
+
+# --- 01-schema ---------------------------------------------------------------
+dbinit/01-schema/extensions.sql
+dbinit/01-schema/schemas.sql
+
+# --- 02-types ----------------------------------------------------------------
+dbinit/02-types/asset_type.sql
+dbinit/02-types/profile_ref.sql
+dbinit/02-types/savings_period.sql
+dbinit/02-types/special_role.sql
+dbinit/02-types/transaction_type.sql
+
+# --- 03-tables ---------------------------------------------------------------
+dbinit/03-tables/api/assets.sql
+dbinit/03-tables/api/asset_prices.sql
+dbinit/03-tables/depots/depots.sql
+dbinit/03-tables/depots/positions.sql
+dbinit/03-tables/depots/savings_plans.sql
+dbinit/03-tables/depots/savings_plans_budget.sql
+dbinit/03-tables/depots/transactions.sql
+dbinit/03-tables/users/special_roles.sql
+
+# --- 04-functions ------------------------------------------------------------
+dbinit/04-functions/api/search_assets.sql
+dbinit/04-functions/users/has_role.sql
+dbinit/04-functions/users/has_any_role.sql
+dbinit/04-functions/users/get_all_profiles.sql
+dbinit/04-functions/users/grant_role.sql
+dbinit/04-functions/users/grant_teacher.sql
+dbinit/04-functions/users/revoke_teacher.sql
+dbinit/04-functions/users/revoke_role.sql
+dbinit/04-functions/users/get_admin_overview.sql
+dbinit/04-functions/users/stats.sql
+dbinit/04-functions/depots/transaction_expense.sql
+dbinit/04-functions/depots/transaction_affects_commission.sql
+dbinit/04-functions/depots/sp_to_per_month.sql
+dbinit/04-functions/depots/sp_to_interval.sql
+dbinit/04-functions/depots/get_commission.sql
+dbinit/04-functions/depots/log_transaction.sql
+dbinit/04-functions/depots/get_position_profits.sql
+dbinit/04-functions/depots/get_transactions_with_position.sql
+dbinit/04-functions/depots/buy_asset.sql
+dbinit/04-functions/depots/sell_asset.sql
+dbinit/04-functions/depots/buy_asset_at.sql
+dbinit/04-functions/depots/update_depot_positions.sql
+dbinit/04-functions/depots/execute_savings_plans.sql
+dbinit/04-functions/depots/is_depot_member.sql
+dbinit/04-functions/depots/new_depot_for_user.sql
+dbinit/04-functions/depots/change_budget.sql
+dbinit/04-functions/depots/grant_default_budget_trigger.sql
+dbinit/04-functions/depots/update_savings_plan.sql
+dbinit/04-functions/depots/upsert_savings_plan.sql
+dbinit/04-functions/depots/delete_savings_plan.sql
+dbinit/04-functions/depots/grant_reward.sql
+dbinit/04-functions/depots/get_depot_overview.sql
+dbinit/04-functions/depots/refresh_depot_mats.sql
+
+# --- 05-materialized-views ---------------------------------------------------
+dbinit/05-materialized-views/api/asset_prices_weekly.sql
+dbinit/05-materialized-views/depots/aggregated_transactions_mat.sql
+dbinit/05-materialized-views/depots/position_values_mat.sql
+
+# --- 06-views ----------------------------------------------------------------
+dbinit/06-views/depots/values.sql
+dbinit/06-views/depots/aggregated_values.sql
+dbinit/06-views/users/profile.sql
+dbinit/06-views/users/admin_overview.sql
+dbinit/06-views/depots/depot_overview.sql
+dbinit/06-views/depots/savings_plans_budget_overview.sql
+dbinit/06-views/depots/savings_plans_with_asset.sql
+dbinit/06-views/depots/leaderboard.sql
+
+# --- 07-triggers -------------------------------------------------------------
+dbinit/07-triggers/depots/grant_default_budget.sql
+
+# --- 08-roles (roles must exist before 09-policies / 10-grants reference them)
+dbinit/08-roles/authenticator.sql
+dbinit/08-roles/anon.sql
+dbinit/08-roles/authenticated.sql
+dbinit/08-roles/service_worker.sql
+dbinit/08-roles/view_refresher.sql
+dbinit/08-roles/auth_admin.sql
+
+# --- 09-policies -------------------------------------------------------------
+dbinit/09-policies/api/assets.sql
+dbinit/09-policies/api/asset_prices.sql
+dbinit/09-policies/depots/depots.sql
+dbinit/09-policies/depots/positions.sql
+dbinit/09-policies/depots/transactions.sql
+dbinit/09-policies/depots/savings_plans.sql
+dbinit/09-policies/depots/savings_plans_budget.sql
+dbinit/09-policies/users/special_roles.sql
+
+# --- 10-grants ---------------------------------------------------------------
+dbinit/10-grants/api/assets.sql
+dbinit/10-grants/api/assets_id_seq.sql
+dbinit/10-grants/api/asset_prices.sql
+dbinit/10-grants/api/asset_prices_weekly.sql
+dbinit/10-grants/api/search_assets.sql
+dbinit/10-grants/depots/depots.sql
+dbinit/10-grants/depots/positions.sql
+dbinit/10-grants/depots/transactions.sql
+dbinit/10-grants/depots/savings_plans.sql
+dbinit/10-grants/depots/savings_plans_budget.sql
+dbinit/10-grants/depots/depots_id_seq.sql
+dbinit/10-grants/depots/positions_id_seq.sql
+dbinit/10-grants/depots/transactions_id_seq.sql
+dbinit/10-grants/depots/savings_plans_id_seq.sql
+dbinit/10-grants/depots/values.sql
+dbinit/10-grants/depots/aggregated_values.sql
+dbinit/10-grants/depots/aggregated_transactions.sql
+dbinit/10-grants/depots/position_profits.sql
+dbinit/10-grants/depots/transactions_with_asset_position.sql
+dbinit/10-grants/depots/depot_overview.sql
+dbinit/10-grants/depots/savings_plans_budget_overview.sql
+dbinit/10-grants/depots/savings_plans_with_asset.sql
+dbinit/10-grants/depots/leaderboard.sql
+dbinit/10-grants/depots/buy_asset.sql
+dbinit/10-grants/depots/sell_asset.sql
+dbinit/10-grants/depots/log_transaction.sql
+dbinit/10-grants/depots/update_depot_positions.sql
+dbinit/10-grants/depots/get_commission.sql
+dbinit/10-grants/depots/new_depot_for_user.sql
+dbinit/10-grants/depots/get_depot_overview.sql
+dbinit/10-grants/depots/grant_reward.sql
+dbinit/10-grants/depots/update_savings_plan.sql
+dbinit/10-grants/depots/upsert_savings_plan.sql
+dbinit/10-grants/depots/delete_savings_plan.sql
+dbinit/10-grants/users/special_roles.sql
+dbinit/10-grants/users/profile.sql
+dbinit/10-grants/users/admin_overview.sql
+dbinit/10-grants/users/grant_teacher.sql
+dbinit/10-grants/users/revoke_role.sql
+dbinit/10-grants/users/has_role.sql
+dbinit/10-grants/users/has_any_role.sql
+dbinit/10-grants/users/stats.sql
+
+# --- 11-config ---------------------------------------------------------------
+dbinit/11-config/config.sql
+
+# --- 12-jobs -----------------------------------------------------------------
+dbinit/12-jobs/refresh_depot_mats.sql
+
+# --- seed (runs last; COPY needs api.assets + the CSV mounted) ---------------
+dbinit/seed/assets.sql

@@ -63,6 +63,8 @@
             # ffmpeg
             rustPlatform.bindgenHook
             llvmPackages.libclang
+            nodejs
+            yarn-berry
           ];
 
           env = {

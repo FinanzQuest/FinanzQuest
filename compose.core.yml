@@ -13,9 +13,9 @@ services:
     volumes:
       - postgres:/data/postgres
       - ./dbinit/init.sh:/docker-entrypoint-initdb.d/00_init.sh
-      - ./dbinit/init.sql:/init/01_init.sql
-      - ./dbinit/functions.sql:/docker-entrypoint-initdb.d/02_functions.sql
-      - ./dbinit/stocks.sql:/docker-entrypoint-initdb.d/03_stocks.sql
+      - ./dbinit/00-preauth:/init/00-preauth
+      # assets.csv must stay in the db container: seed/assets.sql runs
+      # COPY ... FROM which reads the file SERVER-side (see apply_manifest.sh)
       - ./dbinit/assets.csv:/docker-entrypoint-initdb.d/data/assets.csv
     ports:
       - 127.0.0.1:5432:5432
@@ -135,6 +135,8 @@ services:
     image: postgres:17-alpine
     container_name: db-init
     depends_on:
+      db:
+        condition: service_healthy
       auth:
         condition: service_healthy
     environment:
@@ -143,18 +145,20 @@ services:
       PGUSER: postgres
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: postgres
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD}
+      AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
+      SERVICE_WORKER_PASSWORD: ${SERVICE_WORKER_PASSWORD}
+      MANIFEST: /init/manifest.txt
+      BASE: /init
     volumes:
-      - ./dbinit/permissions.sql:/permissions.sql
-      - ./dbinit/postauth.sql:/postauth.sql
-      - ./dbinit/admin.sql:/admin.sql
+      - ./dbinit:/init/dbinit
+      - ./manifest.txt:/init/manifest.txt
     networks:
       - postgres
     command: >
       sh -c "
-        echo 'Running post-auth initialization...'
-        psql -f /permissions.sql
-        psql -f /postauth.sql
-        psql -f /admin.sql
+        echo 'Applying post-GoTrue schema from manifest.txt (skipping 00-preauth)...'
+        sh /init/dbinit/apply_manifest.sh
         echo 'Post-auth initialization complete!'
       "
 

@@ -233,11 +233,13 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 			/>
 			<div className="flex items-center gap-2 flex-row justify-between">
 				<Sheet open={open} onOpenChange={setOpen}>
-					<SheetTrigger asChild>
-						<Button variant="ghost" size="icon">
-							<Menu className="size-5" />
-						</Button>
-					</SheetTrigger>
+					<SheetTrigger
+						render={
+							<Button variant="ghost" size="icon">
+								<Menu className="size-5" />
+							</Button>
+						}
+					></SheetTrigger>
 					<SheetContent side="left" className="w-72 p-0 flex flex-col">
 						<div className="px-6 py-4 border-b">
 							<h1 className="font-bold text-2xl">FinanzQuest</h1>

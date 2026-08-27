@@ -14,9 +14,10 @@ export default function Tooltip({ name, children, className }: IconT) {
 	return (
 		<TooltipProvider>
 			<TooltipComponent>
-				<TooltipTrigger className={className} asChild>
-					{children}
-				</TooltipTrigger>
+				<TooltipTrigger
+					className={className}
+					render={<div>{children}</div>}
+				></TooltipTrigger>
 				<TooltipContent>
 					<p>{name}</p>
 				</TooltipContent>
