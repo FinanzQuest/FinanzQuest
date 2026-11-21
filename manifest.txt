@@ -91,7 +91,11 @@ dbinit/05-materialized-views/depots/position_values_mat.sql
 
 # --- 06-views ----------------------------------------------------------------
 dbinit/06-views/depots/values.sql
+dbinit/06-views/depots/current_position_value.sql
+dbinit/06-views/depots/position_values_with_curr.sql
+dbinit/06-views/depots/depot_values_with_curr.sql
 dbinit/06-views/depots/aggregated_values.sql
+dbinit/06-views/depots/aggregated_values_with_curr.sql
 dbinit/06-views/users/profile.sql
 dbinit/06-views/users/admin_overview.sql
 dbinit/06-views/depots/depot_overview.sql
@@ -137,7 +141,13 @@ dbinit/10-grants/depots/transactions_id_seq.sql
 dbinit/10-grants/depots/savings_plans_id_seq.sql
 dbinit/10-grants/depots/values.sql
 dbinit/10-grants/depots/aggregated_values.sql
+dbinit/10-grants/depots/aggregated_values_with_curr.sql
 dbinit/10-grants/depots/aggregated_transactions.sql
+dbinit/10-grants/depots/aggregated_transactions_mat.sql
+dbinit/10-grants/depots/position_values_mat.sql
+dbinit/10-grants/depots/current_position_value.sql
+dbinit/10-grants/depots/position_values_with_curr.sql
+dbinit/10-grants/depots/depot_values_with_curr.sql
 dbinit/10-grants/depots/position_profits.sql
 dbinit/10-grants/depots/transactions_with_asset_position.sql
 dbinit/10-grants/depots/depot_overview.sql

@@ -77,6 +77,10 @@ BEGIN
       WHERE (s.nspname || '.' || c.relname) = _ AND c.relrowsecurity
     ) THEN fails := fails || ('rls enabled on ' || _); END IF;
   END LOOP;
+  -- depots.aggregated_transactions_mat is NOT RLS-protected (PG does not allow
+  -- RLS on materialized views); it is deliberately NOT readable by
+  -- authenticated (see the REVOKE in 10-grants) and only read via the
+  -- owner-run depots.current_position_value view, which filters is_depot_member.
   -- depots.savings_plans: policies exist but RLS was NEVER enabled in source
   -- (flagged during reorg). Assert current state; flip to relrowsecurity when fixed.
   n := n + 1;
@@ -88,7 +92,7 @@ BEGIN
   -- =========================================================================
   -- VIEWS  (06-views/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['depots.values','depots.aggregated_values','users.profile','users.admin_overview','depots.depot_overview','depots.savings_plans_budget_overview','depots.savings_plans_with_asset','depots.leaderboard'] LOOP
+  FOREACH _ IN ARRAY ARRAY['depots.values','depots.current_position_value','depots.position_values_with_curr','depots.depot_values_with_curr','depots.aggregated_values','depots.aggregated_values_with_curr','users.profile','users.admin_overview','depots.depot_overview','depots.savings_plans_budget_overview','depots.savings_plans_with_asset','depots.leaderboard'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -279,6 +283,18 @@ BEGIN
   IF NOT has_table_privilege('authenticated',   'depots.values',         'SELECT')                     THEN fails := fails || 'grant SELECT depots.values to authenticated'; END IF;
   n := n + 1;
   IF NOT has_table_privilege('anon',            'depots.values',         'SELECT')                     THEN fails := fails || 'grant SELECT depots.values to anon'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'depots.current_position_value', 'SELECT')             THEN fails := fails || 'grant SELECT depots.current_position_value to authenticated'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'depots.position_values_with_curr', 'SELECT')           THEN fails := fails || 'grant SELECT depots.position_values_with_curr to authenticated'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'depots.depot_values_with_curr', 'SELECT')             THEN fails := fails || 'grant SELECT depots.depot_values_with_curr to authenticated'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'depots.aggregated_values_with_curr', 'SELECT')        THEN fails := fails || 'grant SELECT depots.aggregated_values_with_curr to authenticated'; END IF;
+  n := n + 1;
+  IF has_table_privilege('authenticated',       'depots.aggregated_transactions_mat', 'SELECT')        THEN fails := fails || 'expected revoke SELECT depots.aggregated_transactions_mat from authenticated (matview cannot have RLS; direct reads leak all depots)'; END IF;
+  n := n + 1;
+  IF has_table_privilege('authenticated',       'depots.position_values_mat', 'SELECT')                THEN fails := fails || 'expected revoke SELECT depots.position_values_mat from authenticated (matview cannot have RLS; direct reads leak all depots)'; END IF;
   n := n + 1;
   IF NOT has_table_privilege('authenticated',   'users.profile',         'SELECT')                     THEN fails := fails || 'grant SELECT users.profile to authenticated'; END IF;
   n := n + 1;

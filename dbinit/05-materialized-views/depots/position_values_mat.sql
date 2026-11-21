@@ -38,30 +38,34 @@ joined AS (
     t.running_amount,
     t.running_commission,
     t.running_expenses,
+    t.transaction_date = dr.tstamp AS has_transaction,
     ap.close AS price,
+    ap.tstamp AS price_date,
+    ap.tstamp = dr.tstamp AS is_actual_price,
     CASE WHEN dr.asset_id IS NULL
-      THEN 0::numeric                                   -- cash is not an asset holding
+      THEN 0::numeric
       ELSE t.running_amount * ap.close::numeric
     END AS market_value
   FROM date_range dr
   INNER JOIN LATERAL (
-    SELECT running_amount, running_commission, running_expenses
+    SELECT running_amount, running_commission, running_expenses, tstamp AS transaction_date
     FROM depots.aggregated_transactions_mat t
     WHERE t.depot_id  = dr.depot_id
-      AND t.asset_id IS NOT DISTINCT FROM dr.asset_id   -- NULL-safe: keeps cash rows
+      AND t.asset_id IS NOT DISTINCT FROM dr.asset_id
       AND t.tstamp   <= dr.tstamp
     ORDER BY t.tstamp DESC
     LIMIT 1
   ) t ON TRUE
   LEFT JOIN LATERAL (
-    SELECT close
+    SELECT close, tstamp
     FROM api.asset_prices
     WHERE asset_id = dr.asset_id
-      AND tstamp  <= dr.tstamp
+      AND tstamp <= dr.tstamp
+      AND tstamp >= dr.tstamp - INTERVAL '5 days'
     ORDER BY tstamp DESC
     LIMIT 1
   ) ap ON TRUE
-  WHERE dr.asset_id IS NULL OR ap.close IS NOT NULL     -- cash has no price, keep it anyway
+  WHERE dr.asset_id IS NULL OR ap.close IS NOT NULL
 )
 SELECT
   depot_id,
@@ -70,7 +74,10 @@ SELECT
   running_amount,
   running_commission,
   running_expenses,
+  has_transaction,
   price,
+  price_date,
+  is_actual_price,
   market_value,
   market_value - running_expenses - running_commission AS position_profit
 FROM joined

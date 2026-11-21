@@ -6,6 +6,11 @@
 -- -----------------------------------------------------------------------------
 -- Running totals per depot/asset/day. Window functions run once on refresh,
 -- not on every query. asset_id IS NULL = the depot's cash "position".
+-- max_tstamp = the raw transaction timestamp the day's row was aggregated
+-- from (the last transaction included in that row). Consumers that overlay
+-- *live* transactions on top of this snapshot (depots.current_position_value)
+-- use it as the exact cutoff: everything with tstamp > max_tstamp is not yet
+-- reflected in the running totals.
 -- =============================================================================
 
 CREATE MATERIALIZED VIEW depots.aggregated_transactions_mat AS
@@ -14,6 +19,7 @@ WITH daily_totals AS (
     depot_id,
     asset_id,                                    -- NULL = cash (movement rows)
     date(tstamp) AS tstamp,
+    MAX(tstamp)  AS max_tstamp,                  -- last transaction folded into this day
     SUM(depots.transaction_expense(type, amount, price)) AS daily_expenses,
     SUM(amount::numeric)                                 AS daily_amount,
     SUM(
@@ -29,6 +35,7 @@ SELECT
   tstamp,
   daily_amount,
   daily_commission,
+  max_tstamp,
   SUM(daily_expenses)   OVER w AS running_expenses,
   SUM(daily_amount)     OVER w AS running_amount,
   SUM(daily_commission) OVER w AS running_commission
