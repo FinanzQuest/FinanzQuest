@@ -834,6 +834,41 @@ export type Database = {
 	}
 	depots: {
 		Tables: {
+			daily_values: {
+				Row: {
+					assets: number
+					cash: number
+					depot_id: number
+					profit_from_start: number
+					tstamp: string
+					value: number
+				}
+				Insert: {
+					assets: number
+					cash: number
+					depot_id: number
+					profit_from_start: number
+					tstamp: string
+					value: number
+				}
+				Update: {
+					assets?: number
+					cash?: number
+					depot_id?: number
+					profit_from_start?: number
+					tstamp?: string
+					value?: number
+				}
+				Relationships: [
+					{
+						foreignKeyName: "daily_values_depot_fkey"
+						columns: ["depot_id"]
+						isOneToOne: false
+						referencedRelation: "depots"
+						referencedColumns: ["id"]
+					},
+				]
+			}
 			depots: {
 				Row: {
 					cash: number
@@ -857,6 +892,38 @@ export type Database = {
 					users?: string[]
 				}
 				Relationships: []
+			}
+			holdings: {
+				Row: {
+					amount: number
+					asset_id: number | null
+					commission: number
+					depot_id: number
+					expenses: number
+				}
+				Insert: {
+					amount?: number
+					asset_id?: number | null
+					commission?: number
+					depot_id: number
+					expenses?: number
+				}
+				Update: {
+					amount?: number
+					asset_id?: number | null
+					commission?: number
+					depot_id?: number
+					expenses?: number
+				}
+				Relationships: [
+					{
+						foreignKeyName: "holdings_depot_fkey"
+						columns: ["depot_id"]
+						isOneToOne: false
+						referencedRelation: "depots"
+						referencedColumns: ["id"]
+					},
+				]
 			}
 			positions: {
 				Row: {
@@ -1012,28 +1079,6 @@ export type Database = {
 			}
 		}
 		Views: {
-			aggregated_transactions_mat: {
-				Row: {
-					asset_id: number | null
-					daily_amount: number | null
-					daily_commission: number | null
-					depot_id: number | null
-					max_tstamp: string | null
-					running_amount: number | null
-					running_commission: number | null
-					running_expenses: number | null
-					tstamp: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
 			aggregated_values: {
 				Row: {
 					assets: number | null
@@ -1052,49 +1097,6 @@ export type Database = {
 					total: number | null
 					tstamp: string | null
 				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
-			aggregated_values_with_curr: {
-				Row: {
-					assets: number | null
-					cash: number | null
-					depot_id: number | null
-					diff_1d: number | null
-					diff_1m: number | null
-					diff_1y: number | null
-					prev_1d_total: number | null
-					prev_1m_total: number | null
-					prev_1y_total: number | null
-					profit_from_start: number | null
-					rel_diff_1d: number | null
-					rel_diff_1m: number | null
-					rel_diff_1y: number | null
-					total: number | null
-					tstamp: string | null
-				}
-				Relationships: []
-			}
-			current_position_value: {
-				Row: {
-					asset_id: number | null
-					current_amount: number | null
-					current_commission: number | null
-					current_expenses: number | null
-					depot_id: number | null
-					is_actual_price: boolean | null
-					market_value: number | null
-					position_profit: number | null
-					price: number | null
-					price_date: string | null
-				}
 				Relationships: []
 			}
 			depot_overview: {
@@ -1108,17 +1110,6 @@ export type Database = {
 					transaction_count: number | null
 					user_ids: string[] | null
 					user_names: string[] | null
-				}
-				Relationships: []
-			}
-			depot_values_with_curr: {
-				Row: {
-					assets: number | null
-					cash: number | null
-					depot_id: number | null
-					profit_from_start: number | null
-					tstamp: string | null
-					value: number | null
 				}
 				Relationships: []
 			}
@@ -1136,56 +1127,6 @@ export type Database = {
 					tstamp: string | null
 					users: Database["users"]["CompositeTypes"]["profile_ref"][] | null
 					value: number | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
-			position_values_mat: {
-				Row: {
-					asset_id: number | null
-					depot_id: number | null
-					has_transaction: boolean | null
-					is_actual_price: boolean | null
-					market_value: number | null
-					position_profit: number | null
-					price: number | null
-					price_date: string | null
-					running_amount: number | null
-					running_commission: number | null
-					running_expenses: number | null
-					tstamp: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
-			position_values_with_curr: {
-				Row: {
-					asset_id: number | null
-					depot_id: number | null
-					has_transaction: boolean | null
-					is_actual_price: boolean | null
-					market_value: number | null
-					position_profit: number | null
-					price: number | null
-					price_date: string | null
-					running_amount: number | null
-					running_commission: number | null
-					running_expenses: number | null
-					tstamp: string | null
 				}
 				Relationships: []
 			}
@@ -1242,18 +1183,17 @@ export type Database = {
 					tstamp: string | null
 					value: number | null
 				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
+				Relationships: []
 			}
 		}
 		Functions: {
+			apply_ledger_delta: {
+				Args: {
+					p_rows: Database["depots"]["Tables"]["transactions"]["Row"][]
+					p_sign: number
+				}
+				Returns: undefined
+			}
 			buy_asset: {
 				Args: { p_asset_id: number; p_depot_id: number; p_worth: number }
 				Returns: undefined
@@ -1344,6 +1284,15 @@ export type Database = {
 				Returns: undefined
 			}
 			new_depot_for_user: { Args: { p_user_id: string }; Returns: number }
+			rebuild_depot_values: {
+				Args: { p_depot_id?: number; p_from?: string }
+				Returns: undefined
+			}
+			rebuild_depot_values_for: {
+				Args: { p_depot_ids: number[]; p_from_days: string[] }
+				Returns: undefined
+			}
+			rebuild_holdings: { Args: never; Returns: undefined }
 			sell_asset: {
 				Args: { p_asset_id: number; p_depot_id: number; p_worth: number }
 				Returns: undefined
