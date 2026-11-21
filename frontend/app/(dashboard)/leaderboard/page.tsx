@@ -56,7 +56,7 @@ export default async function Page(props: {
 	})()
 
 	return (
-		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
+		<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2">
 					<span className="text-sm text-muted-foreground">Deine Position</span>
@@ -78,7 +78,7 @@ export default async function Page(props: {
 					</div>
 				</div>
 			</div>
-			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,_max-content)] w-full border rounded-2xl divide-y divide-border/50 gap-x-6">
+			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,max-content)] w-full border rounded-2xl divide-y divide-border/50 gap-x-6">
 				{leaderboard.data.map(row => (
 					<LeaderboardEntry key={row.id} row={row} />
 				))}

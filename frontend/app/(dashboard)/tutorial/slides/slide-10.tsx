@@ -5,6 +5,7 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	ComposedChart,
 	Legend,
 	ResponsiveContainer,
 	Tooltip,
@@ -103,47 +104,47 @@ export function Slide10() {
 				</div>
 
 				<ResponsiveContainer width="100%" height={200}>
-					<BarChart
+					<ComposedChart
 						data={chartData}
 						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
 					>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="year"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={v => `J. ${v}`}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={55}
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Nach ${v} Jahren`}
-							formatter={(v: number, name: string) => [
-								`${v.toLocaleString("de-DE")} €`,
+							formatter={(v, name) => [
+								`${(v as number).toLocaleString("de-DE")} €`,
 								name,
 							]}
 						/>
 						<Legend
 							wrapperStyle={{
 								fontSize: 12,
-								color: "hsl(var(--muted-foreground))",
+								color: "var(--muted-foreground)",
 							}}
 						/>
 						<Bar
 							dataKey="Eingezahlt"
 							stackId="a"
-							fill="hsl(var(--muted-foreground))"
+							fill="var(--muted-foreground)"
 							opacity={0.7}
 							radius={[0, 0, 4, 4]}
 						/>
@@ -153,7 +154,7 @@ export function Slide10() {
 							fill="#10b981"
 							radius={[4, 4, 0, 0]}
 						/>
-					</BarChart>
+					</ComposedChart>
 				</ResponsiveContainer>
 
 				<div className="grid grid-cols-3 gap-4">
@@ -166,8 +167,8 @@ export function Slide10() {
 							min={25}
 							max={500}
 							step={25}
-							value={[monthly]}
-							onValueChange={([v]) => setMonthly(v)}
+							value={monthly}
+							onValueChange={v => setMonthly(v as number)}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -179,8 +180,8 @@ export function Slide10() {
 							min={1}
 							max={12}
 							step={0.5}
-							value={[rate]}
-							onValueChange={([v]) => setRate(v)}
+							value={rate}
+							onValueChange={v => setRate(v as number)}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -192,8 +193,8 @@ export function Slide10() {
 							min={5}
 							max={45}
 							step={1}
-							value={[years]}
-							onValueChange={([v]) => setYears(v)}
+							value={years}
+							onValueChange={v => setYears(v as number)}
 						/>
 					</div>
 				</div>

@@ -11,6 +11,7 @@ import { formatter as formatPrices } from "@/lib/data/formatter"
 import { getDepotId } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 export const revalidate = 3600
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
@@ -51,22 +52,24 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 	)
 
 	return (
-		<main className="w-full max-w-[1200px] mx-auto max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
-			<StockHeader
-				currentPrice={pricesFiltered.at(-1) ?? pricesFiltered?.at(0)}
-				referencePrice={pricesFiltered?.at(-2) ?? pricesFiltered?.at(0)}
-				stock={info[0]}
-				depot={depot}
-				position={positions.at(0)}
-				commission={commission}
-			/>
-			<ChartCard
-				className="w-full"
-				prices={pricesWithEmptyDays}
-				pricesWeekly={pricesWeeklyWithEmptyDays}
-			/>
-			{depot && <StockPositionCard position={positions.at(0)} />}
-		</main>
+		<ScrollArea className="h-screen ">
+			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
+				<StockHeader
+					currentPrice={pricesFiltered.at(-1) ?? pricesFiltered?.at(0)}
+					referencePrice={pricesFiltered?.at(-2) ?? pricesFiltered?.at(0)}
+					stock={info[0]}
+					depot={depot}
+					position={positions.at(0)}
+					commission={commission}
+				/>
+				<ChartCard
+					className="w-full"
+					prices={pricesWithEmptyDays}
+					pricesWeekly={pricesWeeklyWithEmptyDays}
+				/>
+				{depot && <StockPositionCard position={positions.at(0)} />}
+			</main>
+		</ScrollArea>
 	)
 }
 

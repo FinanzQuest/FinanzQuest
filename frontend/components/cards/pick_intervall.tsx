@@ -96,10 +96,15 @@ export function IntervallPickerControlled({
 	return (
 		<ToggleGroup
 			className={cn("w-fit flex flex-row gap-1", className)}
-			type="single"
-			value={intervallTemplates.find(item => item.days === value)?.name}
+			value={[
+				intervallTemplates.find(item => item.days === value)?.name as string,
+			]}
 			onValueChange={value => {
-				const s = intervallTemplates.find(intervall => intervall.name === value)
+				console.log("a")
+				const s = intervallTemplates.find(
+					intervall => intervall.name === value[0]
+				)
+
 				const result = s === undefined ? intervallTemplates[0] : s
 				onValueChange(result.days)
 			}}

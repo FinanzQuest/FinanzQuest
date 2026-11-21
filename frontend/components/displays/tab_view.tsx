@@ -275,14 +275,13 @@ function SortSelector(props: {
 				<SelectContent sideOffset={10}>{items}</SelectContent>
 			</Select>
 			<ToggleGroup
-				value={props.descending ? "descending" : "ascending"}
-				type="single"
-				defaultValue="descending"
+				value={[props.descending ? "descending" : "ascending"]}
+				defaultValue={["descending"]}
 				onValueChange={value => {
 					if (props.onValueChange) {
-						props.onValueChange(order ?? "", value === "descending")
+						props.onValueChange(order ?? "", value[0] === "descending")
 					}
-					descending = value === "descending"
+					descending = value[0] === "descending"
 				}}
 			>
 				<ToggleGroupItem value="descending">

@@ -31,13 +31,11 @@ export default function SearchBar({ className, doRedirect }: Props) {
 }
 
 interface PopOutProps extends Props, ComponentPropsWithoutRef<"div"> {
-	triggerRender?: ({ onClick }: { onClick: () => void }) => React.ReactNode
+	triggerRender: ({ onClick }: { onClick: () => void }) => React.ReactNode
 }
 
 export function SearchBarPopOut({
 	doRedirect,
-	className,
-	children,
 	triggerRender,
 }: PopOutProps) {
 	const [open, setOpen] = useState(false)
@@ -52,20 +50,7 @@ export function SearchBarPopOut({
 		setSearchQuery("")
 	}
 
-	const trigger = triggerRender ? (
-		triggerRender({ onClick: () => setOpen(true) })
-	) : (
-		<button
-			type="button"
-			className={cn(
-				"appearance-none !overflow-visible mt-[2px] -0 p-0 border-none !bg-transparent",
-				className
-			)}
-			onClick={() => setOpen(true)}
-		>
-			{children}
-		</button>
-	)
+	const trigger = triggerRender({ onClick: () => setOpen(true) })
 
 	return (
 		<>

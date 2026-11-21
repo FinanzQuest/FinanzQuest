@@ -117,21 +117,21 @@ export function Slide05() {
 						data={chartData}
 						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
 					>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="age"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							label={{
 								value: "Alter",
 								position: "insideBottomRight",
-								fill: "hsl(var(--muted-foreground))",
+								fill: "var(--muted-foreground)",
 								fontSize: 11,
 								offset: -5,
 							}}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={55}
@@ -139,15 +139,15 @@ export function Slide05() {
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Alter ${v}`}
-							formatter={(v: number, name: string) => [
-								`${v.toLocaleString("de-DE")} €`,
+							formatter={(v, name) => [
+								`${(v as number).toLocaleString("de-DE")} €`,
 								name === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`,
 							]}
 						/>
@@ -157,7 +157,7 @@ export function Slide05() {
 							}
 							wrapperStyle={{
 								fontSize: 12,
-								color: "hsl(var(--muted-foreground))",
+								color: "var(--muted-foreground)",
 							}}
 						/>
 						<Line
@@ -171,7 +171,7 @@ export function Slide05() {
 						<Line
 							type="monotone"
 							dataKey="B"
-							stroke="hsl(var(--muted-foreground))"
+							stroke="var(--muted-foreground)"
 							strokeWidth={2}
 							dot={false}
 							strokeDasharray="5 5"
@@ -191,7 +191,7 @@ export function Slide05() {
 							max={50}
 							step={1}
 							value={[ageA]}
-							onValueChange={([v]) => setAgeA(Math.min(v, ageB - 1))}
+							onValueChange={v => setAgeA(Math.min(v as number, ageB - 1))}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -204,7 +204,7 @@ export function Slide05() {
 							max={60}
 							step={1}
 							value={[ageB]}
-							onValueChange={([v]) => setAgeB(Math.max(v, ageA + 1))}
+							onValueChange={v => setAgeB(Math.max(v as number, ageA + 1))}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -217,7 +217,7 @@ export function Slide05() {
 							max={500}
 							step={25}
 							value={[monthly]}
-							onValueChange={([v]) => setMonthly(v)}
+							onValueChange={v => setMonthly(v as number)}
 						/>
 					</div>
 				</div>

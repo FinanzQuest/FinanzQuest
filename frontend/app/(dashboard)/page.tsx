@@ -13,6 +13,7 @@ import ChartContainer from "@/components/charts/primitive/container"
 import TreeChart from "@/components/charts/tree"
 import PositionTabView, { PositionsEmpty } from "@/components/displays/tab_view"
 import ChangeStat from "@/components/stat/change_stat"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type {
 	DepotValue,
 	NonNullableRow,
@@ -68,88 +69,92 @@ export default async function Page({
 		(fres.depotValues as NonNullableRow<DepotValue>[]) ?? []
 	)
 	return (
-		<main className="grid grid-cols-1 gap-8 max-h-screen overflow-y-scroll px-4 md:px-8 py-6">
-			<div className="flex flex-col gap-4">
-				<div className="flex flex-col gap-2">
-					<span className="text-sm text-muted-foreground">Depotwert</span>
-					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
-						{currencyFormat.format(d?.total ?? 0)}
-					</span>
+		<ScrollArea className="h-screen">
+			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2">
+						<span className="text-sm text-muted-foreground">Depotwert</span>
+						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+							{currencyFormat.format(d?.total ?? 0)}
+						</span>
+					</div>
+					<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+						<ChangeStat
+							label="Heute"
+							value={d?.diff_1d ?? 0}
+							prev={d?.prev_1d_total}
+						/>
+						<ChangeStat
+							label="Monat"
+							value={d?.diff_1m ?? 0}
+							prev={d?.prev_1m_total}
+						/>
+						<ChangeStat
+							label="Jahr"
+							value={d?.diff_1y ?? 0}
+							prev={d?.prev_1y_total}
+						/>
+						<ChangeStat label="Cash" value={d?.cash ?? 0} neutral />
+					</div>
 				</div>
-				<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
-					<ChangeStat
-						label="Heute"
-						value={d?.diff_1d ?? 0}
-						prev={d?.prev_1d_total}
+				<ChartContainer
+					className="overflow-hidden"
+					defaultTab="line"
+					tabs={[
+						{
+							name: "line",
+							icon: (
+								<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
+							),
+							content: (
+								<AreaChart
+									className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
+									startValue={areaData?.start ?? 50000}
+									offset={areaData?.offset ?? 0}
+									data={areaData?.data ?? []}
+									dataKey="total"
+									xKey="timestamp"
+									yKey="total"
+								/>
+							),
+						},
+						{
+							name: "tree",
+							icon: (
+								<TableCellsMerge className="size-7 md:size-5 stroke-muted-foreground" />
+							),
+							content: (
+								<TreeChart
+									className="max-h-[500px] w-full"
+									data={treeData as PositionSummary[]}
+									dataKey="market_value"
+								/>
+							),
+						},
+						{
+							name: "pie",
+							icon: (
+								<PieChartIcon className="size-7 md:size-5 stroke-muted-foreground" />
+							),
+							content: (
+								<PieChart
+									className="max-h-[500px] w-full"
+									data={treeData as PositionSummary[]}
+									dataKey="market_value"
+								/>
+							),
+						},
+					]}
+				/>{" "}
+				{!fres.positions || fres.positions?.length === 0 ? (
+					fres.ownedByUser && <PositionsEmpty />
+				) : (
+					<PositionTabView
+						positions_raw={fres.positions as PositionSummary[]}
 					/>
-					<ChangeStat
-						label="Monat"
-						value={d?.diff_1m ?? 0}
-						prev={d?.prev_1m_total}
-					/>
-					<ChangeStat
-						label="Jahr"
-						value={d?.diff_1y ?? 0}
-						prev={d?.prev_1y_total}
-					/>
-					<ChangeStat label="Cash" value={d?.cash ?? 0} neutral />
-				</div>
-			</div>
-			<ChartContainer
-				className="overflow-hidden"
-				defaultTab="line"
-				tabs={[
-					{
-						name: "line",
-						icon: (
-							<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
-						),
-						content: (
-							<AreaChart
-								className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
-								startValue={areaData?.start ?? 50000}
-								offset={areaData?.offset ?? 0}
-								data={areaData?.data ?? []}
-								dataKey="total"
-								xKey="timestamp"
-								yKey="total"
-							/>
-						),
-					},
-					{
-						name: "tree",
-						icon: (
-							<TableCellsMerge className="size-7 md:size-5 stroke-muted-foreground" />
-						),
-						content: (
-							<TreeChart
-								className="max-h-[500px] w-full"
-								data={treeData as PositionSummary[]}
-								dataKey="market_value"
-							/>
-						),
-					},
-					{
-						name: "pie",
-						icon: (
-							<PieChartIcon className="size-7 md:size-5 stroke-muted-foreground" />
-						),
-						content: (
-							<PieChart
-								className="max-h-[500px] w-full"
-								data={treeData as PositionSummary[]}
-								dataKey="market_value"
-							/>
-						),
-					},
-				]}
-			/>{" "}
-			{!fres.positions || fres.positions?.length === 0 ? (
-				fres.ownedByUser && <PositionsEmpty />
-			) : (
-				<PositionTabView positions_raw={fres.positions as PositionSummary[]} />
-			)}
-		</main>
+				)}
+			</main>
+		</ScrollArea>
 	)
 }
 

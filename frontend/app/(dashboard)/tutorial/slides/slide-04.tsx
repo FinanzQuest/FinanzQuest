@@ -95,21 +95,21 @@ export function Slide04() {
 						data={data}
 						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
 					>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="year"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							label={{
 								value: "Jahre",
 								position: "insideBottomRight",
-								fill: "hsl(var(--muted-foreground))",
+								fill: "var(--muted-foreground)",
 								fontSize: 11,
 								offset: -5,
 							}}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={55}
@@ -117,15 +117,15 @@ export function Slide04() {
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Jahr ${v}`}
-							formatter={(v: number, name: string) => [
-								`${v.toLocaleString("de-DE")} €`,
+							formatter={(v, name) => [
+								`${(v as number).toLocaleString("de-DE")} €`,
 								name === "mitZinseszins" ? "Mit Zinseszins" : "Ohne Zinseszins",
 							]}
 						/>
@@ -135,14 +135,14 @@ export function Slide04() {
 							}
 							wrapperStyle={{
 								fontSize: 12,
-								color: "hsl(var(--muted-foreground))",
+								color: "var(--muted-foreground)",
 							}}
 						/>
 						<Line
 							isAnimationActive={false}
 							type="monotone"
 							dataKey="ohneZinseszins"
-							stroke="hsl(var(--muted-foreground))"
+							stroke="var(--muted-foreground)"
 							strokeWidth={2}
 							dot={false}
 							strokeDasharray="5 5"

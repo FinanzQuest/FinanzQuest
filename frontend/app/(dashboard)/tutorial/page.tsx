@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { ScrollAreaLite } from "@/components/scroll_area_lite"
 import {
 	Carousel,
 	type CarouselApi,
@@ -38,11 +39,12 @@ export default function Page() {
 	}, [goNext, goPrev])
 
 	return (
-		<main className="min-h-0 max-h-full w-full overflow-hidden bg-background flex flex-col">
+		<main className="h-screen md:px-12 px-4 pt-6 w-full overflow-hidden bg-background flex flex-col">
 			{/* Header */}
 
 			{/* Carousel */}
-			<div className="flex-1 min-h-0 max-h-full overflow-scroll">
+
+			<div className="flex-1 min-h-0 max-h-full">
 				<Carousel
 					setApi={setApi}
 					opts={{
@@ -54,15 +56,15 @@ export default function Page() {
 							return !target.closest("[data-no-swipe]")
 						},
 					}}
-					className="h-full w-full"
+					className="h-full w-full *:h-full"
 				>
 					<CarouselContent className="h-full ml-0">
 						{slides.map((Slide, i) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: order will not change
 							<CarouselItem key={i} className="h-full pl-0">
-								<div className="h-full w-full overflow-y-scroll">
+								<ScrollAreaLite data-no-swipe className="h-full w-fit mx-auto">
 									<Slide />
-								</div>
+								</ScrollAreaLite>
 							</CarouselItem>
 						))}
 					</CarouselContent>
@@ -70,7 +72,7 @@ export default function Page() {
 			</div>
 
 			{/* Footer */}
-			<footer className="flex-none flex items-center gap-4 px-8 py-4 border-t border-border">
+			<footer className="my-2 w-fit mx-auto bg-muted/50 flex-none flex items-center gap-4 px-4 py-4 border h-16 rounded-2xl border-border">
 				<SlideNavigation
 					onPrev={goPrev}
 					onNext={goNext}

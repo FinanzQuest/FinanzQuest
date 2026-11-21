@@ -70,6 +70,7 @@ export function Slide02() {
 
 				<ResponsiveContainer width="100%" height={180}>
 					<AreaChart
+						className="[&>svg]:overflow-visible"
 						data={data}
 						margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
 					>
@@ -82,18 +83,18 @@ export function Slide02() {
 						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 						<XAxis
 							dataKey="year"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							label={{
 								value: "Jahre",
 								position: "insideBottomRight",
-								fill: "hsl(var(--muted-foreground))",
+								fill: "var(--muted-foreground)",
 								fontSize: 11,
 								offset: -5,
 							}}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={v => `${v} €`}
 							domain={[0, 100]}
@@ -107,7 +108,7 @@ export function Slide02() {
 								color: "hsl(var(--foreground))",
 							}}
 							labelFormatter={v => `Jahr ${v}`}
-							formatter={(v: number) => [`${v} €`, "Kaufkraft"]}
+							formatter={v => [`${v} €`, "Kaufkraft"]}
 						/>
 						<Area
 							type="monotone"
@@ -132,7 +133,7 @@ export function Slide02() {
 							max={5}
 							step={0.1}
 							value={[rate]}
-							onValueChange={([v]) => setRate(v)}
+							onValueChange={v => setRate(v as number)}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -145,7 +146,7 @@ export function Slide02() {
 							max={50}
 							step={1}
 							value={[years]}
-							onValueChange={([v]) => setYears(v)}
+							onValueChange={v => setYears(v as number)}
 						/>
 					</div>
 				</div>

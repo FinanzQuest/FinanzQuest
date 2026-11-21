@@ -12,6 +12,7 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type {
 	PositionSummary,
 	SearchParams,
@@ -49,13 +50,13 @@ export default async function Page(props: {
 	const groupedTransactions = groupTransactionsPerDay(transactions)
 
 	return (
-		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6">
-			<div className="flex flex-col gap-8 max-w-[1000px] mx-auto">
+		<ScrollArea className="h-screen">
+			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8 *:shrink-0">
 				{groupedTransactions.map(group => (
 					<TransactionGroup key={group.day} {...group} />
 				))}
-			</div>
-		</main>
+			</main>
+		</ScrollArea>
 	)
 }
 
@@ -140,8 +141,8 @@ function Description({
 
 	return (
 		<div className={cn(buy ? "flex-row" : "flex-row-reverse", "flex gap-3")}>
-			<HoverCard openDelay={100}>
-				<HoverCardTrigger asChild>
+			<HoverCard>
+				<HoverCardTrigger>
 					<span className="number tabular-nums bg-background border border-border/70 px-2 rounded-lg cursor-pointer">
 						${Math.abs(worth).toFixed(2)}
 					</span>
@@ -161,29 +162,34 @@ function Description({
 			</HoverCard>
 			<MoveRight className="stroke-muted-foreground" />
 			<HoverCard>
-				<HoverCardTrigger asChild>
-					<Link
-						href={getStockPagePath(transaction.asset_id)}
-						className="cursor-pointer flex flex-row gap-2 bg-background border border-border/70 rounded-lg px-2"
-					>
-						<URLIcon
-							className="h-[0.8lh] aspect-square w-auto self-center rounded"
-							size={32}
-							iconURL={iconURL}
-						/>
-						{transaction.symbol}
-						<span className="number tabular-nums text-muted-foreground">
-							x{Math.abs(transaction.amount).toFixed(2)}
-						</span>
-					</Link>
-				</HoverCardTrigger>
+				<HoverCardTrigger
+					render={
+						<Link
+							href={getStockPagePath(transaction.asset_id)}
+							className="cursor-pointer flex flex-row gap-2 bg-background border border-border/70 rounded-lg px-2"
+						>
+							<URLIcon
+								className="h-[0.8lh] aspect-square w-auto self-center rounded"
+								size={32}
+								iconURL={iconURL}
+							/>
+							{transaction.symbol}
+							<span className="number tabular-nums text-muted-foreground">
+								x{Math.abs(transaction.amount).toFixed(2)}
+							</span>
+						</Link>
+					}
+				/>
 				<HoverCardContent
 					className={cn(
-						"grid gap-x-6 px-3 rounded-lg overflow-hidden w-[420px]",
+						"grid gap-x-6 p-0  overflow-hidden w-fit",
 						positionColumns
 					)}
 				>
-					<PositionRow position={transaction} />
+					<PositionRow
+						className="border-none rounded-none"
+						position={transaction}
+					/>
 				</HoverCardContent>
 			</HoverCard>
 		</div>
@@ -208,9 +214,7 @@ function TransactionItem({
 
 	return (
 		<div className={cn("px-4 py-4 flex flex-row gap-3 hover:bg-muted/40")}>
-			<span
-				className={cn(bg, "inline-block w-1 flex-shrink-0 h-[1lh] rounded-xl")}
-			/>
+			<span className={cn(bg, "inline-block w-1 shrink-0 h-lh rounded-xl")} />
 			<span className="font-semibold text-md">
 				<Description transaction={transaction} />
 			</span>
@@ -220,7 +224,7 @@ function TransactionItem({
 					Sparplan
 				</span>
 			)}
-			<span className="flex-grow" />
+			<span className="grow" />
 
 			<span className="text-muted-foreground text-sm self-center">
 				{date.toLocaleTimeString("de-DE")}

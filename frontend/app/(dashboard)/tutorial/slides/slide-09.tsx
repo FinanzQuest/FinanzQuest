@@ -83,7 +83,7 @@ export function Slide09() {
 				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-4"
 			>
 				<div className="grid grid-cols-2 gap-4">
-					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
+					<div className="rounded-lg bg-muted p-4 flex flex-col gap-1">
 						<span className="text-xs text-muted-foreground">
 							ETF (TER 0,2 %)
 						</span>
@@ -91,7 +91,7 @@ export function Slide09() {
 							{etfEnd.toLocaleString("de-DE")} €
 						</span>
 					</div>
-					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
+					<div className="rounded-lg bg-muted p-4 flex flex-col gap-1">
 						<span className="text-xs text-muted-foreground">
 							Aktiver Fonds (TER 1,5 %)
 						</span>
@@ -115,36 +115,36 @@ export function Slide09() {
 								<stop offset="95%" stopColor="#71717a" stopOpacity={0} />
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="year"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							label={{
 								value: "Jahre",
 								position: "insideBottomRight",
-								fill: "hsl(var(--muted-foreground))",
+								fill: "var(--muted-foreground)",
 								fontSize: 11,
 								offset: -5,
 							}}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={formatEur}
 							width={50}
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Jahr ${v}`}
-							formatter={(v: number, name: string) => [
-								`${v.toLocaleString("de-DE")} €`,
+							formatter={(v, name) => [
+								`${(v as number).toLocaleString("de-DE")} €`,
 								name === "ETF"
 									? "ETF (0,2 % TER)"
 									: "Aktiver Fonds (1,5 % TER)",
@@ -156,13 +156,13 @@ export function Slide09() {
 							}
 							wrapperStyle={{
 								fontSize: 12,
-								color: "hsl(var(--muted-foreground))",
+								color: "var(--muted-foreground)",
 							}}
 						/>
 						<Area
 							type="monotone"
 							dataKey="AktiverFonds"
-							stroke="hsl(var(--muted-foreground))"
+							stroke="var(--muted-foreground)"
 							strokeWidth={2}
 							fill="url(#fundGrad)"
 							strokeDasharray="5 5"

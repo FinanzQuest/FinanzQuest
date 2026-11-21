@@ -11,7 +11,7 @@ import SignUpForm from "./form"
 export default function Page() {
 	return (
 		<main className="grow flex justify-center items-center">
-			<Card className="min-w-[350px] w-fit max-w-[33%] shadow-2xl">
+			<Card className="w-[1400px] max-w-[33%] shadow-2xl">
 				<CardHeader>
 					<CardTitle className="text-center">Erstelle einen Account</CardTitle>
 					<CardDescription>

@@ -17,6 +17,7 @@ import { formatDateString } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
 import NewEntryDialog from "./new_dialog"
 import { SavingsPlanTable } from "./table"
+import { ScrollArea } from "@/components/ui/scroll-area"
 export default async function Page(props: {
 	searchParams: Promise<SearchParams>
 }) {
@@ -41,70 +42,72 @@ export default async function Page(props: {
 	}
 
 	return (
-		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
-			{budget && (
-				<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-2">
-						<span className="text-sm text-muted-foreground">
-							Monatliches Budget
-						</span>
-						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
-							{currencyFormat.format(budget.budget ?? 0)}
-						</span>
-						{budget.last_changed && (
+		<ScrollArea className="h-screen">
+			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8 *:shrink-0">
+				{budget && (
+					<div className="flex flex-col gap-4">
+						<div className="flex flex-col gap-2">
 							<span className="text-sm text-muted-foreground">
-								{formatDateString(budget.last_changed)}
+								Monatliches Budget
 							</span>
-						)}
+							<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+								{currencyFormat.format(budget.budget ?? 0)}
+							</span>
+							{budget.last_changed && (
+								<span className="text-sm text-muted-foreground">
+									{formatDateString(budget.last_changed)}
+								</span>
+							)}
+						</div>
+						<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+							<ChangeStat
+								label="Restbudget"
+								value={budget.remaining_budget ?? 0}
+							/>
+							<ChangeStat
+								label="Ausgaben"
+								value={budget.monthly_expenses ?? 0}
+								neutral
+							/>
+						</div>
 					</div>
-					<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
-						<ChangeStat
-							label="Restbudget"
-							value={budget.remaining_budget ?? 0}
-						/>
-						<ChangeStat
-							label="Ausgaben"
-							value={budget.monthly_expenses ?? 0}
-							neutral
-						/>
-					</div>
-				</div>
-			)}
-			<div className="flex flex-col gap-4 w-full grow">
-				{data.length === 0 ? (
-					<Empty>
-						<EmptyHeader>
-							<EmptyMedia variant="icon">
-								<PiggyBank />
-							</EmptyMedia>
-							<EmptyTitle>
-								{isInspect ? "Der" : "Dein"} Sparplan ist leer.
-							</EmptyTitle>
-							<EmptyDescription>
-								{isInspect
-									? "Die Schüler haben noch keine Einträge erstellt."
-									: "Füge einen neuen Eintrag hinzu, um mit deinem Sparplan loszulegen."}
-							</EmptyDescription>
-						</EmptyHeader>
-						<EmptyContent>
-							<EmptyContent>
-								{!isInspect && (
-									<NewEntryDialog
-										trigger={<Button>Eintrag hinzufügen</Button>}
-									/>
-								)}
-							</EmptyContent>
-						</EmptyContent>
-					</Empty>
-				) : (
-					<SavingsPlanTable
-						className="bg-background !rounded-lg"
-						monthlyBudget={budget?.monthly_expenses ?? undefined}
-						data={data}
-					/>
 				)}
-			</div>
-		</main>
+				<div className="flex flex-col gap-4 w-full grow">
+					{data.length === 0 ? (
+						<Empty>
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<PiggyBank />
+								</EmptyMedia>
+								<EmptyTitle>
+									{isInspect ? "Der" : "Dein"} Sparplan ist leer.
+								</EmptyTitle>
+								<EmptyDescription>
+									{isInspect
+										? "Die Schüler haben noch keine Einträge erstellt."
+										: "Füge einen neuen Eintrag hinzu, um mit deinem Sparplan loszulegen."}
+								</EmptyDescription>
+							</EmptyHeader>
+							<EmptyContent>
+								<EmptyContent>
+									{!isInspect && (
+										<NewEntryDialog
+											trigger={<Button>Eintrag hinzufügen</Button>}
+										/>
+									)}
+								</EmptyContent>
+							</EmptyContent>
+						</Empty>
+					) : (
+						<SavingsPlanTable
+							className="bg-background !rounded-lg"
+							monthlyBudget={budget?.monthly_expenses ?? undefined}
+							data={data}
+						/>
+					)}
+				</div>
+			</main>
+		</ScrollArea>
 	)
 }
 

@@ -17,7 +17,7 @@ import type {
 } from "@/database/custom_types"
 import { currencyFormat, to_display_string } from "@/lib/cash_display_string"
 import { getIconURL } from "@/lib/icon_url"
-import { toAbsoluteTimeString } from "@/lib/util"
+import { numberFormat, toAbsoluteTimeString } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import URLIcon from "../icon"
 import ChangeStat from "../stat/change_stat"
@@ -169,26 +169,24 @@ export function StockPositionCard({
 }: StockPositionCardProps) {
 	return (
 		<Card className={cn(className)}>
-			<CardHeader className="flex-row flex-wrap justify-left gap-x-4 gap-y-1">
+			<CardHeader>
 				<CardDescription className="">Deine Positionen</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-3">
 				<div className="flex flex-row flex-wrap gap-3 w-full *:flex-grow h-fit">
-					<div className="px-4 py-2 flex flex-col flex-nowrap bg-background border border-border/20 rounded shadow-sm">
+					<div className="px-4 py-2 flex flex-col flex-nowrap bg-muted  rounded-xl ">
 						<span className="text-muted-foreground text-sm">Wert</span>
-
 						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl number font-normal tabular-nums text-foreground">
-								{position?.worth ? to_display_string(position.worth) : 0}
+							<span className="text-2xl number tabular-nums text-foreground">
+								{position ? currencyFormat.format(position.worth) : "-"}
 							</span>
 						</span>
 					</div>
-					<div className="px-4 py-2 flex flex-col flex-nowrap bg-background border border-border/20 rounded shadow-sm">
+					<div className="px-4 py-2 flex flex-col flex-nowrap bg-muted  rounded-xl">
 						<span className="text-sm text-muted-foreground">Anzahl</span>
-
 						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl number font-normal tabular-nums text-foreground">
-								{position?.amount.toFixed(2) ?? 0}
+							<span className="text-2xl number tabular-nums text-foreground">
+								{position ? numberFormat.format(position.amount) : "-"}
 							</span>
 						</span>
 					</div>

@@ -10,30 +10,21 @@ export const metadata: Metadata = {
 	description: "FinanzQuest",
 }
 
+import logo_full from "@/public/logo_full.svg"
+
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
 	return (
-		<div
-			className={cn(
-				"h-dvh bg-background font-sans antialiased flex flex-col overflow-hidden w-full bg-gradient-to-bl from-win/8 via-background to-background"
-			)}
-		>
-			<div className="absolute w-[calc(100%-4rem)] left-1/2 -translate-x-1/2 pt-8 pb-8 px-2 flex flex-row items-center gap-4 justify-center flex-wrap overflow-hidden border-b">
-				<Image
-					src="/logo_unrounded.svg"
-					alt=""
-					width={48}
-					height={48}
-					className="border rounded-md shadow-md shrink-0 leading-none"
-				/>
-				<div className="h-min text-2xl font-semibold tracking-wide overflow-x-hidden">
-					Finanzquest
-				</div>
+		<div className={cn()}>
+			<div className="w-[calc(100%)]  pt-8 pb-8 px-2 flex flex-row items-center justify-center">
+				<Image src={logo_full} alt="" height={48} />
 			</div>
-			{children}
+			<div className="absolute right-1/2 bottom-1/2 translate-x-1/2 translate-y-1/2">
+				{children}
+			</div>
 			<Toaster />
 		</div>
 	)

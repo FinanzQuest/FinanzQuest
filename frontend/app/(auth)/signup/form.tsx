@@ -83,16 +83,11 @@ export default function SignUpForm() {
 					control={form.control}
 					name="password"
 					render={({ field }) => (
-						<FormItem>
+						<FormItem className="mb-2">
 							<FormLabel>Passwort</FormLabel>
 							<FormMessage />
 							<FormControl>
-								<Input
-									className="rounded-b-none border-b-0 focus-visible:ring-2 ring-inset"
-									type="password"
-									placeholder="Passwort"
-									{...field}
-								/>
+								<Input type="password" placeholder="Passwort" {...field} />
 							</FormControl>
 						</FormItem>
 					)}
@@ -101,10 +96,9 @@ export default function SignUpForm() {
 					control={form.control}
 					name="confirmPassword"
 					render={({ field }) => (
-						<FormItem className="!mt-0">
+						<FormItem>
 							<FormControl>
 								<Input
-									className="rounded-t-none focus-visible:ring-2 ring-inset"
 									type="password"
 									placeholder="Passwort bestätigen"
 									{...field}

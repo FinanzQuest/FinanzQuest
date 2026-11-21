@@ -127,43 +127,43 @@ export function Slide08() {
 						data={chartData}
 						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
 					>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="month"
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							label={{
 								value: "Monate",
 								position: "insideBottomRight",
-								fill: "hsl(var(--muted-foreground))",
+								fill: "var(--muted-foreground)",
 								fontSize: 11,
 								offset: -5,
 							}}
 						/>
 						<YAxis
-							tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 							tickLine={false}
 							tickFormatter={v => `${v} €`}
 							width={60}
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Monat ${v}`}
-							formatter={(v: number, name: string) => [
-								`${v.toLocaleString("de-DE")} €`,
+							formatter={(v, name) => [
+								`${(v as number).toLocaleString("de-DE")} €`,
 								name,
 							]}
 						/>
 						<Legend
 							wrapperStyle={{
 								fontSize: 12,
-								color: "hsl(var(--muted-foreground))",
+								color: "var(--muted-foreground)",
 							}}
 						/>
 						<Line

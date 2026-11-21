@@ -16,7 +16,7 @@ import NewEntryForm from "./new_form"
 export default function NewEntryDialog({
 	trigger,
 }: {
-	trigger?: React.ReactNode
+	trigger?: React.ReactElement
 }) {
 	const [isOpen, setIsOpen] = useState(false)
 	const router = useRouter()
@@ -29,12 +29,11 @@ export default function NewEntryDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger asChild>
-				{trigger || (
+			<DialogTrigger render={trigger || (
 					<Button variant="outline" size="icon">
 						<Plus className="h-4 w-4" />
 					</Button>
-				)}
+				)}>
 			</DialogTrigger>
 			<DialogContent className="overflow-clip">
 				<DialogHeader>

@@ -96,7 +96,7 @@ function NavItems({
 					))}
 				</SidebarMenu>
 			</SidebarGroup>
-			{collapsed && <Separator className="w-[calc(90%-1rem)] mx-auto" />}
+			{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
 		</div>
 	))
 }
@@ -148,37 +148,52 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 							<SidebarMenuItem>
 								<SidebarMenuButton
 									render={
-										<SearchBarPopOut doRedirect>
-											<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
-												<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
-												<span className="text-muted-foreground shrink truncate">
-													Wertpapiersuche...
-												</span>
-											</div>
-										</SearchBarPopOut>
+										<SearchBarPopOut
+											doRedirect
+											triggerRender={({ onClick }) => (
+												<div className="mx-3">
+													<Button
+														onClick={onClick}
+														className="bg-background hover:bg-background w-full flex items-center justify-start py-4 gap-2 whitespace-nowrap text-ellipsis overflow-hidden"
+													>
+														<SearchIcon className="size-4 shrink-0 stroke-muted-foreground" />
+														<span className="text-muted-foreground shrink truncate">
+															Wertpapiersuche...
+														</span>
+													</Button>
+												</div>
+											)}
+										/>
 									}
 								/>
 							</SidebarMenuItem>
 						</SidebarMenu>
 					)}
 
+					{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
 					{collapsed && (
-						<SidebarMenu>
-							<SidebarMenuItem className="mx-auto">
-								<SidebarMenuButton
-									variant="outline"
-									className="rounded-lg"
-									tooltip="Suche"
-									size="lg"
-								>
-									<SearchBarPopOut className="mx-auto" doRedirect>
-										<SearchIcon className="size-6 shrink-0" />
-									</SearchBarPopOut>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						</SidebarMenu>
+						<SidebarGroup>
+							<SidebarMenu>
+								<SidebarMenuItem className="mx-auto">
+									<SearchBarPopOut
+										doRedirect
+										triggerRender={({ onClick }) => (
+											<SidebarMenuButton
+												onClick={onClick}
+												variant="outline"
+												tooltip="Suche"
+												className="items-center justify-center"
+												size="default"
+											>
+												<SearchIcon className="size-6 shrink-0 aspect-square" />
+											</SidebarMenuButton>
+										)}
+									/>
+								</SidebarMenuItem>
+							</SidebarMenu>
+						</SidebarGroup>
 					)}
-
+					{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
 					<NavItems tree={tree} collapsed={collapsed} />
 				</SidebarContent>
 

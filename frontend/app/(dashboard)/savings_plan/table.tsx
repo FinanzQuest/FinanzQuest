@@ -206,7 +206,7 @@ export function SavingsPlanTable({
 				<Checkbox
 					checked={
 						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
+						(table.getIsSomePageRowsSelected())
 					}
 					onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
 					aria-label="Alle auswählen"
@@ -258,7 +258,7 @@ export function SavingsPlanTable({
 				if (isEditing) {
 					return (
 						<AssetPickerDialog
-							className="!w-fit"
+							className="w-fit!"
 							displayName={false}
 							value={(editedData.asset_id as number) || asset_id}
 							onValueChange={asset => {

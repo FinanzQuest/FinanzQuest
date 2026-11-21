@@ -280,30 +280,27 @@ export function Slide06() {
 							data={HISTORICAL_DATA}
 							margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
 						>
-							<CartesianGrid
-								strokeDasharray="3 3"
-								stroke="hsl(var(--border))"
-							/>
+							<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 							<XAxis
 								dataKey="year"
-								tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+								tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 								tickLine={false}
 							/>
 							<YAxis
 								scale="pow"
-								tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+								tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
 								tickLine={false}
 								width={50}
 							/>
 							<Tooltip
 								contentStyle={{
-									background: "hsl(var(--card))",
-									border: "1px solid hsl(var(--border))",
+									background: "var(--card)",
+									border: "1px solid var(--border)",
 									borderRadius: 8,
 									fontSize: 12,
-									color: "hsl(var(--foreground))",
+									color: "var(--foreground)",
 								}}
-								formatter={(v: number, key: string) => {
+								formatter={(v, key) => {
 									const s = SERIES.find(s => s.key === key)
 									return [`${v}`, s?.label ?? key]
 								}}

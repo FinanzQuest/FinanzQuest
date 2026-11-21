@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -59,30 +60,25 @@ export default function User({ collapsed }: { collapsed?: boolean }) {
 		<DropdownMenu>
 			{trigger}
 			<DropdownMenuContent side="right" align="start" sideOffset={10}>
-				<DropdownMenuLabel className="flex flex-row gap-3 items-center">
-					<Avatar className="rounded-lg size-12 ">
-						<AvatarFallback className="rounded-lg">
-							{userData?.name ? getInitials(userData.name) : "?"}
-						</AvatarFallback>
-					</Avatar>
-					<div>
-						<div className="text-lg">{userData?.name}</div>
-						<div className="text-muted-foreground font-normal">
-							{userData?.email}
-						</div>
-					</div>
-				</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={() => logout()}>
-					<div className="flex items-center gap-4">
-						<LogOut className="size-5" />
-						<div>Logout</div>
-					</div>
-				</DropdownMenuItem>
+				<DropdownMenuGroup>
+					<DropdownMenuLabel>
+							<div className="text-base text-foreground">{userData?.name}</div>
+							<div>
+								{userData?.email}
+							</div>
+					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem variant="destructive" onClick={() => logout()}>
+							<LogOut />
+							Logout
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
 }
+
+
 
 export async function dataFetcher(client: SupabaseClient<Database>) {
 	const {
