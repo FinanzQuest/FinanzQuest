@@ -28,6 +28,6 @@ CREATE TABLE IF NOT EXISTS depots.transactions (
 CREATE INDEX IF NOT EXISTS idx_transaction_assets_depot ON depots.transactions (asset_id, depot_id);
 CREATE INDEX IF NOT EXISTS idx_transaction_asset        ON depots.transactions (asset_id);
 CREATE INDEX IF NOT EXISTS idx_transaction_depot        ON depots.transactions (depot_id);
--- Covering index for aggregated_transactions_mat GROUP BY
+-- Covering index for the per-day GROUP BY in depots.rebuild_depot_values_for
 CREATE INDEX IF NOT EXISTS idx_transactions_depot_asset_date
   ON depots.transactions (depot_id, asset_id, (tstamp::date));

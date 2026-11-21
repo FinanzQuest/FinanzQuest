@@ -31,3 +31,9 @@ USING (depots.is_depot_member (depot_id)) ;
 CREATE POLICY "Teachers can view all transactions"
 ON depots.transactions FOR SELECT TO authenticated
 USING (users.has_role('teacher'));
+
+-- grant_reward runs as the calling teacher and logs the reward as a cash
+-- movement into a depot the teacher is not a member of.
+CREATE POLICY "Teachers can log cash movements" ON depots.transactions
+FOR INSERT TO authenticated
+WITH CHECK (users.has_role('teacher') AND type = 'movement');

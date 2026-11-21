@@ -47,6 +47,8 @@ dbinit/03-tables/depots/positions.sql
 dbinit/03-tables/depots/savings_plans.sql
 dbinit/03-tables/depots/savings_plans_budget.sql
 dbinit/03-tables/depots/transactions.sql
+dbinit/03-tables/depots/holdings.sql
+dbinit/03-tables/depots/daily_values.sql
 dbinit/03-tables/users/special_roles.sql
 
 # --- 04-functions ------------------------------------------------------------
@@ -62,6 +64,12 @@ dbinit/04-functions/users/get_admin_overview.sql
 dbinit/04-functions/users/stats.sql
 dbinit/04-functions/depots/transaction_expense.sql
 dbinit/04-functions/depots/transaction_affects_commission.sql
+dbinit/04-functions/depots/apply_ledger_delta.sql
+dbinit/04-functions/depots/rebuild_holdings.sql
+dbinit/04-functions/depots/rebuild_depot_values_for.sql
+dbinit/04-functions/depots/rebuild_depot_values.sql
+dbinit/04-functions/depots/refresh_depot_values.sql
+dbinit/04-functions/depots/on_transactions_change.sql
 dbinit/04-functions/depots/sp_to_per_month.sql
 dbinit/04-functions/depots/sp_to_interval.sql
 dbinit/04-functions/depots/get_commission.sql
@@ -82,20 +90,13 @@ dbinit/04-functions/depots/upsert_savings_plan.sql
 dbinit/04-functions/depots/delete_savings_plan.sql
 dbinit/04-functions/depots/grant_reward.sql
 dbinit/04-functions/depots/get_depot_overview.sql
-dbinit/04-functions/depots/refresh_depot_mats.sql
 
 # --- 05-materialized-views ---------------------------------------------------
 dbinit/05-materialized-views/api/asset_prices_weekly.sql
-dbinit/05-materialized-views/depots/aggregated_transactions_mat.sql
-dbinit/05-materialized-views/depots/position_values_mat.sql
 
 # --- 06-views ----------------------------------------------------------------
 dbinit/06-views/depots/values.sql
-dbinit/06-views/depots/current_position_value.sql
-dbinit/06-views/depots/position_values_with_curr.sql
-dbinit/06-views/depots/depot_values_with_curr.sql
 dbinit/06-views/depots/aggregated_values.sql
-dbinit/06-views/depots/aggregated_values_with_curr.sql
 dbinit/06-views/users/profile.sql
 dbinit/06-views/users/admin_overview.sql
 dbinit/06-views/depots/depot_overview.sql
@@ -105,6 +106,7 @@ dbinit/06-views/depots/leaderboard.sql
 
 # --- 07-triggers -------------------------------------------------------------
 dbinit/07-triggers/depots/grant_default_budget.sql
+dbinit/07-triggers/depots/transactions_ledger.sql
 
 # --- 08-roles (roles must exist before 09-policies / 10-grants reference them)
 dbinit/08-roles/authenticator.sql
@@ -120,6 +122,8 @@ dbinit/09-policies/api/asset_prices.sql
 dbinit/09-policies/depots/depots.sql
 dbinit/09-policies/depots/positions.sql
 dbinit/09-policies/depots/transactions.sql
+dbinit/09-policies/depots/holdings.sql
+dbinit/09-policies/depots/daily_values.sql
 dbinit/09-policies/depots/savings_plans.sql
 dbinit/09-policies/depots/savings_plans_budget.sql
 dbinit/09-policies/users/special_roles.sql
@@ -133,6 +137,8 @@ dbinit/10-grants/api/search_assets.sql
 dbinit/10-grants/depots/depots.sql
 dbinit/10-grants/depots/positions.sql
 dbinit/10-grants/depots/transactions.sql
+dbinit/10-grants/depots/holdings.sql
+dbinit/10-grants/depots/daily_values.sql
 dbinit/10-grants/depots/savings_plans.sql
 dbinit/10-grants/depots/savings_plans_budget.sql
 dbinit/10-grants/depots/depots_id_seq.sql
@@ -141,15 +147,6 @@ dbinit/10-grants/depots/transactions_id_seq.sql
 dbinit/10-grants/depots/savings_plans_id_seq.sql
 dbinit/10-grants/depots/values.sql
 dbinit/10-grants/depots/aggregated_values.sql
-dbinit/10-grants/depots/aggregated_values_with_curr.sql
-dbinit/10-grants/depots/aggregated_transactions.sql
-dbinit/10-grants/depots/aggregated_transactions_mat.sql
-dbinit/10-grants/depots/position_values_mat.sql
-dbinit/10-grants/depots/current_position_value.sql
-dbinit/10-grants/depots/position_values_with_curr.sql
-dbinit/10-grants/depots/depot_values_with_curr.sql
-dbinit/10-grants/depots/position_profits.sql
-dbinit/10-grants/depots/transactions_with_asset_position.sql
 dbinit/10-grants/depots/depot_overview.sql
 dbinit/10-grants/depots/savings_plans_budget_overview.sql
 dbinit/10-grants/depots/savings_plans_with_asset.sql
@@ -158,6 +155,11 @@ dbinit/10-grants/depots/buy_asset.sql
 dbinit/10-grants/depots/sell_asset.sql
 dbinit/10-grants/depots/log_transaction.sql
 dbinit/10-grants/depots/update_depot_positions.sql
+dbinit/10-grants/depots/apply_ledger_delta.sql
+dbinit/10-grants/depots/rebuild_holdings.sql
+dbinit/10-grants/depots/rebuild_depot_values_for.sql
+dbinit/10-grants/depots/rebuild_depot_values.sql
+dbinit/10-grants/depots/on_transactions_change.sql
 dbinit/10-grants/depots/get_commission.sql
 dbinit/10-grants/depots/new_depot_for_user.sql
 dbinit/10-grants/depots/get_depot_overview.sql
@@ -178,7 +180,7 @@ dbinit/10-grants/users/stats.sql
 dbinit/11-config/config.sql
 
 # --- 12-jobs -----------------------------------------------------------------
-dbinit/12-jobs/refresh_depot_mats.sql
+dbinit/12-jobs/refresh_depot_values.sql
 
 # --- seed (runs last; COPY needs api.assets + the CSV mounted) ---------------
 dbinit/seed/assets.sql
