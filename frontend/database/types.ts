@@ -969,35 +969,35 @@ export type Database = {
 			transactions: {
 				Row: {
 					amount: number
-					asset_id: number
+					asset_id: number | null
 					commission: number
 					depot_id: number
 					id: number
-					price: number
+					price: number | null
 					tstamp: string
-					type: Database["public"]["Enums"]["transactiontype"]
+					type: Database["depots"]["Enums"]["transactiontype"]
 					user_id: string | null
 				}
 				Insert: {
 					amount: number
-					asset_id: number
-					commission: number
+					asset_id?: number | null
+					commission?: number
 					depot_id: number
 					id?: number
-					price: number
+					price?: number | null
 					tstamp?: string
-					type?: Database["public"]["Enums"]["transactiontype"]
+					type?: Database["depots"]["Enums"]["transactiontype"]
 					user_id?: string | null
 				}
 				Update: {
 					amount?: number
-					asset_id?: number
+					asset_id?: number | null
 					commission?: number
 					depot_id?: number
 					id?: number
-					price?: number
+					price?: number | null
 					tstamp?: string
-					type?: Database["public"]["Enums"]["transactiontype"]
+					type?: Database["depots"]["Enums"]["transactiontype"]
 					user_id?: string | null
 				}
 				Relationships: [
@@ -1012,12 +1012,13 @@ export type Database = {
 			}
 		}
 		Views: {
-			aggregated_transactions: {
+			aggregated_transactions_mat: {
 				Row: {
 					asset_id: number | null
 					daily_amount: number | null
 					daily_commission: number | null
 					depot_id: number | null
+					max_tstamp: string | null
 					running_amount: number | null
 					running_commission: number | null
 					running_expenses: number | null
@@ -1044,11 +1045,12 @@ export type Database = {
 					prev_1d_total: number | null
 					prev_1m_total: number | null
 					prev_1y_total: number | null
+					profit_from_start: number | null
 					rel_diff_1d: number | null
 					rel_diff_1m: number | null
 					rel_diff_1y: number | null
 					total: number | null
-					tstamp: number | null
+					tstamp: string | null
 				}
 				Relationships: [
 					{
@@ -1059,6 +1061,41 @@ export type Database = {
 						referencedColumns: ["id"]
 					},
 				]
+			}
+			aggregated_values_with_curr: {
+				Row: {
+					assets: number | null
+					cash: number | null
+					depot_id: number | null
+					diff_1d: number | null
+					diff_1m: number | null
+					diff_1y: number | null
+					prev_1d_total: number | null
+					prev_1m_total: number | null
+					prev_1y_total: number | null
+					profit_from_start: number | null
+					rel_diff_1d: number | null
+					rel_diff_1m: number | null
+					rel_diff_1y: number | null
+					total: number | null
+					tstamp: string | null
+				}
+				Relationships: []
+			}
+			current_position_value: {
+				Row: {
+					asset_id: number | null
+					current_amount: number | null
+					current_commission: number | null
+					current_expenses: number | null
+					depot_id: number | null
+					is_actual_price: boolean | null
+					market_value: number | null
+					position_profit: number | null
+					price: number | null
+					price_date: string | null
+				}
+				Relationships: []
 			}
 			depot_overview: {
 				Row: {
@@ -1071,6 +1108,17 @@ export type Database = {
 					transaction_count: number | null
 					user_ids: string[] | null
 					user_names: string[] | null
+				}
+				Relationships: []
+			}
+			depot_values_with_curr: {
+				Row: {
+					assets: number | null
+					cash: number | null
+					depot_id: number | null
+					profit_from_start: number | null
+					tstamp: string | null
+					value: number | null
 				}
 				Relationships: []
 			}
@@ -1099,38 +1147,16 @@ export type Database = {
 					},
 				]
 			}
-			position_profits: {
-				Row: {
-					asset_id: number | null
-					asset_type: Database["public"]["Enums"]["assettype"] | null
-					current_amount: number | null
-					current_price: number | null
-					depot_id: number | null
-					description: string | null
-					market_value: number | null
-					name: string | null
-					symbol: string | null
-					total_invested: number | null
-					total_profit: number | null
-					total_sold: number | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
-			position_values: {
+			position_values_mat: {
 				Row: {
 					asset_id: number | null
 					depot_id: number | null
+					has_transaction: boolean | null
+					is_actual_price: boolean | null
 					market_value: number | null
 					position_profit: number | null
 					price: number | null
+					price_date: string | null
 					running_amount: number | null
 					running_commission: number | null
 					running_expenses: number | null
@@ -1145,6 +1171,23 @@ export type Database = {
 						referencedColumns: ["id"]
 					},
 				]
+			}
+			position_values_with_curr: {
+				Row: {
+					asset_id: number | null
+					depot_id: number | null
+					has_transaction: boolean | null
+					is_actual_price: boolean | null
+					market_value: number | null
+					position_profit: number | null
+					price: number | null
+					price_date: string | null
+					running_amount: number | null
+					running_commission: number | null
+					running_expenses: number | null
+					tstamp: string | null
+				}
+				Relationships: []
 			}
 			savings_plans_budget_overview: {
 				Row: {
@@ -1190,37 +1233,6 @@ export type Database = {
 					},
 				]
 			}
-			transactions_with_asset_position: {
-				Row: {
-					amount: number | null
-					asset_id: number | null
-					asset_type: Database["public"]["Enums"]["assettype"] | null
-					commission: number | null
-					current_amount: number | null
-					current_price: number | null
-					depot_id: number | null
-					description: string | null
-					id: number | null
-					market_value: number | null
-					price: number | null
-					symbol: string | null
-					total_invested: number | null
-					total_profit: number | null
-					total_sold: number | null
-					tstamp: string | null
-					type: Database["public"]["Enums"]["transactiontype"] | null
-					user_id: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: "transactions_depot_fkey"
-						columns: ["depot_id"]
-						isOneToOne: false
-						referencedRelation: "depots"
-						referencedColumns: ["id"]
-					},
-				]
-			}
 			values: {
 				Row: {
 					assets: number | null
@@ -1244,6 +1256,15 @@ export type Database = {
 		Functions: {
 			buy_asset: {
 				Args: { p_asset_id: number; p_depot_id: number; p_worth: number }
+				Returns: undefined
+			}
+			buy_asset_at: {
+				Args: {
+					p_asset_id: number
+					p_at: string
+					p_depot_id: number
+					p_worth: number
+				}
 				Returns: undefined
 			}
 			change_budget: {
@@ -1335,13 +1356,17 @@ export type Database = {
 				Args: { period: Database["public"]["Enums"]["savingsperiod"] }
 				Returns: number
 			}
-			transaction_affects_cash: {
-				Args: { t: Database["public"]["Enums"]["transactiontype"] }
+			transaction_affects_commission: {
+				Args: { t: Database["depots"]["Enums"]["transactiontype"] }
 				Returns: boolean
 			}
-			transaction_affects_commission: {
-				Args: { t: Database["public"]["Enums"]["transactiontype"] }
-				Returns: boolean
+			transaction_expense: {
+				Args: {
+					amount: number
+					price: number
+					t: Database["depots"]["Enums"]["transactiontype"]
+				}
+				Returns: number
 			}
 			update_depot_positions: { Args: never; Returns: undefined }
 			update_savings_plan: {
@@ -1364,7 +1389,7 @@ export type Database = {
 			}
 		}
 		Enums: {
-			[_ in never]: never
+			transactiontype: "user" | "movement" | "savings_plan"
 		}
 		CompositeTypes: {
 			[_ in never]: never
@@ -1621,7 +1646,6 @@ export type Database = {
 							table_name: unknown
 						}[]
 				  }
-			dearmor: { Args: { "": string }; Returns: string }
 			decompress_chunk: {
 				Args: { if_compressed?: boolean; uncompressed_chunk: unknown }
 				Returns: unknown
@@ -1670,8 +1694,6 @@ export type Database = {
 					enabled: boolean
 				}[]
 			}
-			gen_random_uuid: { Args: never; Returns: string }
-			gen_salt: { Args: { "": string }; Returns: string }
 			generate_uuidv7: { Args: never; Returns: string }
 			get_telemetry_report: { Args: never; Returns: Json }
 			hypertable_approximate_detailed_size: {
@@ -1789,10 +1811,6 @@ export type Database = {
 					verbose?: boolean
 				}
 				Returns: undefined
-			}
-			pgp_armor_headers: {
-				Args: { "": string }
-				Returns: Record<string, unknown>[]
 			}
 			remove_compression_policy: {
 				Args: { hypertable: unknown; if_exists?: boolean }
@@ -2019,7 +2037,6 @@ export type Database = {
 		Enums: {
 			assettype: "commodity" | "crypto" | "fund" | "stock"
 			savingsperiod: "annually" | "monthly" | "weekly" | "daily"
-			transactiontype: "user" | "savings_plan"
 		}
 		CompositeTypes: {
 			[_ in never]: never
@@ -2281,13 +2298,14 @@ export const Constants = {
 		},
 	},
 	depots: {
-		Enums: {},
+		Enums: {
+			transactiontype: ["user", "movement", "savings_plan"],
+		},
 	},
 	public: {
 		Enums: {
 			assettype: ["commodity", "crypto", "fund", "stock"],
 			savingsperiod: ["annually", "monthly", "weekly", "daily"],
-			transactiontype: ["user", "savings_plan"],
 		},
 	},
 	users: {

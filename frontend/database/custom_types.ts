@@ -21,8 +21,12 @@ export type CleanedStock = NonNullableRow<Asset>
 export type PlainPrice = Omit<StockPrice, "id" | "asset_id">
 export type CleanedPlainPrice = NonNullableRow<PlainPrice>
 
-export type PositionSummary =
-	Database["depots"]["Views"]["position_profits"]["Row"]
+// Row of depots.get_position_profits. The function casts asset_type to text,
+// so narrow it back to the enum for consumers that group by asset type.
+export type PositionSummary = Omit<
+	Database["depots"]["Functions"]["get_position_profits"]["Returns"][number],
+	"asset_type"
+> & { asset_type: Database["public"]["Enums"]["assettype"] }
 
 export type DepotOverview = Database["depots"]["Views"]["depot_overview"]["Row"]
 export type SpecialRole = Database["users"]["Enums"]["special_role"]

@@ -132,7 +132,7 @@ function Description({
 }) {
 	const buy = transaction.amount > 0
 	const worth =
-		Math.abs(transaction.amount * transaction.price) +
+		Math.abs(transaction.amount * (transaction.price ?? 0)) +
 		transaction.commission * (buy ? 1 : -1)
 	const iconURL =
 		transaction.symbol && transaction.asset_type
@@ -150,7 +150,7 @@ function Description({
 				<HoverCardContent className="w-fit rounded-lg overflow-hidden">
 					<div className="flex flex-row gap-2">
 						<span className="number tabular-nums">
-							${Math.abs(transaction.amount * transaction.price).toFixed(2)}
+							${Math.abs(transaction.amount * (transaction.price ?? 0)).toFixed(2)}
 						</span>
 						<span>{buy ? "+" : "-"}</span>
 						<span className="number tabular-nums">

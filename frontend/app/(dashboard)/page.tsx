@@ -187,15 +187,22 @@ const dataFetcher = async (depotId: number) => {
 	const tstamp = toISODateOnly(getDateCertainDaysAgo(30))
 	const depots = client.schema("depots")
 
+	// Members get the live views (history + today's value incl. today's
+	// transactions). They only return the caller's own depots, so inspecting a
+	// foreign depot falls back to the public, snapshot-based views.
 	const [positionResponse, valueResponse, valueAggResponse] = await Promise.all(
 		[
 			depots.rpc("get_position_profits", { p_depot_id: depot.id }),
 			depots
-				.from("values")
+				.from(ownedByUser ? "depot_values_with_curr" : "values")
 				.select()
 				.eq("depot_id", depot.id)
-				.gte("tstamp", tstamp),
-			depots.from("aggregated_values").select().eq("depot_id", depot.id),
+				.gte("tstamp", tstamp)
+				.order("tstamp"),
+			depots
+				.from(ownedByUser ? "aggregated_values_with_curr" : "aggregated_values")
+				.select()
+				.eq("depot_id", depot.id),
 		]
 	)
 
