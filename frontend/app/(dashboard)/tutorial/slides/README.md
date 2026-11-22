@@ -8,8 +8,8 @@ Gebaut mit Next.js (App Router), Shadcn UI, Tailwind CSS und Recharts.
 ## Stack
 
 - **Next.js** – App Router (`app/`)
-- **Shadcn UI** – Carousel, Slider, Button, Badge, Progress
-- **Tailwind CSS** – Styling durchgehend mit CSS-Variablen (`text-foreground`, `bg-muted/40` etc.)
+- **Shadcn UI** – Carousel, Card, Alert, Table, Chart, Slider, ToggleGroup, Button
+- **Tailwind CSS** – Styling ausschließlich über die Tokens aus `globals.css`
 - **Recharts** – alle Charts (AreaChart, LineChart, BarChart)
 - **Lucide React** – Icons
 
@@ -42,18 +42,27 @@ components/
 
 ---
 
-## Layout-Bausteine (`slide-layout.tsx`)
+## Layout-Bausteine (`slide-layout.tsx`, `slide-chart.tsx`)
 
-Alle Slides bauen auf diesen Komponenten auf:
+Alle Slides bauen auf diesen Komponenten auf. Sie folgen dem Look der übrigen
+Dashboard-Seiten: neutrale Shadcn-Tokens, gedämpfte Labels, Mono-Zahlen, Farbe
+nur mit Bedeutung (`text-win` / `text-loss`, Chart-Serien). Keine Tailwind-
+Palettenfarben (emerald, amber, ...) und keine Hex-Werte.
 
 | Komponente | Verwendung |
 |---|---|
-| `<SlideLayout>` | Äußerer Container, max-w-4xl, zentriert |
-| `<SlideHeader eyebrow title subtitle>` | Seitenüberschrift mit optionalem Eyebrow-Label |
-| `<SlideSection>` | Inhaltsblock mit gap |
-| `<InfoCard>` | Neutrale Infobox |
-| `<InfoCard accent>` | Grün hervorgehobene Infobox (Fazit/Merksatz) |
-| `<DataTable headers rows>` | Tabelle im Slide-Stil |
+| `<SlideLayout>` | Äußerer Container, max-w-3xl, zentriert |
+| `<SlideHeader eyebrow title subtitle>` | Seitenüberschrift wie auf den anderen Seiten |
+| `<SlideSection title>` | Inhaltsblock mit optionaler h2 |
+| `<Text>` / `<Em>` | Fließtext (gedämpft) / hervorgehobener Begriff |
+| `<Callout title>` | Shadcn-`Alert` für Beispiele und Hinweise |
+| `<Callout variant="takeaway">` | Merksatz der Slide |
+| `<Stat label value tone size>` / `<StatRow>` | Kennzahl wie die Stats auf der Depot-Seite |
+| `<Figure title description action>` | Shadcn-`Card` für Charts, Rechner, Quiz (kein Swipe darin) |
+| `<SliderField>` / `<SliderGrid>` | Label + Wert + Slider |
+| `<DataTable headers rows>` | Shadcn-`Table` |
+| `<SlideChart config>` | Shadcn-`ChartContainer`, Farben über `ChartConfig` (`var(--win)` etc.) |
+| `<SlideTooltipContent config xKey>` | Tooltip mit `currencyFormat` |
 
 ---
 

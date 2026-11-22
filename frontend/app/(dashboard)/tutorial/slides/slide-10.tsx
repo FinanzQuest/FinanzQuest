@@ -1,26 +1,35 @@
 "use client"
 
 import { useState } from "react"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { currencyFormat } from "@/lib/cash_display_string"
+import { numberFormat } from "@/lib/util"
 import {
-	Bar,
-	CartesianGrid,
-	ComposedChart,
-	Legend,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { Slider } from "@/components/ui/slider"
+	axisProps,
+	type ChartConfig,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	gridProps,
+	moneyTick,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
 import {
-	InfoCard,
+	Callout,
+	Em,
+	Figure,
 	SlideHeader,
 	SlideLayout,
-	SlideSection,
+	SliderField,
+	SliderGrid,
+	Stat,
+	StatRow,
+	Text,
 } from "./slide-layout"
 
 function calcSparplan(monthly: number, rate: number, years: number) {
-	// Returns yearly snapshots: { year, eingezahlt, zinseszins }
+	// yearly snapshots: paid in vs. gained through compound interest
 	let value = 0
 	const data = []
 	for (let y = 1; y <= years; y++) {
@@ -30,16 +39,17 @@ function calcSparplan(monthly: number, rate: number, years: number) {
 		const eingezahlt = monthly * 12 * y
 		data.push({
 			year: y,
-			Eingezahlt: eingezahlt,
-			Zinseszins: Math.round(value - eingezahlt),
+			eingezahlt,
+			zinseszins: Math.round(value - eingezahlt),
 		})
 	}
 	return data
 }
 
-function formatEur(v: number) {
-	return v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`
-}
+const chartConfig = {
+	eingezahlt: { label: "Eingezahlt", color: "var(--muted-foreground)" },
+	zinseszins: { label: "Zinseszins", color: "var(--win)" },
+} satisfies ChartConfig
 
 export function Slide10() {
 	const [monthly, setMonthly] = useState(100)
@@ -48,10 +58,9 @@ export function Slide10() {
 
 	const data = calcSparplan(monthly, rate, years)
 	const last = data[data.length - 1]
-	const endValue = last.Eingezahlt + last.Zinseszins
-	const totalIn = last.Eingezahlt
+	const endValue = last.eingezahlt + last.zinseszins
 
-	// Show every 5th year on chart to avoid clutter
+	// every 5th year (and the last one) keeps the bars readable
 	const chartData = data.filter(d => d.year % 5 === 0 || d.year === years)
 
 	return (
@@ -61,149 +70,106 @@ export function Slide10() {
 				subtitle="Vermögensaufbau beginnt nicht mit einem großen Einmalbetrag, sondern mit einem Teil des monatlichen Gehalts."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Die wenigsten haben gleich zu Beginn mehrere Tausend Euro zur
-					Verfügung. Das ist auch gar nicht nötig: Ein{" "}
-					<span className="text-foreground font-medium">Sparplan</span> legt
-					automatisch jeden Monat einen festen Betrag in einen ETF an - z. B. 50
-					€ oder 150 € aus dem Gehalt.
-				</p>
-			</SlideSection>
+			<Text>
+				Die wenigsten haben gleich zu Beginn mehrere Tausend Euro zur Verfügung.
+				Das ist auch gar nicht nötig: Ein <Em>Sparplan</Em> legt automatisch
+				jeden Monat einen festen Betrag in einen ETF an - z. B. 50 € oder 150 €
+				aus dem Gehalt.
+			</Text>
 
-			<div
-				data-no-swipe
-				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
-			>
-				<div className="grid grid-cols-3 gap-4">
-					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">
-							Endwert nach {years} Jahren
-						</span>
-						<span className="text-xl font-bold text-emerald-500">
-							{endValue.toLocaleString("de-DE")} €
-						</span>
-					</div>
-					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">
-							Eigene Einzahlungen
-						</span>
-						<span className="text-xl font-bold text-foreground/70">
-							{totalIn.toLocaleString("de-DE")} €
-						</span>
-					</div>
-					<div className="rounded-lg border bg-muted/60 p-3 flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">
-							Zinseszins-Gewinn
-						</span>
-						<span className="text-xl font-bold text-blue-400">
-							{last.Zinseszins.toLocaleString("de-DE")} €
-						</span>
-					</div>
-				</div>
+			<Figure title="Sparplan-Rechner">
+				<StatRow>
+					<Stat
+						size="lg"
+						label={`Endwert nach ${years} Jahren`}
+						value={currencyFormat.format(endValue)}
+					/>
+					<Stat
+						label="Eigene Einzahlungen"
+						value={currencyFormat.format(last.eingezahlt)}
+						tone="muted"
+					/>
+					<Stat
+						label="Zinseszins-Gewinn"
+						value={`+${currencyFormat.format(last.zinseszins)}`}
+						tone="win"
+					/>
+				</StatRow>
 
-				<ResponsiveContainer width="100%" height={200}>
-					<ComposedChart
-						data={chartData}
-						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
-					>
-						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+				<SlideChart config={chartConfig}>
+					<BarChart data={chartData} margin={{ top: 4, right: 4, left: 0 }}>
+						<CartesianGrid {...gridProps} />
 						<XAxis
 							dataKey="year"
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={v => `J. ${v}`}
+							{...axisProps}
+							tickFormatter={v => `${v} J.`}
 						/>
-						<YAxis
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={formatEur}
-							width={55}
+						<YAxis {...axisProps} width={72} tickFormatter={moneyTick} />
+						<ChartTooltip
+							cursor={{ fill: "var(--muted)", opacity: 0.5 }}
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="year"
+									labelPrefix="Jahr"
+								/>
+							}
 						/>
-						<Tooltip
-							contentStyle={{
-								background: "var(--card)",
-								border: "1px solid var(--border)",
-								borderRadius: 8,
-								fontSize: 12,
-								color: "var(--foreground)",
-							}}
-							labelFormatter={v => `Nach ${v} Jahren`}
-							formatter={(v, name) => [
-								`${(v as number).toLocaleString("de-DE")} €`,
-								name,
-							]}
-						/>
-						<Legend
-							wrapperStyle={{
-								fontSize: 12,
-								color: "var(--muted-foreground)",
-							}}
-						/>
+						<ChartLegend content={<ChartLegendContent />} />
 						<Bar
-							dataKey="Eingezahlt"
+							isAnimationActive={false}
+							dataKey="eingezahlt"
 							stackId="a"
-							fill="var(--muted-foreground)"
-							opacity={0.7}
+							fill="var(--color-eingezahlt)"
+							fillOpacity={0.6}
 							radius={[0, 0, 4, 4]}
 						/>
 						<Bar
-							dataKey="Zinseszins"
+							isAnimationActive={false}
+							dataKey="zinseszins"
 							stackId="a"
-							fill="#10b981"
+							fill="var(--color-zinseszins)"
 							radius={[4, 4, 0, 0]}
 						/>
-					</ComposedChart>
-				</ResponsiveContainer>
+					</BarChart>
+				</SlideChart>
 
-				<div className="grid grid-cols-3 gap-4">
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Monatliche Rate</span>
-							<span className="text-foreground font-mono">{monthly} €</span>
-						</div>
-						<Slider
-							min={25}
-							max={500}
-							step={25}
-							value={monthly}
-							onValueChange={v => setMonthly(v as number)}
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Rendite</span>
-							<span className="text-foreground font-mono">{rate} %</span>
-						</div>
-						<Slider
-							min={1}
-							max={12}
-							step={0.5}
-							value={rate}
-							onValueChange={v => setRate(v as number)}
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Laufzeit</span>
-							<span className="text-foreground font-mono">{years} Jahre</span>
-						</div>
-						<Slider
-							min={5}
-							max={45}
-							step={1}
-							value={years}
-							onValueChange={v => setYears(v as number)}
-						/>
-					</div>
-				</div>
-			</div>
+				<SliderGrid>
+					<SliderField
+						label="Monatliche Rate"
+						display={currencyFormat.format(monthly)}
+						value={monthly}
+						onChange={setMonthly}
+						min={25}
+						max={500}
+						step={25}
+					/>
+					<SliderField
+						label="Rendite"
+						display={`${numberFormat.format(rate)} %`}
+						value={rate}
+						onChange={setRate}
+						min={1}
+						max={12}
+						step={0.5}
+					/>
+					<SliderField
+						label="Laufzeit"
+						display={`${years} Jahre`}
+						value={years}
+						onChange={setYears}
+						min={5}
+						max={45}
+						step={1}
+					/>
+				</SliderGrid>
+			</Figure>
 
-			<InfoCard accent>
+			<Callout variant="takeaway">
 				Disziplin durch Automatisierung: Der Betrag wird monatlich abgebucht,
 				bevor du ihn ausgeben kannst. So entsteht Vermögen ohne aktive
 				Entscheidung jeden Monat.
-			</InfoCard>
+			</Callout>
 		</SlideLayout>
 	)
 }

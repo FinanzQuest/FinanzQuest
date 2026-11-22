@@ -1,17 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { numberFormat } from "@/lib/util"
 import {
-	CartesianGrid,
-	Line,
-	LineChart,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { Badge } from "@/components/ui/badge"
-import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
+	axisProps,
+	type ChartConfig,
+	ChartTooltip,
+	gridProps,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
+import { Figure, SlideHeader, SlideLayout } from "./slide-layout"
 
 // Quellen:
 // MSCI World:  chart.csv (Jahresendwerte, Dez), Basis Jan 2004 = 100
@@ -168,28 +169,54 @@ const HISTORICAL_DATA = [
 		bitcoin: 12515.0,
 	},
 ]
-const SERIES = [
-	{ key: "tagesgeld", label: "Tagesgeld", color: "#71717a" },
-	{ key: "anleihen", label: "Staatsanleihen", color: "#f59e0b" },
-	{ key: "msci", label: "MSCI World ETF", color: "#10b981" },
-	{ key: "bitcoin", label: "Bitcoin", color: "#f97316" },
+const chartConfig = {
+	tagesgeld: { label: "Tagesgeld", color: "var(--muted-foreground)" },
+	anleihen: { label: "Staatsanleihen", color: "var(--overlay-1)" },
+	msci: { label: "MSCI World ETF", color: "var(--win)" },
+	bitcoin: { label: "Bitcoin", color: "var(--color-crypto)" },
+} satisfies ChartConfig
+
+type SeriesKey = keyof typeof chartConfig
+const SERIES = Object.keys(chartConfig) as SeriesKey[]
+
+const ASSET_CLASSES: {
+	series: SeriesKey
+	title: string
+	desc: string
+	example: string
+}[] = [
+	{
+		series: "tagesgeld",
+		title: "Tagesgeld",
+		desc: "Ein Sparkonto bei einer Bank, auf das du täglich zugreifen kannst. Die Bank zahlt dir dafür Zinsen - den Tagesgeldzins, der sich am Leitzins der EZB orientiert. Kein Verlustrisiko, aber die Rendite liegt oft unter der Inflation.",
+		example: "z. B. bei DKB, ING, Consorsbank",
+	},
+	{
+		series: "anleihen",
+		title: "Anleihen",
+		desc: "Du leihst einem Staat oder Unternehmen Geld und erhältst dafür regelmäßige Zinszahlungen. Geringeres Risiko als Aktien, aber auch deutlich geringere Rendite.",
+		example: "z. B. Bundesanleihe, US Treasury",
+	},
+	{
+		series: "msci",
+		title: "Aktien & ETFs",
+		desc: "Eine Aktie ist ein Anteil an einem Unternehmen. Ein ETF bündelt viele Aktien automatisch - z. B. den MSCI World mit 1.400 Unternehmen weltweit. Historisch hohe Rendite, aber mit Kursschwankungen.",
+		example: "z. B. iShares MSCI World, S&P 500 ETF",
+	},
+	{
+		series: "bitcoin",
+		title: "Kryptowährungen",
+		desc: "Digitale Währungen wie Bitcoin. Extrem hohe Volatilität, kein innerer Wert im klassischen Sinne, stark spekulativ.",
+		example: "z. B. Bitcoin, Ethereum",
+	},
 ]
 
 export function Slide06() {
-	const [active, setActive] = useState<string[]>([
+	const [active, setActive] = useState<SeriesKey[]>([
 		"tagesgeld",
 		"anleihen",
 		"msci",
 	])
-
-	const toggle = (key: string) =>
-		setActive(prev =>
-			prev.includes(key)
-				? prev.length > 1
-					? prev.filter(k => k !== key)
-					: prev
-				: [...prev, key]
-		)
 
 	return (
 		<SlideLayout>
@@ -199,126 +226,91 @@ export function Slide06() {
 				subtitle="Es gibt verschiedene Arten, Geld anzulegen - von sicheren Konten bis zu spekulativen Investments."
 			/>
 
-			<div className="grid grid-cols-2 gap-3">
-				{[
-					{
-						title: "Tagesgeld",
-						color: "text-zinc-400",
-						desc: "Ein Sparkonto bei einer Bank, auf das du täglich zugreifen kannst. Die Bank zahlt dir dafür Zinsen - den Tagesgeldzins, der sich am Leitzins der EZB orientiert. Kein Verlustrisiko, aber die Rendite liegt oft unter der Inflation.",
-						example: "z. B. bei DKB, ING, Consorsbank",
-					},
-					{
-						title: "Anleihen",
-						color: "text-amber-500",
-						desc: "Du leihst einem Staat oder Unternehmen Geld und erhältst dafür regelmäßige Zinszahlungen. Geringeres Risiko als Aktien, aber auch deutlich geringere Rendite.",
-						example: "z. B. Bundesanleihe, US Treasury",
-					},
-					{
-						title: "Aktien & ETFs",
-						color: "text-emerald-500",
-						desc: "Eine Aktie ist ein Anteil an einem Unternehmen. Ein ETF bündelt viele Aktien automatisch - z. B. den MSCI World mit 1.400 Unternehmen weltweit. Historisch hohe Rendite, aber mit Kursschwankungen.",
-						example: "z. B. iShares MSCI World, S&P 500 ETF",
-					},
-					{
-						title: "Kryptowährungen",
-						color: "text-orange-500",
-						desc: "Digitale Währungen wie Bitcoin. Extrem hohe Volatilität, kein innerer Wert im klassischen Sinne, stark spekulativ.",
-						example: "z. B. Bitcoin, Ethereum",
-					},
-				].map(item => (
-					<div
-						key={item.title}
-						className="rounded-xl border bg-muted/40 p-4 flex flex-col gap-2"
-					>
-						<span className={`font-semibold text-sm ${item.color}`}>
+			<div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+				{ASSET_CLASSES.map(item => (
+					<div key={item.title} className="flex flex-col gap-1.5">
+						<span className="flex items-center gap-2 font-semibold">
+							<span
+								aria-hidden
+								className="size-2.5 rounded-[2px]"
+								style={{ background: chartConfig[item.series].color }}
+							/>
 							{item.title}
 						</span>
-						<p className="text-foreground/70 text-xs leading-relaxed">
+						<p className="text-sm text-muted-foreground leading-relaxed text-pretty">
 							{item.desc}
 						</p>
-						<span className="text-muted-foreground text-xs">
+						<span className="text-xs text-muted-foreground">
 							{item.example}
 						</span>
 					</div>
 				))}
 			</div>
 
-			<SlideSection>
-				<div className="flex items-center justify-between flex-wrap gap-2">
-					<span className="text-foreground font-semibold text-sm">
-						Historische Wertentwicklung 2004-2024 (Index: 100)
-					</span>
-					<div className="flex gap-2 flex-wrap">
-						{SERIES.map(s => (
-							<Badge
-								key={s.key}
-								variant={active.includes(s.key) ? "default" : "outline"}
-								className="cursor-pointer text-xs"
-								style={
-									active.includes(s.key)
-										? {
-												background: s.color,
-												color: "#fff",
-												borderColor: s.color,
-											}
-										: {}
-								}
-								onClick={() => toggle(s.key)}
-							>
-								{s.label}
-							</Badge>
-						))}
-					</div>
-					<p className="text-muted-foreground text-xs">
-						Bitcoin ab 2014 verfügbar. Achtung: stark abweichende Skala beim
-						Einblenden.
-					</p>
-				</div>
-				<div data-no-swipe className="rounded-xl border bg-muted/40 p-4">
-					<ResponsiveContainer width="100%" height={200}>
-						<LineChart
-							data={HISTORICAL_DATA}
-							margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
-						>
-							<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-							<XAxis
-								dataKey="year"
-								tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-								tickLine={false}
+			<Figure
+				title="Historische Wertentwicklung 2004-2024"
+				description="Indexiert auf 100. Bitcoin erst ab 2014 verfügbar und mit stark abweichender Skala."
+			>
+				<ToggleGroup
+					multiple
+					variant="outline"
+					size="sm"
+					value={active}
+					// keep at least one series visible
+					onValueChange={(next: string[]) => {
+						if (next.length > 0) setActive(next as SeriesKey[])
+					}}
+					aria-label="Angezeigte Anlageklassen"
+					className="flex-wrap"
+				>
+					{SERIES.map(key => (
+						<ToggleGroupItem key={key} value={key}>
+							<span
+								aria-hidden
+								className="size-2 rounded-[2px]"
+								style={{ background: chartConfig[key].color }}
 							/>
-							<YAxis
-								scale="pow"
-								tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-								tickLine={false}
-								width={50}
-							/>
-							<Tooltip
-								contentStyle={{
-									background: "var(--card)",
-									border: "1px solid var(--border)",
-									borderRadius: 8,
-									fontSize: 12,
-									color: "var(--foreground)",
-								}}
-								formatter={(v, key) => {
-									const s = SERIES.find(s => s.key === key)
-									return [`${v}`, s?.label ?? key]
-								}}
-							/>
-							{SERIES.filter(s => active.includes(s.key)).map(s => (
-								<Line
-									key={s.key}
-									type="monotone"
-									dataKey={s.key}
-									stroke={s.color}
-									strokeWidth={2}
-									dot={false}
+							{chartConfig[key].label}
+						</ToggleGroupItem>
+					))}
+				</ToggleGroup>
+
+				<SlideChart config={chartConfig}>
+					<LineChart
+						data={HISTORICAL_DATA}
+						margin={{ top: 4, right: 4, left: 0 }}
+					>
+						<CartesianGrid {...gridProps} />
+						<XAxis dataKey="year" {...axisProps} />
+						<YAxis
+							{...axisProps}
+							scale="pow"
+							width={52}
+							tickFormatter={v => numberFormat.format(v)}
+						/>
+						<ChartTooltip
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="year"
+									format={v => numberFormat.format(v)}
 								/>
-							))}
-						</LineChart>
-					</ResponsiveContainer>
-				</div>
-			</SlideSection>
+							}
+						/>
+						{SERIES.filter(key => active.includes(key)).map(key => (
+							<Line
+								key={key}
+								isAnimationActive={false}
+								type="monotone"
+								dataKey={key}
+								stroke={`var(--color-${key})`}
+								strokeWidth={2}
+								dot={false}
+							/>
+						))}
+					</LineChart>
+				</SlideChart>
+			</Figure>
 		</SlideLayout>
 	)
 }

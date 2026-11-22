@@ -4,31 +4,32 @@ import { CheckCircle2, XCircle } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
+import {
+	Figure,
+	SlideHeader,
+	SlideLayout,
+	SlideSection,
+	Stat,
+} from "./slide-layout"
 
 const PRINCIPLES = [
 	{
-		number: "01",
 		title: "Frühzeitig beginnen",
 		desc: "Zeit ist der entscheidende Faktor: Der Zinseszinseffekt braucht Jahrzehnte, um seine volle Wirkung zu entfalten.",
 	},
 	{
-		number: "02",
 		title: "Regelmäßig investieren",
 		desc: "Ein Sparplan macht Vermögensaufbau alltagstauglich und nutzt den Cost-Average-Effekt.",
 	},
 	{
-		number: "03",
 		title: "Breit diversifizieren",
 		desc: "ETFs streuen das Risiko automatisch über hunderte oder tausende Unternehmen.",
 	},
 	{
-		number: "04",
 		title: "Kosten niedrig halten",
 		desc: "Eine hohe TER frisst über Jahrzehnte einen erheblichen Teil der Rendite auf.",
 	},
 	{
-		number: "05",
 		title: "Langfristig denken",
 		desc: "Kursschwankungen gehören dazu - wer nicht voreilig verkauft, profitiert langfristig.",
 	},
@@ -131,160 +132,139 @@ export function Slide11() {
 		<SlideLayout>
 			<SlideHeader eyebrow="Zusammenfassung" title="Die fünf Grundprinzipien" />
 
-			<div className="grid grid-cols-1 gap-2">
-				{PRINCIPLES.map(p => (
-					<div
-						key={p.number}
-						className="rounded-xl border bg-muted/40 p-4 flex items-start gap-4"
-					>
-						<span className="text-emerald-500 font-bold font-mono text-lg w-8 shrink-0">
-							{p.number}
+			<ol className="rounded-xl border divide-y">
+				{PRINCIPLES.map((p, i) => (
+					<li key={p.title} className="flex items-baseline gap-4 p-4">
+						<span className="number tabular-nums text-sm text-muted-foreground w-4 shrink-0">
+							{i + 1}
 						</span>
-						<div>
-							<span className="text-foreground font-semibold text-sm">
-								{p.title}
-							</span>
-							<p className="text-foreground/60 text-xs mt-0.5 leading-relaxed">
+						<div className="flex flex-col gap-0.5">
+							<span className="font-semibold">{p.title}</span>
+							<p className="text-sm text-muted-foreground leading-relaxed text-pretty">
 								{p.desc}
 							</p>
 						</div>
-					</div>
+					</li>
 				))}
-			</div>
+			</ol>
 
-			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">
-					Abschluss-Quiz
-				</h2>
-
+			<SlideSection title="Abschluss-Quiz">
 				{quizState === "idle" && (
-					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col items-center gap-4 text-center">
-						<p className="text-foreground/70 text-sm">
-							5 Fragen zu den Inhalten dieser Einheit. Teste, was du dir gemerkt
-							hast.
-						</p>
-						<Button onClick={() => setQuizState("running")}>
-							Quiz starten
-						</Button>
-					</div>
+					<Figure>
+						<div className="flex flex-col items-start gap-4">
+							<p className="text-muted-foreground">
+								{QUIZ.length} Fragen zu den Inhalten dieser Einheit. Teste, was
+								du dir gemerkt hast.
+							</p>
+							<Button onClick={() => setQuizState("running")}>
+								Quiz starten
+							</Button>
+						</div>
+					</Figure>
 				)}
 
 				{quizState === "running" && (
-					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-5">
-						{/* Progress dots */}
-						<div className="flex items-center justify-between">
-							<span className="text-muted-foreground text-xs">
-								Frage {currentQ + 1} von {QUIZ.length}
-							</span>
-							<div className="flex gap-1">
+					<Figure
+						title={q.question}
+						description={`Frage ${currentQ + 1} von ${QUIZ.length}`}
+						action={
+							<div className="flex gap-1 pt-1" aria-hidden>
 								{QUIZ.map((_, i) => (
-									<div
+									<span
 										// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 										key={i}
 										className={cn(
-											"w-2 h-2 rounded-full transition-all",
+											"size-2 rounded-full",
 											i < currentQ
 												? answers[i] === QUIZ[i].correct
-													? "bg-emerald-500"
-													: "bg-rose-500"
+													? "bg-win"
+													: "bg-loss"
 												: i === currentQ
 													? "bg-foreground"
-													: "bg-muted-foreground/30"
+													: "bg-border"
 										)}
 									/>
 								))}
 							</div>
-						</div>
-
-						{/* Question */}
-						<p className="text-foreground font-semibold text-sm leading-relaxed">
-							{q.question}
-						</p>
-
-						{/* Options */}
+						}
+					>
 						<div className="flex flex-col gap-2">
 							{q.options.map((opt, i) => {
 								const isSelected = selected === i
 								const isCorrect = i === q.correct
-
-								let borderStyle = ""
-								if (confirmed) {
-									if (isCorrect)
-										borderStyle = "border-emerald-500 bg-emerald-500/10"
-									else if (isSelected)
-										borderStyle = "border-rose-500 bg-rose-500/10"
-									else borderStyle = "border bg-muted/20 opacity-50"
-								} else if (isSelected)
-									borderStyle = "border-foreground bg-muted/60"
-								else borderStyle = "border-border bg-muted/40"
-
 								return (
 									<button
 										// biome-ignore lint/suspicious/noArrayIndexKey: list is static and will not change
 										key={i}
 										type="button"
 										disabled={confirmed}
+										aria-pressed={isSelected}
 										onClick={() => setSelected(i)}
 										className={cn(
-											"rounded-lg px-4 py-3 text-left text-sm transition-all",
-											"flex items-center justify-between gap-2 w-full",
-											"disabled:cursor-default",
-											!confirmed && "hover:bg-muted/80 cursor-pointer",
-											"border",
-											borderStyle
+											"flex w-full items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+											"outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-default",
+											!confirmed && "hover:bg-muted",
+											!confirmed && isSelected && "border-foreground bg-muted",
+											confirmed && isCorrect && "border-win bg-win/10",
+											confirmed &&
+												isSelected &&
+												!isCorrect &&
+												"border-loss bg-loss/10",
+											confirmed &&
+												!isCorrect &&
+												!isSelected &&
+												"text-muted-foreground"
 										)}
 									>
-										<span className="text-foreground/80 pointer-events-none">
-											{opt}
-										</span>
+										<span>{opt}</span>
 										{confirmed && isCorrect && (
-											<CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 pointer-events-none" />
+											<CheckCircle2 className="size-4 shrink-0 text-win" />
 										)}
 										{confirmed && isSelected && !isCorrect && (
-											<XCircle className="w-4 h-4 text-rose-500 shrink-0 pointer-events-none" />
+											<XCircle className="size-4 shrink-0 text-loss" />
 										)}
 									</button>
 								)
 							})}
 						</div>
 
-						{/* Actions */}
 						<div className="flex justify-end">
 							{!confirmed ? (
-								<Button
-									onClick={handleConfirm}
-									disabled={selected === null}
-									size="sm"
-								>
+								<Button onClick={handleConfirm} disabled={selected === null}>
 									Antwort bestätigen
 								</Button>
 							) : (
-								<Button onClick={handleNext} size="sm">
+								<Button onClick={handleNext}>
 									{currentQ < QUIZ.length - 1
 										? "Nächste Frage"
 										: "Ergebnis anzeigen"}
 								</Button>
 							)}
 						</div>
-					</div>
+					</Figure>
 				)}
 
 				{quizState === "done" && (
-					<div className="rounded-xl border bg-muted/40 p-6 flex flex-col items-center gap-4 text-center">
-						<span className="text-5xl font-bold text-emerald-500">
-							{score}/{QUIZ.length}
-						</span>
-						<p className="text-foreground/70 text-sm">
-							{score === 5
-								? "Perfekt! Du hast alle Fragen richtig beantwortet."
-								: score >= 3
-									? "Gut gemacht! Ein paar Konzepte kannst du nochmal nachlesen."
-									: "Schau dir die Slides nochmal an - dann klappt's beim nächsten Versuch."}
-						</p>
-						<Button variant="outline" size="sm" onClick={restart}>
-							Nochmal versuchen
-						</Button>
-					</div>
+					<Figure>
+						<div className="flex flex-col items-start gap-4">
+							<Stat
+								size="lg"
+								label="Ergebnis"
+								value={`${score} / ${QUIZ.length}`}
+								tone={score >= 3 ? "win" : "loss"}
+							/>
+							<p className="text-muted-foreground">
+								{score === QUIZ.length
+									? "Perfekt! Du hast alle Fragen richtig beantwortet."
+									: score >= 3
+										? "Gut gemacht! Ein paar Konzepte kannst du nochmal nachlesen."
+										: "Schau dir die Slides nochmal an - dann klappt's beim nächsten Versuch."}
+							</p>
+							<Button variant="outline" onClick={restart}>
+								Nochmal versuchen
+							</Button>
+						</div>
+					</Figure>
 				)}
 			</SlideSection>
 		</SlideLayout>

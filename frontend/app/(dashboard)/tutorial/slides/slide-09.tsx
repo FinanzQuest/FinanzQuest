@@ -1,21 +1,28 @@
 "use client"
 
-import {
-	Area,
-	AreaChart,
-	CartesianGrid,
-	Legend,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { currencyFormat } from "@/lib/cash_display_string"
 import {
+	axisProps,
+	type ChartConfig,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	gridProps,
+	moneyTick,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
+import {
 	DataTable,
+	Em,
+	Figure,
 	SlideHeader,
 	SlideLayout,
 	SlideSection,
+	Stat,
+	StatRow,
+	Text,
 } from "./slide-layout"
 
 function calcGrowthWithTER(
@@ -36,13 +43,17 @@ const activeFundData = calcGrowthWithTER(10000, 7, 1.5, 30)
 
 const chartData = etfData.map((d, i) => ({
 	year: d.year,
-	ETF: d.value,
-	AktiverFonds: activeFundData[i].value,
+	etf: d.value,
+	fonds: activeFundData[i].value,
 }))
 
-function formatEur(v: number) {
-	return currencyFormat.format(v)
-}
+const chartConfig = {
+	etf: { label: "ETF (TER 0,2 %)", color: "var(--win)" },
+	fonds: {
+		label: "Aktiver Fonds (TER 1,5 %)",
+		color: "var(--muted-foreground)",
+	},
+} satisfies ChartConfig
 
 export function Slide09() {
 	const etfEnd = etfData[etfData.length - 1].value
@@ -55,151 +66,105 @@ export function Slide09() {
 				subtitle="ETFs kombinieren breite Risikostreuung mit sehr geringen Kosten - und genau das macht über Jahrzehnte einen enormen Unterschied."
 			/>
 
-			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">
-					Was ist die TER?
-				</h2>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Die{" "}
-					<span className="text-foreground font-medium">
-						TER (Total Expense Ratio)
-					</span>{" "}
-					ist die jährliche Gebühr, die ein Fonds für seine Verwaltung erhebt.
-					Sie wird automatisch vom Fondsvermögen abgezogen - du siehst sie nicht
-					als separate Zahlung, aber sie schmälert deine Rendite jedes Jahr.
-				</p>
-				<p className="text-foreground/75 text-sm leading-relaxed">
+			<SlideSection title="Was ist die TER?">
+				<Text>
+					Die <Em>TER (Total Expense Ratio)</Em> ist die jährliche Gebühr, die
+					ein Fonds für seine Verwaltung erhebt. Sie wird automatisch vom
+					Fondsvermögen abgezogen - du siehst sie nicht als separate Zahlung,
+					aber sie schmälert deine Rendite jedes Jahr.
+				</Text>
+				<Text>
 					Warum ist eine hohe TER so problematisch? Weil sie jedes Jahr anfällt
 					und damit durch den Zinseszinseffekt über lange Zeiträume{" "}
-					<span className="text-foreground font-medium">
-						enorme Auswirkungen
-					</span>{" "}
-					hat.
-				</p>
+					<Em>enorme Auswirkungen</Em> hat.
+				</Text>
 			</SlideSection>
 
-			<div
-				data-no-swipe
-				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-4"
+			<Figure
+				title="10.000 € über 30 Jahre"
+				description="Gleiche Rendite vor Kosten (7 %), nur die TER unterscheidet sich."
 			>
-				<div className="grid grid-cols-2 gap-4">
-					<div className="rounded-lg bg-muted p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">
-							ETF (TER 0,2 %)
-						</span>
-						<span className="text-2xl font-bold text-emerald-500">
-							{etfEnd.toLocaleString("de-DE")} €
-						</span>
-					</div>
-					<div className="rounded-lg bg-muted p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">
-							Aktiver Fonds (TER 1,5 %)
-						</span>
-						<span className="text-2xl font-bold text-foreground/60">
-							{fundEnd.toLocaleString("de-DE")} €
-						</span>
-					</div>
-				</div>
-				<ResponsiveContainer width="100%" height={180}>
-					<AreaChart
-						data={chartData}
-						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
-					>
+				<StatRow>
+					<Stat
+						size="lg"
+						label="ETF"
+						value={currencyFormat.format(etfEnd)}
+						tone="win"
+					/>
+					<Stat
+						size="lg"
+						label="Aktiver Fonds"
+						value={currencyFormat.format(fundEnd)}
+						tone="muted"
+					/>
+					<Stat
+						label="Differenz"
+						value={currencyFormat.format(etfEnd - fundEnd)}
+						hint="allein durch die Kosten"
+					/>
+				</StatRow>
+
+				<SlideChart config={chartConfig}>
+					<AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0 }}>
 						<defs>
-							<linearGradient id="etfGrad" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-								<stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-							</linearGradient>
-							<linearGradient id="fundGrad" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="5%" stopColor="#71717a" stopOpacity={0.2} />
-								<stop offset="95%" stopColor="#71717a" stopOpacity={0} />
+							<linearGradient id="etfFill" x1="0" y1="0" x2="0" y2="1">
+								<stop
+									offset="5%"
+									stopColor="var(--color-etf)"
+									stopOpacity={0.25}
+								/>
+								<stop
+									offset="95%"
+									stopColor="var(--color-etf)"
+									stopOpacity={0}
+								/>
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-						<XAxis
-							dataKey="year"
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							label={{
-								value: "Jahre",
-								position: "insideBottomRight",
-								fill: "var(--muted-foreground)",
-								fontSize: 11,
-								offset: -5,
-							}}
-						/>
-						<YAxis
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={formatEur}
-							width={50}
-						/>
-						<Tooltip
-							contentStyle={{
-								background: "var(--card)",
-								border: "1px solid var(--border)",
-								borderRadius: 8,
-								fontSize: 12,
-								color: "var(--foreground)",
-							}}
-							labelFormatter={v => `Jahr ${v}`}
-							formatter={(v, name) => [
-								`${(v as number).toLocaleString("de-DE")} €`,
-								name === "ETF"
-									? "ETF (0,2 % TER)"
-									: "Aktiver Fonds (1,5 % TER)",
-							]}
-						/>
-						<Legend
-							formatter={v =>
-								v === "ETF" ? "ETF (0,2 % TER)" : "Aktiver Fonds (1,5 % TER)"
+						<CartesianGrid {...gridProps} />
+						<XAxis dataKey="year" {...axisProps} />
+						<YAxis {...axisProps} width={72} tickFormatter={moneyTick} />
+						<ChartTooltip
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="year"
+									labelPrefix="Jahr"
+								/>
 							}
-							wrapperStyle={{
-								fontSize: 12,
-								color: "var(--muted-foreground)",
-							}}
 						/>
+						<ChartLegend content={<ChartLegendContent />} />
 						<Area
+							isAnimationActive={false}
 							type="monotone"
-							dataKey="AktiverFonds"
-							stroke="var(--muted-foreground)"
+							dataKey="fonds"
+							stroke="var(--color-fonds)"
 							strokeWidth={2}
-							fill="url(#fundGrad)"
 							strokeDasharray="5 5"
+							fill="none"
 						/>
 						<Area
+							isAnimationActive={false}
 							type="monotone"
-							dataKey="ETF"
-							stroke="#10b981"
+							dataKey="etf"
+							stroke="var(--color-etf)"
 							strokeWidth={2.5}
-							fill="url(#etfGrad)"
+							fill="url(#etfFill)"
 						/>
 					</AreaChart>
-				</ResponsiveContainer>
-				<p className="text-muted-foreground text-xs">
-					Gleiche Rendite vor Kosten (7 %), Startkapital 10.000 €, Laufzeit 30
-					Jahre. Differenz:{" "}
-					<span className="text-foreground font-medium">
-						{(etfEnd - fundEnd).toLocaleString("de-DE")} €
-					</span>{" "}
-					- allein durch den Kostenunterschied.
-				</p>
-			</div>
+				</SlideChart>
+			</Figure>
 
-			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">
-					Weitere wichtige ETF-Begriffe
-				</h2>
+			<SlideSection title="Weitere wichtige ETF-Begriffe">
 				<DataTable
 					headers={["Begriff", "Bedeutung"]}
 					rows={[
 						[
 							"Thesaurierend",
-							"Erträge werden automatisch reinvestiert → Zinseszinseffekt ohne Zutun",
+							"Erträge werden automatisch reinvestiert, der Zinseszinseffekt wirkt ohne Zutun",
 						],
 						[
 							"Ausschüttend",
-							"Erträge werden regelmäßig ausgezahlt - müssen selbst reinvestiert werden",
+							"Erträge werden regelmäßig ausgezahlt und müssen selbst reinvestiert werden",
 						],
 						[
 							"MSCI World",

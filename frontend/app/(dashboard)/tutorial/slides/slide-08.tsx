@@ -1,18 +1,28 @@
 "use client"
 
 import { useCallback, useState } from "react"
-import {
-	CartesianGrid,
-	Legend,
-	Line,
-	LineChart,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { Button } from "@/components/ui/button"
-import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
+import { currencyFormat } from "@/lib/cash_display_string"
+import {
+	axisProps,
+	type ChartConfig,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	gridProps,
+	moneyTick,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
+import {
+	Figure,
+	SlideHeader,
+	SlideLayout,
+	Stat,
+	StatRow,
+	Text,
+} from "./slide-layout"
 
 /** Seeded PRNG (mulberry32): the first render is deterministic, so the
  * slide can be prerendered; "neu simulieren" picks a new seed. */
@@ -79,6 +89,11 @@ function generateData(seed: number) {
 
 const INITIAL_SEED = 20261122
 
+const chartConfig = {
+	einzelaktie: { label: "Einzelaktie", color: "var(--loss)" },
+	portfolio: { label: "Portfolio (20 Aktien)", color: "var(--win)" },
+} satisfies ChartConfig
+
 export function Slide08() {
 	const [simData, setSimData] = useState(() => generateData(INITIAL_SEED))
 
@@ -90,8 +105,8 @@ export function Slide08() {
 
 	const chartData = simData.single.map((d, i) => ({
 		month: d.month,
-		Einzelaktie: d.value,
-		Portfolio: simData.portfolio[i].value,
+		einzelaktie: d.value,
+		portfolio: simData.portfolio[i].value,
 	}))
 
 	return (
@@ -101,114 +116,74 @@ export function Slide08() {
 				subtitle="Nicht alles auf eine Karte setzen: Das Verteilen von Kapital auf viele Anlagen senkt das Risiko erheblich."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Angenommen, du investierst dein gesamtes Geld in die Aktie eines
-					einzigen Unternehmens. Geht dieses Unternehmen pleite, ist dein
-					gesamtes Kapital verloren. Diversifikation löst dieses Problem: Statt
-					auf ein Unternehmen zu setzen, verteilst du dein Kapital auf viele
-					verschiedene Anlagen.
-				</p>
-			</SlideSection>
+			<Text>
+				Angenommen, du investierst dein gesamtes Geld in die Aktie eines
+				einzigen Unternehmens. Geht dieses Unternehmen pleite, ist dein gesamtes
+				Kapital verloren. Diversifikation löst dieses Problem: Statt auf ein
+				Unternehmen zu setzen, verteilst du dein Kapital auf viele verschiedene
+				Anlagen.
+			</Text>
 
-			<div className="grid grid-cols-2 gap-4">
-				<div className="rounded-xl border bg-muted/40 p-4 flex flex-col gap-1">
-					<span className="text-foreground font-semibold text-sm">
-						1.000 € - eine Aktie
-					</span>
-					<p className="text-foreground/60 text-xs leading-relaxed">
-						Unternehmen geht pleite → vollständiger Verlust
-					</p>
-					<span className="text-rose-500 font-bold mt-1">− 1.000 €</span>
-				</div>
-				<div className="rounded-xl border bg-muted/40 p-4 flex flex-col gap-1">
-					<span className="text-foreground font-semibold text-sm">
-						1.000 € - 1.000 Aktien
-					</span>
-					<p className="text-foreground/60 text-xs leading-relaxed">
-						Ein Unternehmen geht pleite → Verlust von ca. 1 €
-					</p>
-					<span className="text-emerald-500 font-bold mt-1">− 1 €</span>
-				</div>
-			</div>
+			<StatRow>
+				<Stat
+					size="lg"
+					label="1.000 € in einer Aktie"
+					value={currencyFormat.format(-1000)}
+					tone="loss"
+					hint="Unternehmen geht pleite: vollständiger Verlust"
+				/>
+				<Stat
+					size="lg"
+					label="1.000 € in 1.000 Aktien"
+					value={currencyFormat.format(-1)}
+					tone="muted"
+					hint="Ein Unternehmen geht pleite: Verlust von ca. 1 €"
+				/>
+			</StatRow>
 
-			<div
-				data-no-swipe
-				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-4"
-			>
-				<div className="flex items-center justify-between">
-					<span className="text-foreground font-semibold text-sm">
-						Simulation: 36 Monate Kursverlauf
-					</span>
+			<Figure
+				title="Simulation: 36 Monate Kursverlauf"
+				description="Beide starten bei 1.000 €. Die Einzelaktie schwankt stark, das Portfolio aus 20 Aktien ist deutlich stabiler."
+				action={
 					<Button variant="outline" size="sm" onClick={rerun}>
-						Neue Simulation
+						Neu simulieren
 					</Button>
-				</div>
-				<ResponsiveContainer width="100%" height={200}>
-					<LineChart
-						data={chartData}
-						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
-					>
-						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-						<XAxis
-							dataKey="month"
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							label={{
-								value: "Monate",
-								position: "insideBottomRight",
-								fill: "var(--muted-foreground)",
-								fontSize: 11,
-								offset: -5,
-							}}
+				}
+			>
+				<SlideChart config={chartConfig}>
+					<LineChart data={chartData} margin={{ top: 4, right: 4, left: 0 }}>
+						<CartesianGrid {...gridProps} />
+						<XAxis dataKey="month" {...axisProps} />
+						<YAxis {...axisProps} width={72} tickFormatter={moneyTick} />
+						<ChartTooltip
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="month"
+									labelPrefix="Monat"
+								/>
+							}
 						/>
-						<YAxis
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={v => `${v} €`}
-							width={60}
-						/>
-						<Tooltip
-							contentStyle={{
-								background: "var(--card)",
-								border: "1px solid var(--border)",
-								borderRadius: 8,
-								fontSize: 12,
-								color: "var(--foreground)",
-							}}
-							labelFormatter={v => `Monat ${v}`}
-							formatter={(v, name) => [
-								`${(v as number).toLocaleString("de-DE")} €`,
-								name,
-							]}
-						/>
-						<Legend
-							wrapperStyle={{
-								fontSize: 12,
-								color: "var(--muted-foreground)",
-							}}
-						/>
+						<ChartLegend content={<ChartLegendContent />} />
 						<Line
+							isAnimationActive={false}
 							type="monotone"
-							dataKey="Einzelaktie"
-							stroke="#f43f5e"
+							dataKey="einzelaktie"
+							stroke="var(--color-einzelaktie)"
 							strokeWidth={2}
 							dot={false}
 						/>
 						<Line
+							isAnimationActive={false}
 							type="monotone"
-							dataKey="Portfolio"
-							stroke="#10b981"
+							dataKey="portfolio"
+							stroke="var(--color-portfolio)"
 							strokeWidth={2.5}
 							dot={false}
 						/>
 					</LineChart>
-				</ResponsiveContainer>
-				<p className="text-muted-foreground text-xs">
-					Beide Linien starten bei 1.000 €. Die Einzelaktie schwankt stark - das
-					Portfolio aus 20 Aktien ist deutlich stabiler.
-				</p>
-			</div>
+				</SlideChart>
+			</Figure>
 		</SlideLayout>
 	)
 }
