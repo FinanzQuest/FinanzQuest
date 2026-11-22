@@ -1,22 +1,30 @@
 "use client"
 
 import { useState } from "react"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { currencyFormat } from "@/lib/cash_display_string"
 import {
-	CartesianGrid,
-	Legend,
-	Line,
-	LineChart,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { Slider } from "@/components/ui/slider"
+	axisProps,
+	type ChartConfig,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	gridProps,
+	moneyTick,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
 import {
-	InfoCard,
+	Callout,
+	Em,
+	Figure,
 	SlideHeader,
 	SlideLayout,
-	SlideSection,
+	SliderField,
+	SliderGrid,
+	Stat,
+	StatRow,
+	Text,
 } from "./slide-layout"
 
 const Y_MAX = (() => {
@@ -42,10 +50,6 @@ function calcSparplan(startAge: number, monthlyRate: number, rate: number) {
 	return yearlyData
 }
 
-function formatEur(v: number) {
-	return v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`
-}
-
 export function Slide05() {
 	const [ageA, setAgeA] = useState(25)
 	const [ageB, setAgeB] = useState(35)
@@ -67,6 +71,11 @@ export function Slide05() {
 		B: dataB.find(d => d.age === age)?.value ?? null,
 	}))
 
+	const chartConfig = {
+		A: { label: `Start mit ${ageA}`, color: "var(--win)" },
+		B: { label: `Start mit ${ageB}`, color: "var(--muted-foreground)" },
+	} satisfies ChartConfig
+
 	return (
 		<SlideLayout>
 			<SlideHeader
@@ -74,168 +83,112 @@ export function Slide05() {
 				subtitle="Zehn Jahre früher zu beginnen kann das Endergebnis mehr als verdoppeln - bei gleicher monatlicher Rate."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Der Zinseszinseffekt braucht eines vor allem:{" "}
-					<span className="text-foreground font-medium">Zeit</span>. Je früher
-					du anfängst, desto länger kann dein Geld wachsen - und desto größer
-					wird der Unterschied.
-				</p>
-			</SlideSection>
+			<Text>
+				Der Zinseszinseffekt braucht eines vor allem: <Em>Zeit</Em>. Je früher
+				du anfängst, desto länger kann dein Geld wachsen - und desto größer wird
+				der Unterschied.
+			</Text>
 
-			<div
-				data-no-swipe
-				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
+			<Figure
+				title="Vermögen mit 65"
+				description="Monatlicher Sparplan bei 7 % Rendite pro Jahr."
 			>
-				<div className="grid grid-cols-2 gap-4">
-					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">
-							Start mit {ageA}
-						</span>
-						<span className="text-2xl font-bold text-emerald-500">
-							{endA.toLocaleString("de-DE")} €
-						</span>
-						<span className="text-xs text-foreground/60">
-							{65 - ageA} Jahre Anlagezeit
-						</span>
-					</div>
-					<div className="rounded-lg border bg-muted/60 p-4 flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground">
-							Start mit {ageB}
-						</span>
-						<span className="text-2xl font-bold text-foreground/70">
-							{endB.toLocaleString("de-DE")} €
-						</span>
-						<span className="text-xs text-foreground/60">
-							{65 - ageB} Jahre Anlagezeit
-						</span>
-					</div>
-				</div>
+				<StatRow>
+					<Stat
+						size="lg"
+						label={`Start mit ${ageA}`}
+						value={currencyFormat.format(endA)}
+						tone="win"
+						hint={`${65 - ageA} Jahre Anlagezeit`}
+					/>
+					<Stat
+						size="lg"
+						label={`Start mit ${ageB}`}
+						value={currencyFormat.format(endB)}
+						tone="muted"
+						hint={`${65 - ageB} Jahre Anlagezeit`}
+					/>
+				</StatRow>
 
-				<ResponsiveContainer width="100%" height={200}>
-					<LineChart
-						data={chartData}
-						margin={{ top: 4, right: 4, left: -10, bottom: 0 }}
-					>
-						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-						<XAxis
-							dataKey="age"
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							label={{
-								value: "Alter",
-								position: "insideBottomRight",
-								fill: "var(--muted-foreground)",
-								fontSize: 11,
-								offset: -5,
-							}}
-						/>
+				<SlideChart config={chartConfig}>
+					<LineChart data={chartData} margin={{ top: 4, right: 4, left: 0 }}>
+						<CartesianGrid {...gridProps} />
+						<XAxis dataKey="age" {...axisProps} />
 						<YAxis
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={formatEur}
-							width={55}
+							{...axisProps}
+							width={72}
+							tickFormatter={moneyTick}
 							domain={[0, Y_MAX]}
 						/>
-						<Tooltip
-							contentStyle={{
-								background: "var(--card)",
-								border: "1px solid var(--border)",
-								borderRadius: 8,
-								fontSize: 12,
-								color: "var(--foreground)",
-							}}
-							labelFormatter={v => `Alter ${v}`}
-							formatter={(v, name) => [
-								`${(v as number).toLocaleString("de-DE")} €`,
-								name === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`,
-							]}
-						/>
-						<Legend
-							formatter={v =>
-								v === "A" ? `Start mit ${ageA}` : `Start mit ${ageB}`
+						<ChartTooltip
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="age"
+									labelPrefix="Alter"
+								/>
 							}
-							wrapperStyle={{
-								fontSize: 12,
-								color: "var(--muted-foreground)",
-							}}
 						/>
+						<ChartLegend content={<ChartLegendContent />} />
 						<Line
+							isAnimationActive={false}
 							type="monotone"
 							dataKey="A"
-							stroke="#10b981"
+							stroke="var(--color-A)"
 							strokeWidth={2.5}
 							dot={false}
-							connectNulls={false}
 						/>
 						<Line
+							isAnimationActive={false}
 							type="monotone"
 							dataKey="B"
-							stroke="var(--muted-foreground)"
+							stroke="var(--color-B)"
 							strokeWidth={2}
-							dot={false}
 							strokeDasharray="5 5"
-							connectNulls={false}
+							dot={false}
 						/>
 					</LineChart>
-				</ResponsiveContainer>
+				</SlideChart>
 
-				<div className="grid grid-cols-3 gap-4">
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Startalter A</span>
-							<span className="text-foreground font-mono">{ageA} Jahre</span>
-						</div>
-						<Slider
-							min={18}
-							max={50}
-							step={1}
-							value={[ageA]}
-							onValueChange={v => setAgeA(Math.min(v as number, ageB - 1))}
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Startalter B</span>
-							<span className="text-foreground font-mono">{ageB} Jahre</span>
-						</div>
-						<Slider
-							min={18}
-							max={60}
-							step={1}
-							value={[ageB]}
-							onValueChange={v => setAgeB(Math.max(v as number, ageA + 1))}
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Monatliche Rate</span>
-							<span className="text-foreground font-mono">{monthly} €</span>
-						</div>
-						<Slider
-							min={25}
-							max={500}
-							step={25}
-							value={[monthly]}
-							onValueChange={v => setMonthly(v as number)}
-						/>
-					</div>
-				</div>
-			</div>
+				<SliderGrid>
+					<SliderField
+						label="Startalter A"
+						display={`${ageA} Jahre`}
+						value={ageA}
+						onChange={v => setAgeA(Math.min(v, ageB - 1))}
+						min={18}
+						max={50}
+						step={1}
+					/>
+					<SliderField
+						label="Startalter B"
+						display={`${ageB} Jahre`}
+						value={ageB}
+						onChange={v => setAgeB(Math.max(v, ageA + 1))}
+						min={18}
+						max={60}
+						step={1}
+					/>
+					<SliderField
+						label="Monatliche Rate"
+						display={currencyFormat.format(monthly)}
+						value={monthly}
+						onChange={setMonthly}
+						min={25}
+						max={500}
+						step={25}
+					/>
+				</SliderGrid>
+			</Figure>
 
-			<InfoCard accent>
-				{ageA < ageB && (
-					<>
-						{ageB - ageA} Jahre früher anfangen ergibt{" "}
-						<span className="font-semibold">
-							{(endA - endB).toLocaleString("de-DE")} € mehr
-						</span>{" "}
-						- obwohl in diesem Zeitraum nur{" "}
-						{((ageB - ageA) * 12 * monthly).toLocaleString("de-DE")} € mehr
-						eingezahlt wurden. Den Rest erledigt der Zinseszins.
-					</>
-				)}
-			</InfoCard>
+			{ageA < ageB && (
+				<Callout variant="takeaway">
+					{ageB - ageA} Jahre früher anfangen ergibt{" "}
+					<Em>{currencyFormat.format(endA - endB)} mehr</Em> - obwohl in diesem
+					Zeitraum nur {currencyFormat.format((ageB - ageA) * 12 * monthly)}{" "}
+					mehr eingezahlt wurden. Den Rest erledigt der Zinseszins.
+				</Callout>
+			)}
 		</SlideLayout>
 	)
 }

@@ -1,11 +1,5 @@
-"use client"
-
-import {
-	InfoCard,
-	SlideHeader,
-	SlideLayout,
-	SlideSection,
-} from "./slide-layout"
+import { cn } from "@/lib/utils"
+import { Callout, Em, SlideHeader, SlideLayout, Text } from "./slide-layout"
 
 const riskItems = [
 	{
@@ -40,20 +34,34 @@ const riskItems = [
 	},
 ]
 
-const riskColor: Record<number, string> = {
-	1: "bg-emerald-500",
-	2: "bg-yellow-300",
-	3: "bg-amber-500",
-	4: "bg-orange-600",
-	5: "bg-rose-500",
-}
-
 const riskLabel: Record<number, string> = {
 	1: "sehr gering",
 	2: "gering",
 	3: "mittel-hoch",
 	4: "hoch",
 	5: "sehr hoch",
+}
+
+/** Five rising bars, filled up to the risk level. */
+function RiskMeter({ level }: { level: number }) {
+	return (
+		<span
+			role="img"
+			aria-label={`Risiko ${level} von 5: ${riskLabel[level]}`}
+			className="flex items-end gap-0.5 h-4"
+		>
+			{[1, 2, 3, 4, 5].map(i => (
+				<span
+					key={i}
+					className={cn(
+						"w-1.5 rounded-[1px]",
+						i <= level ? "bg-foreground" : "bg-border"
+					)}
+					style={{ height: `${i * 20}%` }}
+				/>
+			))}
+		</span>
+	)
 }
 
 export function Slide07() {
@@ -64,55 +72,54 @@ export function Slide07() {
 				subtitle="Rendite und Risiko sind untrennbar verbunden. Wer mehr Rendite möchte, muss größere Schwankungen in Kauf nehmen."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					<span className="text-foreground font-medium">Volatilität</span>{" "}
-					beschreibt, wie stark der Kurs eines Wertpapiers schwankt. Ein
-					Aktienkurs kann innerhalb eines Jahres um 30 % steigen - aber auch um
-					40 % fallen. Wer 2008 während der Finanzkrise Aktien hatte, sah seinen
-					Depotwert zeitweise halbiert.
-				</p>
-			</SlideSection>
+			<Text>
+				<Em>Volatilität</Em> beschreibt, wie stark der Kurs eines Wertpapiers
+				schwankt. Ein Aktienkurs kann innerhalb eines Jahres um 30 % steigen -
+				aber auch um 40 % fallen. Wer 2008 während der Finanzkrise Aktien hatte,
+				sah seinen Depotwert zeitweise halbiert.
+			</Text>
 
-			<div className="flex flex-col gap-3">
+			<ul className="rounded-xl border divide-y">
 				{riskItems.map(item => (
-					<div
+					<li
 						key={item.label}
-						className="rounded-xl border bg-muted/40 p-4 flex items-center gap-4"
+						className="grid gap-x-6 gap-y-2 p-4 sm:grid-cols-[11rem_1fr]"
 					>
-						<div className="flex flex-col gap-1 w-36 shrink-0">
-							<span className="text-foreground font-semibold text-sm">
-								{item.label}
-							</span>
-							<span className="text-foreground/60 text-xs">
-								Rendite: {item.rendite}
-							</span>
-						</div>
-						<div className="flex-1 flex flex-col gap-1">
-							<div className="flex items-center gap-2">
-								<div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-									<div
-										className={`h-full rounded-full transition-all ${riskColor[item.risk]}`}
-										style={{ width: `${item.risk * 20}%` }}
-									/>
-								</div>
-								<span className="text-xs text-muted-foreground w-20 text-right">
-									{riskLabel[item.risk]}
+						<div className="flex flex-col gap-0.5">
+							<span className="font-semibold">{item.label}</span>
+							<span className="text-sm text-muted-foreground">
+								Rendite:{" "}
+								<span
+									className={cn(
+										/\d/.test(item.rendite) && "number tabular-nums"
+									)}
+								>
+									{item.rendite}
 								</span>
-							</div>
-							<p className="text-foreground/60 text-xs">{item.desc}</p>
+							</span>
 						</div>
-					</div>
+						<div className="flex flex-col gap-1.5">
+							<span className="flex items-center gap-2 text-sm">
+								<RiskMeter level={item.risk} />
+								<span className="text-muted-foreground">
+									Risiko {riskLabel[item.risk]}
+								</span>
+							</span>
+							<p className="text-sm text-muted-foreground leading-relaxed text-pretty">
+								{item.desc}
+							</p>
+						</div>
+					</li>
 				))}
-			</div>
+			</ul>
 
-			<InfoCard>
-				<span className="font-medium text-foreground">Wichtig:</span> Wer
-				kurzfristig auf sein Geld angewiesen ist, kann sich starke Schwankungen
-				nicht leisten. Wer aber einen langen Anlagehorizont hat - z. B. 30 Jahre
-				bis zur Rente - kann Kursschwankungen aussitzen. Historisch haben sich
-				Aktienmärkte nach jedem Einbruch erholt und sind langfristig gestiegen.
-			</InfoCard>
+			<Callout title="Wichtig">
+				Wer kurzfristig auf sein Geld angewiesen ist, kann sich starke
+				Schwankungen nicht leisten. Wer aber einen langen Anlagehorizont hat -
+				z. B. 30 Jahre bis zur Rente - kann Kursschwankungen aussitzen.
+				Historisch haben sich Aktienmärkte nach jedem Einbruch erholt und sind
+				langfristig gestiegen.
+			</Callout>
 		</SlideLayout>
 	)
 }

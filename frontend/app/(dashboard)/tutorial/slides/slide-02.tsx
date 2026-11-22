@@ -1,21 +1,28 @@
 "use client"
 
 import { useState } from "react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { currencyFormat } from "@/lib/cash_display_string"
+import { numberFormat } from "@/lib/util"
 import {
-	Area,
-	AreaChart,
-	CartesianGrid,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { Slider } from "@/components/ui/slider"
+	axisProps,
+	type ChartConfig,
+	ChartTooltip,
+	gridProps,
+	SlideChart,
+	SlideTooltipContent,
+} from "./slide-chart"
 import {
-	InfoCard,
+	Callout,
+	Em,
+	Figure,
 	SlideHeader,
 	SlideLayout,
-	SlideSection,
+	SliderField,
+	SliderGrid,
+	Stat,
+	StatRow,
+	Text,
 } from "./slide-layout"
 
 function calcPurchasingPower(startAmount: number, rate: number, years: number) {
@@ -24,6 +31,10 @@ function calcPurchasingPower(startAmount: number, rate: number, years: number) {
 		kaufkraft: Math.round(startAmount * (1 - rate / 100) ** i),
 	}))
 }
+
+const chartConfig = {
+	kaufkraft: { label: "Kaufkraft", color: "var(--loss)" },
+} satisfies ChartConfig
 
 export function Slide02() {
 	const [rate, setRate] = useState(2.3)
@@ -40,124 +51,103 @@ export function Slide02() {
 				subtitle="Inflation bedeutet: Preise steigen - und dein Geld wird dadurch Jahr für Jahr weniger wert."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Ein Beispiel aus dem Alltag: Eine Kinokarte hat vor 20 Jahren ca. 5 €
-					gekostet, heute oft 15 €. Der Betrag auf deinem Konto bleibt gleich -
-					aber du kannst damit weniger kaufen als früher. Diesen Effekt nennt
-					man{" "}
-					<span className="text-foreground font-medium">Kaufkraftverlust</span>.
-				</p>
-			</SlideSection>
+			<Text>
+				Ein Beispiel aus dem Alltag: Eine Kinokarte hat vor 20 Jahren ca. 5 €
+				gekostet, heute oft 15 €. Der Betrag auf deinem Konto bleibt gleich -
+				aber du kannst damit weniger kaufen als früher. Diesen Effekt nennt man{" "}
+				<Em>Kaufkraftverlust</Em>.
+			</Text>
 
-			<div
-				data-no-swipe
-				className="rounded-xl border bg-muted/40 p-6 flex flex-col gap-6"
+			<Figure
+				title="Kaufkraft von 100 € über die Zeit"
+				description="Was 100 € von heute in Zukunft noch wert sind."
 			>
-				<div className="flex items-center justify-between flex-wrap gap-2">
-					<span className="text-foreground font-semibold text-sm">
-						Kaufkraft von 100 € über die Zeit
-					</span>
-					<div className="flex items-center gap-2">
-						<span className="text-muted-foreground text-xs">
-							Wert nach {years} Jahren:
-						</span>
-						<span className="text-2xl font-bold text-amber-500">
-							{finalValue} €
-						</span>
-					</div>
-				</div>
+				<StatRow>
+					<Stat
+						size="lg"
+						label={`Nach ${years} Jahren`}
+						value={currencyFormat.format(finalValue)}
+						tone="loss"
+					/>
+					<Stat
+						label="Verlust"
+						value={currencyFormat.format(finalValue - 100)}
+						tone="muted"
+					/>
+				</StatRow>
 
-				<ResponsiveContainer width="100%" height={180}>
-					<AreaChart
-						className="[&>svg]:overflow-visible"
-						data={data}
-						margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-					>
+				<SlideChart config={chartConfig}>
+					<AreaChart data={data} margin={{ top: 4, right: 4, left: 0 }}>
 						<defs>
-							<linearGradient id="kaufkraftGrad" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
-								<stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+							<linearGradient id="kaufkraftFill" x1="0" y1="0" x2="0" y2="1">
+								<stop
+									offset="5%"
+									stopColor="var(--color-kaufkraft)"
+									stopOpacity={0.3}
+								/>
+								<stop
+									offset="95%"
+									stopColor="var(--color-kaufkraft)"
+									stopOpacity={0}
+								/>
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-						<XAxis
-							dataKey="year"
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							label={{
-								value: "Jahre",
-								position: "insideBottomRight",
-								fill: "var(--muted-foreground)",
-								fontSize: 11,
-								offset: -5,
-							}}
-						/>
+						<CartesianGrid {...gridProps} />
+						<XAxis dataKey="year" {...axisProps} />
 						<YAxis
-							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-							tickLine={false}
-							tickFormatter={v => `${v} €`}
+							{...axisProps}
+							width={48}
 							domain={[0, 100]}
+							tickFormatter={v => currencyFormat.format(v)}
 						/>
-						<Tooltip
-							contentStyle={{
-								background: "var(--card)",
-								border: "1px solid var(--border)",
-								borderRadius: 8,
-								fontSize: 12,
-								color: "var(--foreground)",
-							}}
-							labelFormatter={v => `Jahr ${v}`}
-							formatter={v => [`${v} €`, "Kaufkraft"]}
+						<ChartTooltip
+							content={
+								<SlideTooltipContent
+									config={chartConfig}
+									xKey="year"
+									labelPrefix="Jahr"
+								/>
+							}
 						/>
 						<Area
 							type="monotone"
 							dataKey="kaufkraft"
-							stroke="#f59e0b"
+							stroke="var(--color-kaufkraft)"
 							strokeWidth={2}
-							fill="url(#kaufkraftGrad)"
+							fill="url(#kaufkraftFill)"
+							isAnimationActive={false}
 						/>
 					</AreaChart>
-				</ResponsiveContainer>
+				</SlideChart>
 
-				<div className="grid grid-cols-2 gap-6">
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Inflationsrate</span>
-							<span className="text-foreground font-mono">
-								{rate.toFixed(1)} %
-							</span>
-						</div>
-						<Slider
-							min={1}
-							max={5}
-							step={0.1}
-							value={[rate]}
-							onValueChange={v => setRate(v as number)}
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<div className="flex justify-between text-sm">
-							<span className="text-foreground/70">Zeitraum</span>
-							<span className="text-foreground font-mono">{years} Jahre</span>
-						</div>
-						<Slider
-							min={1}
-							max={50}
-							step={1}
-							value={[years]}
-							onValueChange={v => setYears(v as number)}
-						/>
-					</div>
-				</div>
-			</div>
+				<SliderGrid>
+					<SliderField
+						label="Inflationsrate"
+						display={`${numberFormat.format(rate)} %`}
+						value={rate}
+						onChange={setRate}
+						min={1}
+						max={5}
+						step={0.1}
+					/>
+					<SliderField
+						label="Zeitraum"
+						display={`${years} Jahre`}
+						value={years}
+						onChange={setYears}
+						min={1}
+						max={50}
+						step={1}
+					/>
+				</SliderGrid>
+			</Figure>
 
-			<InfoCard accent>
+			<Callout variant="takeaway">
 				Geld auf einem niedrig verzinsten Konto zu lassen ist keine neutrale
 				Entscheidung - real bedeutet es einen schleichenden Wertverlust von Jahr
 				zu Jahr. Die Lösung: Geld so anlegen, dass es mehr wächst als die
 				Inflation steigt.
-			</InfoCard>
+			</Callout>
 		</SlideLayout>
 	)
 }

@@ -52,12 +52,8 @@ export default function Page() {
 	}, [goNext, goPrev])
 
 	return (
-		<main className="h-full md:px-12 px-4 pt-6 w-full overflow-hidden bg-background flex flex-col">
-			{/* Header */}
-
-			{/* Carousel */}
-
-			<div className="flex-1 min-h-0 max-h-full">
+		<main className="h-full w-full overflow-hidden bg-background flex flex-col">
+			<div className="flex-1 min-h-0">
 				<Carousel
 					setApi={setApi}
 					opts={{
@@ -75,7 +71,7 @@ export default function Page() {
 						{slides.map((Slide, i) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: order will not change
 							<CarouselItem key={i} className="h-full pl-0">
-								<ScrollAreaLite data-no-swipe className="h-full w-fit mx-auto">
+								<ScrollAreaLite className="h-full w-full md:px-12 px-4">
 									<Slide />
 								</ScrollAreaLite>
 							</CarouselItem>
@@ -84,17 +80,24 @@ export default function Page() {
 				</Carousel>
 			</div>
 
-			{/* Footer */}
-			<footer className="my-2 w-fit mx-auto bg-muted/50 flex-none flex items-center gap-4 px-4 py-4 border h-16 rounded-2xl border-border">
-				<SlideNavigation
-					onPrev={goPrev}
-					onNext={goNext}
-					canPrev={current > 0}
-					canNext={current < count - 1}
-				/>
-				<SlideProgress current={current} count={count} onGoTo={goTo} />
-				<div>
-					{current + 1} / {count}
+			<footer className="flex-none border-t md:px-12 px-4 py-3">
+				<div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+					<SlideNavigation
+						direction="prev"
+						onClick={goPrev}
+						disabled={current === 0}
+					/>
+					<div className="flex flex-col items-center gap-1.5">
+						<SlideProgress current={current} count={count} onGoTo={goTo} />
+						<span className="text-xs text-muted-foreground number tabular-nums">
+							{current + 1} / {count}
+						</span>
+					</div>
+					<SlideNavigation
+						direction="next"
+						onClick={goNext}
+						disabled={current >= count - 1}
+					/>
 				</div>
 			</footer>
 		</main>

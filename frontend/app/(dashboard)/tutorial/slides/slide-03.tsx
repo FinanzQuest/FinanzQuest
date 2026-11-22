@@ -1,12 +1,23 @@
-"use client"
-
+import type { ReactNode } from "react"
+import { cn } from "@/lib/utils"
 import {
+	Callout,
 	DataTable,
-	InfoCard,
+	Em,
 	SlideHeader,
 	SlideLayout,
 	SlideSection,
+	Text,
+	type Tone,
 } from "./slide-layout"
+
+function Verdict({ tone, children }: { tone: Tone; children: ReactNode }) {
+	return (
+		<span className={cn(tone === "win" ? "text-win" : "text-muted-foreground")}>
+			{children}
+		</span>
+	)
+}
 
 export function Slide03() {
 	return (
@@ -16,69 +27,63 @@ export function Slide03() {
 				subtitle="Wer Geld anlegt, erhält dafür eine Vergütung - die Rendite. Aber nicht jede Rendite ist gleich viel wert."
 			/>
 
-			<SlideSection>
-				<p className="text-foreground/75 text-sm leading-relaxed">
-					Wenn du jemandem Geld zur Verfügung stellst - einer Bank, einem
-					Unternehmen oder dem Staat - erhältst du dafür eine Vergütung. Diese
-					nennt sich{" "}
-					<span className="text-foreground font-medium">Rendite</span> und wird
-					als jährlicher Prozentsatz angegeben.
-				</p>
-			</SlideSection>
+			<Text>
+				Wenn du jemandem Geld zur Verfügung stellst - einer Bank, einem
+				Unternehmen oder dem Staat - erhältst du dafür eine Vergütung. Diese
+				nennt sich <Em>Rendite</Em> und wird als jährlicher Prozentsatz
+				angegeben.
+			</Text>
 
-			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">
-					Typische Renditen im Vergleich
-				</h2>
+			<SlideSection title="Typische Renditen im Vergleich">
 				<DataTable
 					headers={["Anlageform", "Typische Rendite", "Bewertung"]}
 					rows={[
 						[
 							"Tagesgeld",
-							"1-2 %",
-							<span key="tg" className="text-amber-500 text-xs font-medium">
-								oft unter Inflation
+							<span key="r" className="number tabular-nums">
+								1-2 %
 							</span>,
+							<Verdict key="v" tone="muted">
+								oft unter Inflation
+							</Verdict>,
 						],
 						[
 							"Staatsanleihen",
-							"2-3 %",
-							<span key="sa" className="text-amber-500 text-xs font-medium">
-								knapp über Inflation
+							<span key="r" className="number tabular-nums">
+								2-3 %
 							</span>,
+							<Verdict key="v" tone="muted">
+								knapp über Inflation
+							</Verdict>,
 						],
 						[
 							"Aktien / ETFs (MSCI World)",
-							"7-9 % (historisch)",
-							<span key="etf" className="text-emerald-500 text-xs font-medium">
-								deutlich über Inflation
+							<span key="r" className="number tabular-nums">
+								7-9 % (historisch)
 							</span>,
+							<Verdict key="v" tone="win">
+								deutlich über Inflation
+							</Verdict>,
 						],
 					]}
 				/>
 			</SlideSection>
 
-			<SlideSection>
-				<h2 className="text-foreground font-semibold text-lg">
-					Realrendite - was wirklich zählt
-				</h2>
-				<p className="text-foreground/75 text-sm leading-relaxed">
+			<SlideSection title="Realrendite - was wirklich zählt">
+				<Text>
 					Die entscheidende Frage ist: Liegt deine Rendite{" "}
-					<span className="text-foreground font-medium">
-						über der Inflationsrate
-					</span>
-					? Nur dann wächst dein Vermögen real - also in echter Kaufkraft.
-				</p>
-				<InfoCard>
-					<span className="font-medium text-foreground">Beispiel:</span> Bei 2 %
-					Inflation und 1,5 % Tagesgeld-Zinsen verlierst du unterm Strich 0,5 %
-					Kaufkraft pro Jahr. Dein Kontostand steigt zwar - aber du kannst dir
-					davon weniger leisten als vorher.
-				</InfoCard>
-				<InfoCard accent>
+					<Em>über der Inflationsrate</Em>? Nur dann wächst dein Vermögen real -
+					also in echter Kaufkraft.
+				</Text>
+				<Callout title="Beispiel">
+					Bei 2 % Inflation und 1,5 % Tagesgeld-Zinsen verlierst du unterm
+					Strich 0,5 % Kaufkraft pro Jahr. Dein Kontostand steigt zwar - aber du
+					kannst dir davon weniger leisten als vorher.
+				</Callout>
+				<Callout variant="takeaway">
 					Wer sein Geld langfristig wachsen lassen möchte, muss eine Anlageform
 					wählen, deren Rendite die Inflation dauerhaft übertrifft.
-				</InfoCard>
+				</Callout>
 			</SlideSection>
 		</SlideLayout>
 	)
