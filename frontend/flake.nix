@@ -38,9 +38,10 @@
           default = pkgs.mkShell {
             packages = with pkgs; [
               openssl
-              typescript-go
-              typescript-language-server
+              # TypeScript 7 (native Go compiler; nixpkgs folded typescript-go
+              # into this attribute); matches package.json
               typescript
+              typescript-language-server
               tailwindcss-language-server
               nodejs
               pnpm

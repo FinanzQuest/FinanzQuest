@@ -5,12 +5,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 # yarn.lock is Yarn 4 (berry); the image's bundled Yarn 1 cannot read it.
 # Corepack provides the version from package.json "packageManager".
-# The local Nix Yarn writes lockfile metadata v9 and the setting
-# approvedGitRepositories, both unknown to upstream Yarn 4.13: the setting is
-# dropped (no git dependencies) and the install may rewrite the lockfile
-# metadata inside the image (same resolutions), hence no --immutable.
 COPY package.json yarn.lock .yarnrc.yml ./
-RUN corepack enable && sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && yarn install
+RUN corepack enable && yarn install --immutable
 
 FROM deps AS builder
 WORKDIR /app
@@ -29,9 +25,8 @@ ARG API_URL_CLIENT
 RUN apk add --no-cache openssl
 COPY generate_keys.sh ./
 RUN --mount=type=secret,id=jwt_secret,required=true \
-    sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && \
     sh generate_keys.sh "$API_URL_SERVER" "$API_URL_CLIENT" "$(cat /run/secrets/jwt_secret)" > keys.env && \
-    grep -v '^SUPABASE_SERVICE_ROLE_KEY=' keys.env > .env.local && \
+    grep -vE '^(SUPABASE_SERVICE_ROLE_KEY|SUPABASE_JWT_SECRET)=' keys.env > .env.local && \
     rm keys.env && \
     yarn build && \
     rm -f .env.local .next/standalone/.env*
@@ -44,7 +39,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && touch /app/.env.local
+RUN touch /app/.env.local
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
