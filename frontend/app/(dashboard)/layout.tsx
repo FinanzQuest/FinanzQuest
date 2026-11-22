@@ -2,6 +2,7 @@ import "@/app/globals.css"
 import "./layout.css"
 
 import type { Metadata } from "next"
+import { connection } from "next/server"
 import type React from "react"
 import { Suspense } from "react"
 import {
@@ -24,6 +25,9 @@ export const metadata: Metadata = {
  * getUser() / depots with the page.
  */
 async function getSidebarData(): Promise<SidebarData> {
+	// per user and per request: never part of the prerendered shell (the
+	// auth client reads the clock before the cookies)
+	await connection()
 	const { user } = await getUser()
 	if (!user) {
 		return { user: null, isTeacher: false, depots: [], activeDepotId: null }

@@ -1,6 +1,6 @@
 import { Search } from "lucide-react"
-import Image from "next/image"
 import { useMemo, useState } from "react"
+import URLIcon from "@/components/icon"
 import type { Asset } from "@/database/custom_types"
 import { getIconURL } from "@/lib/icon_url"
 import { cn } from "@/lib/utils"
@@ -68,17 +68,12 @@ export default function AssetPickerDialog({
 					>
 						{selectedAsset ? (
 							<div className="flex items-center gap-2 w-full">
-								{iconUrl ? (
-									<Image
-										src={iconUrl}
-										alt={selectedAsset.symbol}
-										width={32}
-										height={32}
-										className="rounded size-5"
-									/>
-								) : (
-									""
-								)}
+								<URLIcon
+									iconURL={iconUrl}
+									size={32}
+									fallback={selectedAsset.symbol}
+									className="rounded size-5"
+								/>
 								<span className="font-medium ">{selectedAsset.symbol}</span>
 								{displayName ? (
 									<>

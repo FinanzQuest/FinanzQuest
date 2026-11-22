@@ -1,7 +1,7 @@
 import { ArrowRight, Check } from "lucide-react"
-import Image from "next/image"
 import { useEffect, useState } from "react"
 import { fmtSignedPercent } from "@/components/asset_details/format"
+import URLIcon from "@/components/icon"
 import { Sparkline } from "@/components/search/sparkline"
 import {
 	Command,
@@ -122,18 +122,12 @@ export default function StockPicker({
 								value={hit.id.toString()}
 								onSelect={() => onSelect(hit.id, toAsset(hit))}
 							>
-								{iconUrl ? (
-									<Image
-										src={iconUrl}
-										alt=""
-										width={16}
-										height={16}
-										fetchPriority="high"
-										className="rounded size-[1.7lh] bg-primary/50"
-									/>
-								) : (
-									<div className="size-[1.6lh] bg-primary/50 rounded" />
-								)}
+								<URLIcon
+									iconURL={iconUrl}
+									size={32}
+									fallback={hit.symbol}
+									className="rounded size-[1.7lh] shrink-0"
+								/>
 								<div className="flex flex-col min-w-0 grow">
 									<span className="font-medium truncate">{hit.name}</span>
 									<span className="text-sm text-muted-foreground">

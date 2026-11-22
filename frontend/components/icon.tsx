@@ -1,10 +1,14 @@
+"use client"
+
 import Image from "next/image"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 /**
- * Asset logo. Without a logo URL (ETFs, unknown assets) a placeholder of the
- * same size with the first letters of `fallback` (the symbol) takes its
- * place, so rows and headers keep their layout.
+ * Asset logo. Without a logo URL (ETFs, unknown assets), or when the logo
+ * does not load (the logo service has none for many exchange listings), a
+ * placeholder of the same size with the first letters of `fallback` (the
+ * symbol) takes its place, so rows and headers keep their layout.
  */
 export default function URLIcon({
 	iconURL,
@@ -18,7 +22,8 @@ export default function URLIcon({
 	/** text for the placeholder, e.g. the symbol */
 	fallback?: string | null
 }) {
-	if (!iconURL) {
+	const [failed, setFailed] = useState<string | null>(null)
+	if (!iconURL || failed === iconURL) {
 		const letters = (fallback ?? "")
 			.replace(/[^A-Za-z0-9]/g, "")
 			.slice(0, 3)
@@ -44,6 +49,10 @@ export default function URLIcon({
 			priority={false}
 			src={iconURL}
 			alt=""
+			// the logo service already serves webp at the requested size; loading
+			// it directly also keeps missing logos out of the server log
+			unoptimized
+			onError={() => setFailed(iconURL)}
 		/>
 	)
 }

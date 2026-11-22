@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import {
 	countryName,
@@ -6,6 +5,7 @@ import {
 	fmtSignedPercent,
 	sectorName,
 } from "@/components/asset_details/format"
+import URLIcon from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import type { SearchHit } from "@/database/find_assets"
 import { compactMoneyString, currencyFormat } from "@/lib/cash_display_string"
@@ -59,17 +59,12 @@ export function ResultRow({ hit }: { hit: SearchHit }) {
 			href={getStockPagePath(hit.id)}
 			className="grid grid-cols-[auto_1fr_auto_auto] md:grid-cols-[auto_1fr_6rem_6rem_5rem_5rem_6rem] items-center gap-x-4 gap-y-1 px-4 py-3 hover:bg-muted/50 focus-visible:bg-muted/50 outline-none transition-colors"
 		>
-			{icon ? (
-				<Image
-					src={icon}
-					alt=""
-					width={40}
-					height={40}
-					className="size-10 rounded-lg bg-muted object-contain"
-				/>
-			) : (
-				<div className="size-10 rounded-lg bg-muted" aria-hidden />
-			)}
+			<URLIcon
+				iconURL={icon}
+				size={64}
+				fallback={hit.symbol}
+				className="size-10 rounded-lg bg-muted object-contain"
+			/>
 			<div className="flex flex-col min-w-0">
 				<div className="flex flex-row items-center gap-2 min-w-0">
 					<span className="font-semibold truncate">{hit.name}</span>

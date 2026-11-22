@@ -108,6 +108,7 @@ async function Results({
 						variant="outline"
 						size="sm"
 						disabled={filter.page <= 1}
+						nativeButton={filter.page <= 1}
 						render={
 							filter.page > 1 ? (
 								<Link href={pageHref(filter.page - 1)} />
@@ -123,6 +124,7 @@ async function Results({
 						variant="outline"
 						size="sm"
 						disabled={to >= total}
+						nativeButton={to >= total}
 						render={
 							to < total ? <Link href={pageHref(filter.page + 1)} /> : undefined
 						}

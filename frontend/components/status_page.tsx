@@ -25,7 +25,9 @@ export function StatusPage({
 				<h1 className="text-2xl font-bold tracking-tight">{title}</h1>
 				<p className="text-muted-foreground">{message}</p>
 			</div>
-			<Button render={<Link href="/" />}>Zur Startseite</Button>
+			<Button nativeButton={false} render={<Link href="/" />}>
+				Zur Startseite
+			</Button>
 		</main>
 	)
 }
