@@ -42,6 +42,7 @@ dbinit/02-types/transaction_type.sql
 # --- 03-tables ---------------------------------------------------------------
 dbinit/03-tables/api/assets.sql
 dbinit/03-tables/api/asset_prices.sql
+dbinit/03-tables/api/asset_prices_intraday.sql
 dbinit/03-tables/api/latest_prices.sql
 dbinit/03-tables/depots/depots.sql
 dbinit/03-tables/depots/savings_plans.sql
@@ -53,8 +54,10 @@ dbinit/03-tables/users/special_roles.sql
 
 # --- 04-functions ------------------------------------------------------------
 dbinit/04-functions/api/search_assets.sql
+dbinit/04-functions/api/daily_price_as_of.sql
 dbinit/04-functions/api/on_asset_prices_change.sql
 dbinit/04-functions/api/rebuild_latest_prices.sql
+dbinit/04-functions/api/rollup_intraday.sql
 dbinit/04-functions/users/has_role.sql
 dbinit/04-functions/users/has_any_role.sql
 dbinit/04-functions/users/is_superuser_session.sql
@@ -78,6 +81,7 @@ dbinit/04-functions/depots/sp_to_interval.sql
 dbinit/04-functions/depots/check_savings_budget.sql
 dbinit/04-functions/depots/get_commission.sql
 dbinit/04-functions/depots/get_position_profits.sql
+dbinit/04-functions/depots/get_intraday_values.sql
 dbinit/04-functions/depots/get_transactions_with_position.sql
 dbinit/04-functions/depots/buy_asset.sql
 dbinit/04-functions/depots/sell_asset.sql
@@ -122,6 +126,7 @@ dbinit/08-roles/auth_admin.sql
 # --- 09-policies -------------------------------------------------------------
 dbinit/09-policies/api/assets.sql
 dbinit/09-policies/api/asset_prices.sql
+dbinit/09-policies/api/asset_prices_intraday.sql
 dbinit/09-policies/api/latest_prices.sql
 dbinit/09-policies/depots/depots.sql
 dbinit/09-policies/depots/transactions.sql
@@ -135,6 +140,7 @@ dbinit/09-policies/users/special_roles.sql
 dbinit/10-grants/api/assets.sql
 dbinit/10-grants/api/assets_id_seq.sql
 dbinit/10-grants/api/asset_prices.sql
+dbinit/10-grants/api/asset_prices_intraday.sql
 dbinit/10-grants/api/latest_prices.sql
 dbinit/10-grants/api/on_asset_prices_change.sql
 dbinit/10-grants/api/asset_prices_weekly.sql
@@ -170,6 +176,7 @@ dbinit/10-grants/depots/update_savings_plan.sql
 dbinit/10-grants/depots/upsert_savings_plan.sql
 dbinit/10-grants/depots/delete_savings_plan.sql
 dbinit/10-grants/depots/execute_savings_plans.sql
+dbinit/10-grants/depots/get_intraday_values.sql
 dbinit/10-grants/users/special_roles.sql
 dbinit/10-grants/users/profile.sql
 dbinit/10-grants/users/admin_overview.sql
@@ -185,6 +192,7 @@ dbinit/11-config/config.sql
 # --- 12-jobs -----------------------------------------------------------------
 dbinit/12-jobs/refresh_depot_values.sql
 dbinit/12-jobs/execute_savings_plans.sql
+dbinit/12-jobs/asset_prices_intraday_retention.sql
 
 # --- seed (runs last; COPY needs api.assets + the CSV mounted) ---------------
 dbinit/seed/assets.sql
