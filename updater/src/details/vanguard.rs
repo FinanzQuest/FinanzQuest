@@ -19,20 +19,25 @@ pub fn parse(page: &str) -> Result<FundDetails, Error> {
     let mut details = FundDetails::default();
     let tables = html::tables(page);
     let starts_with = |label: &str| {
-        tables
-            .iter()
-            .find(|t| t.first().and_then(|h| h.first()).is_some_and(|c| c == label))
+        tables.iter().find(|t| {
+            t.first()
+                .and_then(|h| h.first())
+                .is_some_and(|c| c == label)
+        })
     };
 
     if let Some(table) = starts_with("Country") {
         let mut by_country: BTreeMap<&'static str, f64> = BTreeMap::new();
         // Country | Region | Fund | Benchmark | Variance
         for row in table.iter().skip(1) {
-            let (Some(name), Some(weight)) = (row.first(), row.get(2).and_then(|w| parse::percent(w)))
+            let (Some(name), Some(weight)) =
+                (row.first(), row.get(2).and_then(|w| parse::percent(w)))
             else {
                 continue;
             };
-            *by_country.entry(countries::code(name).unwrap_or("ZZ")).or_default() += weight;
+            *by_country
+                .entry(countries::code(name).unwrap_or("ZZ"))
+                .or_default() += weight;
         }
         details.countries = complete(by_country);
     }
@@ -57,7 +62,10 @@ pub fn parse(page: &str) -> Result<FundDetails, Error> {
 
     if let Some(table) = starts_with("Fundamentals") {
         // Fundamentals | Fund | Benchmark | As at
-        if let Some(row) = table.iter().find(|r| r.first().is_some_and(|c| c == "Number of stocks")) {
+        if let Some(row) = table
+            .iter()
+            .find(|r| r.first().is_some_and(|c| c == "Number of stocks"))
+        {
             details.holdings_count = row.get(1).and_then(|n| parse::number(n)).map(|n| n as i32);
             details.as_of = row.get(3).and_then(|d| parse::date(d));
         }
@@ -74,7 +82,9 @@ pub fn parse(page: &str) -> Result<FundDetails, Error> {
     }
 
     if details.countries.is_empty() && details.holdings.is_empty() {
-        return Err(Error::Format("no country or holdings table on the page".into()));
+        return Err(Error::Format(
+            "no country or holdings table on the page".into(),
+        ));
     }
     Ok(details)
 }

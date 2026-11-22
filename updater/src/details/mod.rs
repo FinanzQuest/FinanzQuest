@@ -156,7 +156,9 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
             ("ishares", Some(url)) => ishares::fetch(&http, url).await,
             ("vanguard", Some(url)) => vanguard::fetch(&http, url).await,
             ("yahoo", _) => yahoo.fund(&fund.symbol).await,
-            (provider, None) => Err(Error::Format(format!("{provider}: fund has no details_source"))),
+            (provider, None) => Err(Error::Format(format!(
+                "{provider}: fund has no details_source"
+            ))),
             (provider, _) => Err(Error::Format(format!("unknown provider {provider}"))),
         };
         match result {
@@ -172,7 +174,10 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
                 ok += 1;
             }
             Err(Error::RateLimited) => {
-                eprintln!("{} ({}): rate limited, stopping funds", fund.name, fund.provider);
+                eprintln!(
+                    "{} ({}): rate limited, stopping funds",
+                    fund.name, fund.provider
+                );
                 failed += 1;
                 break;
             }
@@ -203,7 +208,10 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
     .bind(opts.stock_limit)
     .fetch_all(pool)
     .await?;
-    println!("Stock details: {} stocks to refresh (Yahoo Finance).", stocks.len());
+    println!(
+        "Stock details: {} stocks to refresh (Yahoo Finance).",
+        stocks.len()
+    );
 
     let (mut ok, mut missing, mut failed) = (0, 0, 0);
     for stock in &stocks {
@@ -219,7 +227,10 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
                 missing += 1;
             }
             Err(Error::RateLimited) => {
-                eprintln!("{}: rate limited, stopping (the next run continues)", stock.symbol);
+                eprintln!(
+                    "{}: rate limited, stopping (the next run continues)",
+                    stock.symbol
+                );
                 failed += 1;
                 break;
             }
@@ -263,7 +274,11 @@ async fn store_fund(pool: &PgPool, fund_id: i64, d: &FundDetails) -> Result<(), 
         let positions: Vec<i16> = (1..=d.holdings.len() as i16).collect();
         let names: Vec<&str> = d.holdings.iter().map(|h| h.name.as_str()).collect();
         let tickers: Vec<Option<&str>> = d.holdings.iter().map(|h| h.ticker.as_deref()).collect();
-        let weights: Vec<f64> = d.holdings.iter().map(|h| h.weight.clamp(0.0, 1.0)).collect();
+        let weights: Vec<f64> = d
+            .holdings
+            .iter()
+            .map(|h| h.weight.clamp(0.0, 1.0))
+            .collect();
         let sectors: Vec<Option<&str>> = d.holdings.iter().map(|h| h.sector.as_deref()).collect();
         let countries: Vec<Option<&str>> = d.holdings.iter().map(|h| h.country).collect();
         sqlx::query(
