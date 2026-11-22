@@ -363,3 +363,37 @@ impl AlpacaClient {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::macros::datetime;
+
+    #[test]
+    fn intraday_params() {
+        let params = QueryParams {
+            timeframe: Timeframe::Minutes(15),
+            start: Some(DateTime::DateTime(datetime!(2026-11-21 00:00 UTC))),
+            currency: Some(Currency::EUR),
+            adjustment: Some(Adjustment::All),
+            feed: Some(Feed::Iex),
+            ..Default::default()
+        }
+        .to_params_list()
+        .unwrap();
+
+        let get = |k: &str| {
+            params
+                .iter()
+                .find(|(key, _)| key == k)
+                .map(|(_, v)| v.as_str())
+        };
+        assert_eq!(get("timeframe"), Some("15Min"));
+        assert_eq!(get("start"), Some("2026-11-21T00:00:00Z"));
+        assert_eq!(get("currency"), Some("EUR"));
+        assert_eq!(get("adjustment"), Some("all"));
+        assert_eq!(get("feed"), Some("iex"));
+        assert_eq!(get("asof"), None);
+        assert_eq!(get("end"), None);
+    }
+}

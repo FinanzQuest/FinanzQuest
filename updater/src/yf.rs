@@ -147,8 +147,9 @@ async fn fetch_once(
     client: &Client,
     symbol: &str,
     range: Option<&(time::OffsetDateTime, time::OffsetDateTime)>,
+    interval: &str,
 ) -> Result<PriceFrame, Error> {
-    let url = mk_url(symbol, range, "1d");
+    let url = mk_url(symbol, range, interval);
     let response: Value = client.get(&url).send().await?.json().await?;
 
     // classify errors
@@ -235,6 +236,17 @@ impl From<Asset> for FetchRequest {
     }
 }
 
+impl FetchRequest {
+    /// Request for a fixed window, ignoring `last_updated` (intraday mode).
+    pub fn for_window(asset: Asset, window: (time::OffsetDateTime, time::OffsetDateTime)) -> Self {
+        Self {
+            asset_id: asset.id,
+            symbol: asset.symbol,
+            range: Some(window),
+        }
+    }
+}
+
 pub struct FetchConfig {
     /// Base delay between requests
     pub request_delay: Duration,
@@ -244,6 +256,8 @@ pub struct FetchConfig {
     pub max_retries: u32,
     /// Base backoff for retries
     pub backoff_base: Duration,
+    /// Bar interval as understood by the chart API ("1d", "15m", ...)
+    pub interval: String,
 }
 
 impl Default for FetchConfig {
@@ -253,6 +267,7 @@ impl Default for FetchConfig {
             jitter: Duration::from_millis(500),
             backoff_base: Duration::from_secs(2),
             max_retries: 4,
+            interval: "1d".into(),
         }
     }
 }
@@ -279,7 +294,7 @@ pub fn stream_prices(
                     }
                 };
 
-                match fetch_once(&client, &req.symbol, req.range.as_ref()).await {
+                match fetch_once(&client, &req.symbol, req.range.as_ref(), &config.interval).await {
                     Ok(frame) => {
                         last_err = None;
                         yield SymbolResult {
@@ -316,5 +331,37 @@ pub fn stream_prices(
                 };
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::macros::datetime;
+
+    #[test]
+    fn url_with_intraday_interval_and_window() {
+        let window = (
+            datetime!(2026-11-21 00:00 UTC),
+            datetime!(2026-11-22 14:30 UTC),
+        );
+        assert_eq!(
+            mk_url("SAP.DE", Some(&window), "15m"),
+            "https://query2.finance.yahoo.com/v8/finance/chart/SAP.DE\
+             ?period1=1795219200&period2=1795357800&interval=15m"
+        );
+    }
+
+    #[test]
+    fn url_without_range_uses_5y() {
+        assert_eq!(
+            mk_url("VWCE.DE", None, "1d"),
+            "https://query2.finance.yahoo.com/v8/finance/chart/VWCE.DE?range=5y&interval=1d"
+        );
+    }
+
+    #[test]
+    fn default_config_is_daily() {
+        assert_eq!(FetchConfig::default().interval, "1d");
     }
 }

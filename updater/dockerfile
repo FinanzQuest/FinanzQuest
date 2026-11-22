@@ -17,7 +17,12 @@ COPY run_updater.sh /usr/local/bin/run_updater.sh
 COPY startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/run_updater.sh /usr/local/bin/startup.sh
 
-RUN echo '0 1 * * * /usr/local/bin/run_updater.sh' > /etc/crontabs/root && \
+# Times are UTC. Nightly: full daily candles. Intraday: 15-minute bars every
+# 15 minutes on weekdays, 07:00-21:45 UTC (covers the EU and US sessions).
+RUN printf '%s\n' \
+      '0 1 * * * /usr/local/bin/run_updater.sh daily' \
+      '*/15 7-21 * * 1-5 /usr/local/bin/run_updater.sh intraday' \
+      > /etc/crontabs/root && \
     chmod 0644 /etc/crontabs/root
 
 CMD ["/usr/local/bin/startup.sh"]
