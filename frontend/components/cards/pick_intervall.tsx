@@ -1,6 +1,5 @@
 "use client"
 
-import { Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import {
@@ -12,8 +11,6 @@ import {
 } from "@/components/ui/select"
 import { getStockPagePath } from "@/lib/get_stock_path"
 import { cn } from "@/lib/utils"
-import { Separator } from "../ui/separator"
-import { Toggle } from "../ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group"
 
 interface props {
@@ -97,21 +94,10 @@ export const stockIntervals: IntervalOption[] = [
 	{ name: "5years", display: "5J", days: 365 * 5 },
 ]
 
-/** Intraday bars are kept for 30 days (api.asset_prices_intraday retention). */
-export const maxIntradayDays = 30
-
-export interface IntradayOption {
-	/** intraday prices exist for this chart */
-	available: boolean
-	/** the user's choice (useIntradayPreference) */
-	enabled: boolean
-	onChange: (enabled: boolean) => void
-}
-
 interface ControlledProps extends props {
 	options?: IntervalOption[]
-	/** shows the "15 Min" switch: intraday prices for ranges up to 30 days */
-	intraday?: IntradayOption
+	/** intraday prices exist: the intraday-only ranges (1T, 5T) are offered */
+	intradayAvailable?: boolean
 }
 
 export function IntervallPickerControlled({
@@ -119,10 +105,11 @@ export function IntervallPickerControlled({
 	value,
 	className,
 	options = stockIntervals,
-	intraday,
+	intradayAvailable = false,
 }: ControlledProps) {
-	const showIntraday = !!intraday?.available && intraday.enabled
-	const visible = options.filter(item => showIntraday || !item.intradayOnly)
+	const visible = options.filter(
+		item => intradayAvailable || !item.intradayOnly
+	)
 
 	return (
 		<div
@@ -146,35 +133,6 @@ export function IntervallPickerControlled({
 					</ToggleGroupItem>
 				))}
 			</ToggleGroup>
-			{intraday && (
-				<>
-					<Separator orientation="vertical" className="h-5 mx-1" />
-					<Toggle
-						variant="outline"
-						size="sm"
-						aria-label="Intraday-Kurse (15 Minuten) anzeigen"
-						title={
-							intraday.available
-								? `15-Minuten-Kurse für Zeiträume bis ${maxIntradayDays} Tage`
-								: "Noch keine Intraday-Kurse verfügbar"
-						}
-						disabled={!intraday.available}
-						pressed={showIntraday}
-						onPressedChange={pressed => {
-							intraday.onChange(pressed)
-							// an intraday-only range (1T/5T) falls back to the shortest daily one
-							const current = options.find(item => item.days === value)
-							const fallback = options.find(item => !item.intradayOnly)
-							if (!pressed && current?.intradayOnly && fallback) {
-								onValueChange(fallback.days)
-							}
-						}}
-					>
-						<Clock data-icon="inline-start" />
-						<span className="hidden sm:inline">15 Min</span>
-					</Toggle>
-				</>
-			)}
 		</div>
 	)
 }

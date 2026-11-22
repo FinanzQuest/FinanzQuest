@@ -86,7 +86,7 @@ export function OverlayPicker({
 						Mit dem Markt vergleichen
 						{!benchmarksAvailable && (
 							<span className="block text-xs font-normal text-muted-foreground">
-								Ab 7 Tagen ohne 15-Minuten-Kurse
+								Ab 7 Tagen verfügbar (nicht für 1T und 5T)
 							</span>
 						)}
 					</DropdownMenuLabel>

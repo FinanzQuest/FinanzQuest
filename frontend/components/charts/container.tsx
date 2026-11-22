@@ -4,12 +4,7 @@ import {
 	CandlestickChart as CandleStickIcon,
 	LineChart as LinechartIcon,
 } from "lucide-react"
-import {
-	type ComponentPropsWithoutRef,
-	useEffect,
-	useMemo,
-	useState,
-} from "react"
+import { type ComponentPropsWithoutRef, useMemo, useState } from "react"
 
 import type { PlainPrice } from "@/database/custom_types"
 import toRelativeValues, { calculateOffset } from "@/lib/data/data_utils"
@@ -20,18 +15,13 @@ import {
 	withOverlays,
 } from "@/lib/data/overlays"
 import { useChartOverlays } from "@/lib/use_chart_overlays"
-import { useIntradayPreference } from "@/lib/use_intraday_preference"
 import {
 	getCurrentDate,
 	getDateCertainDaysAgo,
 	type TimeAxis,
 	toISODateOnly,
 } from "@/lib/util"
-import { supabase } from "@/utils/supabase/client"
-import {
-	IntervallPickerControlled,
-	maxIntradayDays,
-} from "../cards/pick_intervall"
+import { IntervallPickerControlled } from "../cards/pick_intervall"
 import AreaChart from "./area"
 import CandleStickChart from "./candle_stick"
 import { OverlayLegend, OverlayPicker } from "./overlay_picker"
@@ -58,38 +48,15 @@ export default function StockChartContainer({
 	previousClose,
 }: props) {
 	const hasIntraday = pricesIntraday1d.length > 0
-	const {
-		enabled: intradayEnabled,
-		loaded: intradayLoaded,
-		setEnabled: setIntradayEnabled,
-	} = useIntradayPreference()
 	const [selectedIntervall, setSelectedIntervall] = useState<number>(7)
 	const [overlays, setOverlays] = useState<OverlayKey[]>([])
-	// 7T-30T with intraday prices: loaded on demand
-	const monthBars = useMonthBars(
-		assetId,
-		hasIntraday &&
-			intradayLoaded &&
-			intradayEnabled &&
-			selectedIntervall > 5 &&
-			selectedIntervall <= maxIntradayDays,
-		pricesIntraday1d.at(-1)?.tstamp
-	)
-	// 1T/5T are intraday only; up to 30 days intraday when switched on (daily
-	// candles until the bars have loaded); longer ranges daily/weekly candles
-	const intraday =
-		hasIntraday &&
-		(selectedIntervall <= 5 ||
-			(intradayEnabled &&
-				selectedIntervall <= maxIntradayDays &&
-				monthBars !== null))
+	// 1T/5T: 15-minute bars; every longer range: daily (weekly from 1J)
+	const intraday = hasIntraday && selectedIntervall <= 5
 	const timeAxis: TimeAxis = !intraday
 		? "date"
 		: selectedIntervall === 1
 			? "time"
-			: selectedIntervall <= 7
-				? "weekdayTime"
-				: "dateTime"
+			: "weekdayTime"
 	const timeFrame = useMemo(() => {
 		const start = getDateCertainDaysAgo(selectedIntervall)
 		const end = getCurrentDate()
@@ -98,10 +65,7 @@ export default function StockChartContainer({
 
 	const data = useMemo(() => {
 		if (intraday) {
-			if (selectedIntervall === 1) return pricesIntraday1d
-			if (selectedIntervall === 5) return pricesIntraday5d
-			const start = timeFrame.start.toISOString()
-			return (monthBars ?? []).filter(price => price.tstamp >= start)
+			return selectedIntervall === 1 ? pricesIntraday1d : pricesIntraday5d
 		}
 		const data = []
 		const src = selectedIntervall < 360 ? prices : pricesWeekly
@@ -118,7 +82,6 @@ export default function StockChartContainer({
 		pricesWeekly,
 		pricesIntraday1d,
 		pricesIntraday5d,
-		monthBars,
 		intraday,
 		timeFrame,
 		selectedIntervall,
@@ -196,11 +159,7 @@ export default function StockChartContainer({
 					key={0}
 					value={selectedIntervall}
 					onValueChange={setSelectedIntervall}
-					intraday={{
-						available: hasIntraday,
-						enabled: intradayEnabled,
-						onChange: setIntradayEnabled,
-					}}
+					intradayAvailable={hasIntraday}
 				/>,
 				<OverlayPicker
 					key={1}
@@ -259,44 +218,4 @@ export default function StockChartContainer({
 			]}
 		/>
 	)
-}
-
-/**
- * The last 30 days of 15-minute bars, fetched in the browser once `active`
- * (7T-30T with intraday prices on). Refetched when `latestBar` (the newest
- * bar of the server-rendered data) changes, i.e. after a new bar arrived.
- */
-function useMonthBars(
-	assetId: number,
-	active: boolean,
-	latestBar: string | undefined
-): PlainPrice[] | null {
-	const [bars, setBars] = useState<PlainPrice[] | null>(null)
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: latestBar triggers a refetch after a new bar
-	useEffect(() => {
-		if (!active) return
-		let cancelled = false
-		supabase
-			.schema("api")
-			.from("asset_prices_intraday")
-			.select("tstamp, open, high, low, close, volume")
-			.eq("asset_id", assetId)
-			.gte("tstamp", getDateCertainDaysAgo(maxIntradayDays).toISOString())
-			.not("close", "is", null)
-			.order("tstamp", { ascending: true })
-			.then(({ data, error }) => {
-				if (cancelled) return
-				if (error) {
-					console.error("Failed to load intraday prices", error)
-					return
-				}
-				setBars(data as PlainPrice[])
-			})
-		return () => {
-			cancelled = true
-		}
-	}, [active, assetId, latestBar])
-
-	return bars
 }

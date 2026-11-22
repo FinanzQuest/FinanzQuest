@@ -9,13 +9,11 @@ import { useEffect, useMemo, useState } from "react"
 import {
 	IntervallPickerControlled,
 	type IntervalOption,
-	maxIntradayDays,
 } from "@/components/cards/pick_intervall"
 import AreaChart from "@/components/charts/area"
 import ChartContainer from "@/components/charts/primitive/container"
 import { type DepotValuePoint, processDepotValues } from "@/database/depots"
 import { calculateOffset } from "@/lib/data/data_utils"
-import { useIntradayPreference } from "@/lib/use_intraday_preference"
 import {
 	getDateCertainDaysAgo,
 	startOfTradingDaysAgo,
@@ -52,27 +50,19 @@ export default function DepotValueChart({
 	pieChart,
 }: DepotValueChartProps) {
 	const [days, setDays] = useState(30)
-	const {
-		enabled: intradayEnabled,
-		loaded: intradayLoaded,
-		setEnabled: setIntradayEnabled,
-	} = useIntradayPreference()
-	const showIntraday = hasIntraday && intradayEnabled
-	// switched off (or no intraday prices): 1T/5T fall back to 1M
-	const range = !showIntraday && days <= 5 ? 30 : days
+	// without intraday prices 1T/5T are not offered: fall back to 1M
+	const range = !hasIntraday && days <= 5 ? 30 : days
 
-	// 5T and 1M with intraday prices: loaded on demand
+	// 5T: 15-minute values loaded on demand (1T comes with the page)
 	const lazyIntraday = useIntradayValues(
 		depotId,
-		intradayLoaded && showIntraday && range > 1 && range <= maxIntradayDays
-			? range
-			: null,
+		hasIntraday && range === 5 ? range : null,
 		// newest bar time (the last point is always now()): refetch per new bar
 		valuesIntraday.at(-2)?.tstamp
 	)
+	// 1T/5T: 15-minute values; 1M/1J: daily
 	const intraday =
-		showIntraday &&
-		(range === 1 || (lazyIntraday !== null && range <= maxIntradayDays))
+		hasIntraday && (range === 1 || (range === 5 && lazyIntraday !== null))
 
 	const area = useMemo(() => {
 		if (intraday) {
@@ -96,9 +86,7 @@ export default function DepotValueChart({
 		? "date"
 		: range === 1
 			? "time"
-			: range <= 5
-				? "weekdayTime"
-				: "dateTime"
+			: "weekdayTime"
 
 	return (
 		<ChartContainer
@@ -110,11 +98,7 @@ export default function DepotValueChart({
 					options={depotIntervals}
 					value={range}
 					onValueChange={setDays}
-					intraday={{
-						available: hasIntraday,
-						enabled: intradayEnabled,
-						onChange: setIntradayEnabled,
-					}}
+					intradayAvailable={hasIntraday}
 				/>,
 			]}
 			tabs={[
