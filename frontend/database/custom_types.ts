@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "./types.ts"
 
 export type SearchParams = {
-	depot?: string | null
+	/** teachers: view a student's depot read-only (the active depot stays) */
 	inspect_depot?: string | null
 }
 export type StockPrice = Database["api"]["Tables"]["asset_prices"]["Row"]

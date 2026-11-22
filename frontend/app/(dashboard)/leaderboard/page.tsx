@@ -61,7 +61,9 @@ export default async function Page(props: {
 		<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2">
-					<span className="text-sm text-muted-foreground">Deine Position</span>
+					<span className="text-sm text-muted-foreground">
+						Deine Position{depot.data?.name && ` · ${depot.data.name}`}
+					</span>
 					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
 						#{depot.data?.rank}
 					</span>
@@ -131,7 +133,7 @@ function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
 						#{row.rank}
 					</span>
 				</div>
-				<div>Depot {row.id}</div>
+				<div className="truncate">{row.name}</div>
 				<div>{userNames}</div>
 				<div className="number text-right tabular-nums">
 					{row.value && currencyFormatFixedLength.format(row.value)}

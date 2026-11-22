@@ -4,7 +4,7 @@ import type React from "react"
 import { Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import PageLoader from "../../loaders/page_loader"
+import { ChartSkeleton } from "../../skeletons"
 
 interface TabConfig {
 	name: string
@@ -42,7 +42,7 @@ export default function ChartContainer({
 	))
 
 	return (
-		<Suspense fallback={<PageLoader />}>
+		<Suspense fallback={<ChartSkeleton />}>
 			<Tabs defaultValue={defaultName} className={cn(className)}>
 				{tabsContent}
 				<div className="w-full bg-muted/50 px-2 border py-2 rounded-full flex flex-row items-center">

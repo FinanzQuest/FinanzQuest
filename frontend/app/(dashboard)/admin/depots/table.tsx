@@ -150,15 +150,18 @@ export function DepotTable({ data, className }: DepotTableProps) {
 					className="px-0 hover:bg-transparent"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					ID
+					Depot
 					<ArrowUpDown />
 				</Button>
 			),
 			cell: ({ row }) => {
 				const id = row.getValue("id") as number
 				return (
-					<Link href={`/?inspect_depot=${id}`} className="font-mono">
-						{id}
+					<Link href={`/?inspect_depot=${id}`} className="flex flex-col">
+						<span>{row.original.name}</span>
+						<span className="font-mono text-xs text-muted-foreground">
+							#{id}
+						</span>
 					</Link>
 				)
 			},

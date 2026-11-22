@@ -14,8 +14,22 @@ import {
 import { Button } from "@/components/ui/button"
 import { SlideHeader, SlideLayout, SlideSection } from "./slide-layout"
 
+/** Seeded PRNG (mulberry32): the first render is deterministic, so the
+ * slide can be prerendered; "neu simulieren" picks a new seed. */
+function prng(seed: number) {
+	let a = seed >>> 0
+	return () => {
+		a = (a + 0x6d2b79f5) >>> 0
+		let t = a
+		t = Math.imul(t ^ (t >>> 15), t | 1)
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+	}
+}
+
 // Monte-Carlo-Sim basically
 function randomWalk(
+	random: () => number,
 	steps: number,
 	volatility: number,
 	trend: number,
@@ -24,7 +38,7 @@ function randomWalk(
 	let value = start
 	const series = [{ month: 0, value: start }]
 	for (let i = 1; i <= steps; i++) {
-		const shock = (Math.random() * 2.0 - 1.0) * volatility
+		const shock = (random() * 2.0 - 1.0) * volatility
 		value = value * (1 + trend + shock)
 		series.push({ month: i, value: Math.max(0, Math.round(value)) })
 	}
@@ -33,6 +47,7 @@ function randomWalk(
 
 // Average of n monte-carlo walks
 function avgWalk(
+	random: () => number,
 	n: number,
 	steps: number,
 	volatility: number,
@@ -40,7 +55,7 @@ function avgWalk(
 	start: number
 ) {
 	const walks = Array.from({ length: n }, () =>
-		randomWalk(steps, volatility, trend, start)
+		randomWalk(random, steps, volatility, trend, start)
 	)
 	// + 1 to include the initial value
 	return Array.from({ length: steps + 1 }, (_, i) => {
@@ -52,19 +67,26 @@ function avgWalk(
 	})
 }
 
-function generateData() {
+function generateData(seed: number) {
+	const random = prng(seed)
 	const steps = 36
 	const start = 1000
 	return {
-		single: randomWalk(steps, 0.18, 0.004, start),
-		portfolio: avgWalk(20, steps, 0.18, 0.004, start),
+		single: randomWalk(random, steps, 0.18, 0.004, start),
+		portfolio: avgWalk(random, 20, steps, 0.18, 0.004, start),
 	}
 }
 
-export function Slide08() {
-	const [simData, setSimData] = useState(() => generateData())
+const INITIAL_SEED = 20261122
 
-	const rerun = useCallback(() => setSimData(generateData()), [])
+export function Slide08() {
+	const [simData, setSimData] = useState(() => generateData(INITIAL_SEED))
+
+	// event handler: a fresh random seed is fine here (not during render)
+	const rerun = useCallback(
+		() => setSimData(generateData(Math.floor(Math.random() * 2 ** 32))),
+		[]
+	)
 
 	const chartData = simData.single.map((d, i) => ({
 		month: d.month,

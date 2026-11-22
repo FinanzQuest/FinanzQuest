@@ -32,6 +32,7 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import logo from "@/public/logo.svg"
 import logo_full from "@/public/logo_full.svg"
@@ -41,8 +42,8 @@ import User from "./user"
 export interface SidebarData {
 	user: { name: string | null; email: string | null } | null
 	isTeacher: boolean
-	depotIds: number[]
-	/** active depot from the cookie; ?depot= in the URL takes precedence */
+	depots: { id: number; name: string }[]
+	/** the active depot (cookie, validated against the user's depots) */
 	activeDepotId: number | null
 }
 
@@ -114,7 +115,7 @@ function DesktopSidebar({
 	data,
 }: {
 	tree: Record<string, Array<ItemT>>
-	data: SidebarData
+	data: SidebarData | null
 }) {
 	const { state } = useSidebar()
 	const collapsed = state === "collapsed"
@@ -220,14 +221,7 @@ function DesktopSidebar({
 						collapsed ? "gap-2" : "gap-0"
 					)}
 				>
-					<User collapsed={collapsed} user={data.user} />
-					<Suspense fallback={null}>
-						<DepotPicker
-							collapsed={collapsed}
-							depotIds={data.depotIds}
-							activeDepotId={data.activeDepotId}
-						/>
-					</Suspense>
+					<SidebarAccount data={data} collapsed={collapsed} />
 				</SidebarFooter>
 			</Sidebar>
 		</>
@@ -240,7 +234,7 @@ function MobileTopbar({
 	data,
 }: {
 	tree: Record<string, Array<ItemT>>
-	data: SidebarData
+	data: SidebarData | null
 }) {
 	const [open, setOpen] = useState(false)
 
@@ -310,13 +304,7 @@ function MobileTopbar({
 							</nav>
 						</div>
 						<div className="border-t px-3 py-3 flex flex-col gap-2">
-							<User user={data.user} />
-							<Suspense fallback={null}>
-								<DepotPicker
-									depotIds={data.depotIds}
-									activeDepotId={data.activeDepotId}
-								/>
-							</Suspense>
+							<SidebarAccount data={data} />
 						</div>
 					</SheetContent>
 				</Sheet>
@@ -330,8 +318,45 @@ function MobileTopbar({
 // We control "landscape only" via a media query wrapper in the layout instead.
 
 // ── Main export ──────────────────────────────────────────────────────────────
-export function AppSidebar({ data }: { data: SidebarData }) {
-	const tree = useNavTree(data.isTeacher)
+/** User menu and depot picker; skeletons while the layout's data streams in. */
+function SidebarAccount({
+	data,
+	collapsed,
+}: {
+	data: SidebarData | null
+	collapsed?: boolean
+}) {
+	if (!data) {
+		return collapsed ? (
+			<>
+				<Skeleton className="aspect-square w-full rounded-lg" />
+				<Skeleton className="aspect-square w-full rounded-lg" />
+			</>
+		) : (
+			<div className="flex flex-col gap-2 p-3">
+				<Skeleton className="h-4 w-2/3" />
+				<Skeleton className="h-3 w-full" />
+				<Skeleton className="h-8 w-full mt-1" />
+			</div>
+		)
+	}
+	return (
+		<>
+			<User collapsed={collapsed} user={data.user} />
+			<Suspense fallback={<Skeleton className="h-8 w-full" />}>
+				<DepotPicker
+					collapsed={collapsed}
+					depots={data.depots}
+					activeDepotId={data.activeDepotId}
+				/>
+			</Suspense>
+		</>
+	)
+}
+
+/** `data` null: still loading (rendered as the layout's Suspense fallback). */
+export function AppSidebar({ data }: { data: SidebarData | null }) {
+	const tree = useNavTree(data?.isTeacher ?? false)
 
 	return (
 		<>

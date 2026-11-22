@@ -58,7 +58,9 @@ export default async function Page({
 				<AutoRefresh />
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
-						<span className="text-sm text-muted-foreground">Depotwert</span>
+						<span className="text-sm text-muted-foreground">
+							Depotwert · {fres.depot.name}
+						</span>
 						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
 							{currencyFormat.format(d?.total ?? 0)}
 						</span>

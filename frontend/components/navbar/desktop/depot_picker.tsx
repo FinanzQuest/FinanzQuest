@@ -1,6 +1,8 @@
 "use client"
 import { Briefcase } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useOptimistic, useTransition } from "react"
+import { toast } from "sonner"
 import {
 	Select,
 	SelectContent,
@@ -8,26 +10,28 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { selectDepot } from "@/lib/depot_actions"
 
 /**
- * Switches the active depot. The list and the cookie's depot come from the
- * dashboard layout (server); selecting navigates with ?depot=, and the proxy
- * stores the choice in the activeDepotId cookie for later pages.
+ * Switches the active depot. List and active depot come from the dashboard
+ * layout (server: cookie validated against the user's depots). Selecting
+ * calls selectDepot(), which sets the cookie and re-renders the route, so the
+ * page and this picker always agree; the picker updates optimistically.
  */
 export default function DepotPicker({
 	collapsed,
-	depotIds,
+	depots,
 	activeDepotId,
 }: {
 	collapsed?: boolean
-	depotIds: number[]
+	depots: { id: number; name: string }[]
 	activeDepotId: number | null
 }) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
-	const fromUrl = Number.parseInt(searchParams.get("depot") ?? "", 10)
-	const active = Number.isNaN(fromUrl) ? activeDepotId : fromUrl
+	const [optimisticId, setOptimisticId] = useOptimistic(activeDepotId)
+	const [pending, startTransition] = useTransition()
 
 	const trigger = collapsed ? (
 		<SelectTrigger className="aspect-square! focus:ring-transparent! flex flex-row py-2 h-fit p-0">
@@ -35,31 +39,41 @@ export default function DepotPicker({
 		</SelectTrigger>
 	) : (
 		<SelectTrigger className="rounded-t-none! focus:ring-transparent! w-full">
-			<SelectValue placeholder="Select a depot" />
+			<SelectValue placeholder="Depot wählen" />
 		</SelectTrigger>
 	)
 
 	return (
 		<Select
 			// labels for the trigger (Base UI shows the raw value otherwise)
-			items={depotIds.map(id => ({
-				value: id.toString(),
-				label: `Depot ${id}`,
+			items={depots.map(depot => ({
+				value: depot.id.toString(),
+				label: depot.name,
 			}))}
-			value={active?.toString() ?? null}
+			value={optimisticId?.toString() ?? null}
+			disabled={pending}
 			onValueChange={value => {
 				if (value === null) return
-				const params = new URLSearchParams(searchParams)
-				params.set("depot", value)
-				params.delete("inspect_depot")
-				router.push(`${pathname}?${params}`)
+				const id = Number.parseInt(value, 10)
+				startTransition(async () => {
+					setOptimisticId(id)
+					const { error } = await selectDepot(id)
+					if (error) {
+						toast.error(error.message)
+						return
+					}
+					// a teacher's ?inspect_depot view is not the active depot
+					if (searchParams.has("inspect_depot")) {
+						router.replace(pathname)
+					}
+				})
 			}}
 		>
 			{trigger}
 			<SelectContent align="start" side="right" sideOffset={10}>
-				{depotIds.map(id => (
-					<SelectItem key={id} value={id.toString()}>
-						Depot {id}
+				{depots.map(depot => (
+					<SelectItem key={depot.id} value={depot.id.toString()}>
+						{depot.name}
 					</SelectItem>
 				))}
 			</SelectContent>

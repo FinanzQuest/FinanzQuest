@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 
 type Props = {
-	/** depot shown on the page (not the cookie: ?depot= may differ) */
+	/** depot shown on the page (the active one, or a teacher's ?inspect_depot) */
 	depotId: number
 	limit?: number
 	onSuccessAction?: () => void

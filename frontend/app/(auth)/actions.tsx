@@ -5,13 +5,12 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { getDepotDefaultId } from "@/lib/db"
-import { clearActiveDepotId } from "@/lib/depot_cookie/server"
+import { clearActiveDepotId, setActiveDepotId } from "@/lib/depot_cookie/server"
 import { createClient } from "@/utils/supabase/server"
 
 export async function loginRedirect(email: string, password: string) {
 	const client = await createClient()
-	const { data, error } = await client.auth.signInWithPassword({
+	const { error } = await client.auth.signInWithPassword({
 		email,
 		password,
 	})
@@ -20,14 +19,14 @@ export async function loginRedirect(email: string, password: string) {
 		return error.message
 	}
 
+	// a previous user's depot cookie does not apply; the first depot is active
 	await clearActiveDepotId()
-	const depot = (await getDepotDefaultId(client, data.user.id)).depotId
 
 	revalidatePath("/", "layout")
-	redirect(depot ? `/?depot=${depot}` : "/")
+	redirect("/")
 }
 
-export async function createDepotRedirect() {
+export async function createDepotRedirect(name?: string) {
 	const client = await createClient()
 	const { data, error } = await client.auth.getUser()
 
@@ -35,9 +34,11 @@ export async function createDepotRedirect() {
 		return { message: error?.message ?? "Could not fetch user" }
 	}
 
-	const res = await client
-		.schema("depots")
-		.rpc("new_depot_for_user", { p_user_id: data.user.id })
+	const res = await client.schema("depots").rpc("new_depot_for_user", {
+		p_user_id: data.user.id,
+		// empty -> random friendly name (database default)
+		p_name: name?.trim() || undefined,
+	})
 
 	if (res.error) {
 		return { message: res.error.message }
@@ -46,7 +47,10 @@ export async function createDepotRedirect() {
 		return { message: "Depot not found" }
 	}
 
-	redirect(`/?depot=${res.data}`)
+	// the new depot becomes the active one
+	await setActiveDepotId(res.data, data.user.id)
+	revalidatePath("/", "layout")
+	redirect("/")
 }
 
 export async function signUpRedirect(
