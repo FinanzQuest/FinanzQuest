@@ -7,6 +7,7 @@ mod alpaca;
 mod priceframe;
 use alpaca::AlpacaClient;
 
+mod details;
 mod providers;
 mod yf;
 
@@ -27,6 +28,12 @@ enum Mode {
     /// has daily bars for the symbol, else Yahoo Finance, else NULL. Checks
     /// assets without a provider, or all with --recheck-all.
     ResolveProviders,
+    /// Fund facts, top holdings and country weights (api.funds,
+    /// api.fund_holdings, api.fund_countries) and stock figures
+    /// (api.asset_details), each from its api.assets.details_provider.
+    /// Resolves the details provider of stocks on the way (Yahoo has the
+    /// figures -> 'yahoo').
+    Details,
 }
 
 /// Intraday fetch window, ending at `now`. Normally from 00:00 UTC of the
@@ -82,6 +89,18 @@ struct Args {
     /// a provider
     #[arg(long)]
     recheck_all: bool,
+    /// --mode details: pause between two requests in milliseconds
+    #[arg(long, env = "DETAILS_DELAY_MS", default_value_t = 1_500)]
+    details_delay_ms: u64,
+    /// --mode details: refresh a stock's figures when older than this
+    #[arg(long, default_value_t = 7)]
+    details_max_age_days: i32,
+    /// --mode details: at most this many stocks per run (Yahoo rate limits)
+    #[arg(long, default_value_t = 400)]
+    details_stock_limit: i64,
+    /// --mode details: refresh funds even if updated in the last 20 hours
+    #[arg(long)]
+    force: bool,
 }
 
 #[tokio::main]
@@ -98,6 +117,10 @@ async fn main() -> anyhow::Result<()> {
         interval_minutes,
         backfill_days,
         recheck_all,
+        details_delay_ms,
+        details_max_age_days,
+        details_stock_limit,
+        force,
     } = Args::parse();
 
     let now = time::OffsetDateTime::now_utc();
@@ -115,6 +138,16 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     println!("DONE");
+
+    if mode == Mode::Details {
+        let opts = details::Options {
+            delay: Duration::from_millis(details_delay_ms),
+            max_age_days: details_max_age_days,
+            stock_limit: details_stock_limit,
+            force,
+        };
+        return details::run(&pool, &opts).await;
+    }
 
     print!("Fetching assets from database: ");
     let assets = uploader::fetch_assets(&pool).await?;
@@ -189,7 +222,7 @@ async fn main() -> anyhow::Result<()> {
                 Target::Intraday,
             )
         }
-        Mode::ResolveProviders => unreachable!("returned above"),
+        Mode::ResolveProviders | Mode::Details => unreachable!("returned above"),
     };
     let uploader = Uploader::new(pool.clone(), batch_size, target).await?;
 

@@ -19,8 +19,11 @@ RUN chmod +x /usr/local/bin/run_updater.sh /usr/local/bin/startup.sh
 
 # Times are UTC. Nightly: full daily candles. Intraday: 15-minute bars every
 # 15 minutes on weekdays, 07:00-21:45 UTC (covers the EU and US sessions).
+# Details: fund holdings/countries daily, stock figures in batches (each
+# stock about weekly), after the nightly prices.
 RUN printf '%s\n' \
       '0 1 * * * /usr/local/bin/run_updater.sh daily' \
+      '30 2 * * * /usr/local/bin/run_updater.sh details' \
       '*/15 7-21 * * 1-5 /usr/local/bin/run_updater.sh intraday' \
       > /etc/crontabs/root && \
     chmod 0644 /etc/crontabs/root

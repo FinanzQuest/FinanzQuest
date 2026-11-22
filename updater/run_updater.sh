@@ -1,5 +1,5 @@
 #!/bin/sh
-# Usage: run_updater.sh [daily|intraday|resolve-providers] [extra updater args]
+# Usage: run_updater.sh [daily|intraday|resolve-providers|details] [extra updater args]
 #        (default: daily), e.g. run_updater.sh resolve-providers --recheck-all
 MODE="${1:-daily}"
 [ $# -gt 0 ] && shift

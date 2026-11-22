@@ -1,0 +1,83 @@
+//! Country names as the providers write them -> ISO 3166-1 alpha-2.
+
+/// `None` for names that are no country (cash, "Other", supranational
+/// issuers, ...) and for names missing here; callers book those as 'ZZ'.
+pub fn code(name: &str) -> Option<&'static str> {
+    let name = name.trim();
+    // Vanguard's holdings table already uses codes
+    if name.len() == 2 && name.bytes().all(|b| b.is_ascii_uppercase()) {
+        return CODES.iter().find(|c| **c == name).copied();
+    }
+    let key = name.to_lowercase();
+    NAMES
+        .iter()
+        .find(|(n, _)| *n == key)
+        .map(|(_, code)| *code)
+}
+
+const NAMES: &[(&str, &str)] = &[
+    ("united states", "US"), ("united states of america", "US"), ("usa", "US"), ("u.s.", "US"),
+    ("united kingdom", "GB"), ("uk", "GB"), ("great britain", "GB"), ("england", "GB"),
+    ("japan", "JP"), ("canada", "CA"), ("switzerland", "CH"), ("france", "FR"),
+    ("germany", "DE"), ("netherlands", "NL"), ("the netherlands", "NL"), ("australia", "AU"),
+    ("sweden", "SE"), ("denmark", "DK"), ("italy", "IT"), ("spain", "ES"), ("finland", "FI"),
+    ("belgium", "BE"), ("ireland", "IE"), ("norway", "NO"), ("singapore", "SG"),
+    ("israel", "IL"), ("austria", "AT"), ("new zealand", "NZ"), ("portugal", "PT"),
+    ("luxembourg", "LU"), ("hong kong", "HK"), ("china", "CN"), ("taiwan", "TW"),
+    ("korea (south)", "KR"), ("south korea", "KR"), ("korea", "KR"), ("korea, republic of", "KR"),
+    ("republic of korea", "KR"), ("india", "IN"), ("brazil", "BR"), ("saudi arabia", "SA"),
+    ("south africa", "ZA"), ("mexico", "MX"), ("indonesia", "ID"), ("thailand", "TH"),
+    ("malaysia", "MY"), ("united arab emirates", "AE"), ("uae", "AE"), ("poland", "PL"),
+    ("turkey", "TR"), ("turkiye", "TR"), ("türkiye", "TR"), ("qatar", "QA"), ("kuwait", "KW"),
+    ("philippines", "PH"), ("chile", "CL"), ("greece", "GR"), ("peru", "PE"),
+    ("hungary", "HU"), ("czech republic", "CZ"), ("czechia", "CZ"), ("colombia", "CO"),
+    ("egypt", "EG"), ("argentina", "AR"), ("russia", "RU"), ("russian federation", "RU"),
+    ("macau", "MO"), ("macao", "MO"), ("bermuda", "BM"), ("cayman islands", "KY"),
+    ("jersey", "JE"), ("guernsey", "GG"), ("isle of man", "IM"), ("puerto rico", "PR"),
+    ("panama", "PA"), ("uruguay", "UY"), ("liberia", "LR"), ("curacao", "CW"),
+    ("curaçao", "CW"), ("bahamas", "BS"), ("cyprus", "CY"), ("malta", "MT"), ("monaco", "MC"),
+    ("iceland", "IS"), ("estonia", "EE"), ("latvia", "LV"), ("lithuania", "LT"),
+    ("slovenia", "SI"), ("slovakia", "SK"), ("romania", "RO"), ("bulgaria", "BG"),
+    ("croatia", "HR"), ("kazakhstan", "KZ"), ("pakistan", "PK"), ("vietnam", "VN"),
+    ("viet nam", "VN"), ("bangladesh", "BD"), ("nigeria", "NG"), ("kenya", "KE"),
+    ("morocco", "MA"), ("jordan", "JO"), ("bahrain", "BH"), ("oman", "OM"),
+    ("british virgin islands", "VG"), ("virgin islands (british)", "VG"), ("gibraltar", "GI"),
+    ("liechtenstein", "LI"), ("mauritius", "MU"), ("zambia", "ZM"), ("ukraine", "UA"),
+    ("serbia", "RS"), ("sri lanka", "LK"), ("dominican republic", "DO"), ("costa rica", "CR"),
+    ("ecuador", "EC"), ("guatemala", "GT"), ("jamaica", "JM"), ("trinidad and tobago", "TT"),
+    ("venezuela", "VE"), ("ghana", "GH"), ("angola", "AO"), ("ivory coast", "CI"),
+    ("cote d'ivoire", "CI"), ("côte d'ivoire", "CI"), ("senegal", "SN"), ("tunisia", "TN"),
+    ("lebanon", "LB"), ("iraq", "IQ"), ("georgia", "GE"), ("armenia", "AM"),
+    ("azerbaijan", "AZ"), ("uzbekistan", "UZ"), ("mongolia", "MN"), ("papua new guinea", "PG"),
+    ("el salvador", "SV"), ("honduras", "HN"), ("paraguay", "PY"), ("bolivia", "BO"),
+    ("north macedonia", "MK"), ("montenegro", "ME"), ("albania", "AL"),
+    ("bosnia and herzegovina", "BA"), ("belarus", "BY"), ("ethiopia", "ET"),
+    ("cameroon", "CM"), ("gabon", "GA"), ("namibia", "NA"), ("rwanda", "RW"),
+    ("uganda", "UG"), ("tanzania", "TZ"), ("barbados", "BB"), ("belize", "BZ"),
+    ("marshall islands", "MH"), ("greenland", "GL"), ("faroe islands", "FO"),
+];
+
+const CODES: &[&str] = &[
+    "US", "GB", "JP", "CA", "CH", "FR", "DE", "NL", "AU", "SE", "DK", "IT", "ES", "FI", "BE",
+    "IE", "NO", "SG", "IL", "AT", "NZ", "PT", "LU", "HK", "CN", "TW", "KR", "IN", "BR", "SA",
+    "ZA", "MX", "ID", "TH", "MY", "AE", "PL", "TR", "QA", "KW", "PH", "CL", "GR", "PE", "HU",
+    "CZ", "CO", "EG", "AR", "RU", "MO", "BM", "KY", "JE", "GG", "IM", "PR", "PA", "UY", "LR",
+    "CW", "BS", "CY", "MT", "MC", "IS", "EE", "LV", "LT", "SI", "SK", "RO", "BG", "HR", "KZ",
+    "PK", "VN", "BD", "NG", "KE", "MA", "JO", "BH", "OM", "VG", "GI", "LI", "MU",
+];
+
+#[cfg(test)]
+mod tests {
+    use super::code;
+
+    #[test]
+    fn provider_spellings() {
+        assert_eq!(code("United States"), Some("US"));
+        assert_eq!(code("United States of America"), Some("US"));
+        assert_eq!(code("Korea (South)"), Some("KR"));
+        assert_eq!(code(" Taiwan "), Some("TW"));
+        assert_eq!(code("US"), Some("US"));
+        assert_eq!(code("Cash and/or Derivatives"), None);
+        assert_eq!(code("-"), None);
+    }
+}
