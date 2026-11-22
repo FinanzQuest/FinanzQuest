@@ -52,7 +52,13 @@ export type StockPosition = {
 	amount: number
 }
 export type DepotValue = Database["depots"]["Views"]["values"]["Row"]
-export type DepotPosition = Database["depots"]["Tables"]["positions"]["Row"]
+/** One open position of a depot (from depots.holdings via get_position_profits). */
+export type DepotPosition = {
+	asset_id: number
+	amount: number
+	worth: number
+	price: number | null
+}
 export type Depot = Database["depots"]["Tables"]["depots"]["Row"]
 
 export type Transaction = Database["depots"]["Tables"]["transactions"]["Row"]

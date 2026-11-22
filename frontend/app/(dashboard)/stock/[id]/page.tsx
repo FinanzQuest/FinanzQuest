@@ -6,12 +6,13 @@ import {
 	StockPositionCard,
 } from "@/components/cards/cards"
 import { ChartCard } from "@/components/cards/client"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import type { DepotPosition } from "@/database/custom_types"
 import { fetchStockData } from "@/database/fetch_stock_data"
 import { formatter as formatPrices } from "@/lib/data/formatter"
 import { getDepotId } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 export const revalidate = 3600
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
@@ -104,20 +105,26 @@ const dataFetcher = async (stockId: number, depotId: number) => {
 
 	// parallel statt sequentiell
 	const [
-		{ data: positions, error: positionError },
+		{ data: positionRows, error: positionError },
 		{ data: commission, error: commissionError },
 	] = await Promise.all([
 		client
 			.schema("depots")
-			.from("positions")
-			.select("*")
-			.eq("depot_id", depot.id)
+			.rpc("get_position_profits", { p_depot_id: depot.id })
 			.eq("asset_id", stockId),
 		client.schema("depots").rpc("get_commission"),
 	])
 
 	if (positionError)
 		return { depot, error: positionError, positions: null, commission: null }
+
+	const positions: DepotPosition[] = (positionRows ?? []).map(p => ({
+		asset_id: p.asset_id,
+		amount: p.current_amount,
+		worth: p.market_value ?? 0,
+		price: p.current_price,
+	}))
+
 	if (commissionError)
 		return { depot, error: commissionError, positions, commission: null }
 
