@@ -51,7 +51,19 @@ async function getSidebarData(): Promise<SidebarData> {
 	}
 }
 
-export default async function DashboardLayout({
+/** Sidebar with the user's data; streams in after the static shell. */
+async function Sidebar() {
+	return <AppSidebar data={await getSidebarData()} />
+}
+
+const emptySidebar: SidebarData = {
+	user: null,
+	isTeacher: false,
+	depotIds: [],
+	activeDepotId: null,
+}
+
+export default function DashboardLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
@@ -59,7 +71,9 @@ export default async function DashboardLayout({
 	return (
 		<>
 			<SidebarProvider>
-				<AppSidebar data={await getSidebarData()} />
+				<Suspense fallback={<AppSidebar data={emptySidebar} />}>
+					<Sidebar />
+				</Suspense>
 				<Suspense fallback={<PageLoader />}>
 					{/*<SidebarTrigger />*/}
 					<div className="min-h-screen max-h-screen w-full overflow-hidden">

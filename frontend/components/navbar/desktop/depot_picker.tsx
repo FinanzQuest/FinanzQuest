@@ -41,6 +41,11 @@ export default function DepotPicker({
 
 	return (
 		<Select
+			// labels for the trigger (Base UI shows the raw value otherwise)
+			items={depotIds.map(id => ({
+				value: id.toString(),
+				label: `Depot ${id}`,
+			}))}
 			value={active?.toString() ?? null}
 			onValueChange={value => {
 				if (value === null) return

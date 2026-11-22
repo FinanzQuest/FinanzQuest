@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react"
 import { ScrollAreaLite } from "@/components/scroll_area_lite"
 import {
 	Carousel,
@@ -14,15 +14,28 @@ import { SlideProgress } from "./slides/slide-progress"
 
 export default function Page() {
 	const [api, setApi] = useState<CarouselApi>()
-	const [current, setCurrent] = useState(0)
-	const [count, setCount] = useState(0)
-
-	useEffect(() => {
-		if (!api) return
-		setCount(api.scrollSnapList().length)
-		setCurrent(api.selectedScrollSnap())
-		api.on("select", () => setCurrent(api.selectedScrollSnap()))
-	}, [api])
+	// the carousel is the source of truth: subscribe to it instead of
+	// mirroring it into state (the old listener was also never removed)
+	const subscribe = useCallback(
+		(onChange: () => void) => {
+			if (!api) return () => {}
+			api.on("select", onChange).on("reInit", onChange)
+			return () => {
+				api.off("select", onChange).off("reInit", onChange)
+			}
+		},
+		[api]
+	)
+	const current = useSyncExternalStore(
+		subscribe,
+		() => api?.selectedScrollSnap() ?? 0,
+		() => 0
+	)
+	const count = useSyncExternalStore(
+		subscribe,
+		() => api?.scrollSnapList().length ?? 0,
+		() => 0
+	)
 
 	const goTo = useCallback((index: number) => api?.scrollTo(index), [api])
 

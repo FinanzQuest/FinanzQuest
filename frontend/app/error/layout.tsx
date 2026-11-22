@@ -6,7 +6,6 @@ import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 export const metadata: Metadata = {
 	title: "MoneyTrail",

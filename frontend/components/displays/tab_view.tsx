@@ -51,24 +51,16 @@ function ToolBar(props: {
 		},
 	]
 
-	const interval = props.value.interval
-	let order: string = props.value.order
-	let descending = props.value.descending
-
 	return (
 		<>
 			<SortSelector
 				orders={orders}
-				onValueChange={(value, desc) => {
-					order = value
-					descending = desc
-					if (props.onValueChange) {
-						props.onValueChange({
-							order: order as SortMode,
-							descending,
-							interval,
-						})
-					}
+				onValueChange={(value, descending) => {
+					props.onValueChange?.({
+						order: value as SortMode,
+						descending,
+						interval: props.value.interval,
+					})
 				}}
 				value={props.value.order}
 				descending={props.value.descending}
@@ -244,8 +236,8 @@ function SortSelector(props: {
 	value?: string
 	descending?: boolean
 }) {
-	let descending = props.descending ?? false
-	let order = props.value
+	// controlled: always report the current props plus the one changed value
+	const descending = props.descending ?? false
 	const items: React.ReactNode[] = []
 	for (const order of props.orders) {
 		items.push(
@@ -264,10 +256,7 @@ function SortSelector(props: {
 			<Select
 				onValueChange={value => {
 					if (value === null) return
-					if (props.onValueChange) {
-						props.onValueChange(value, descending)
-					}
-					order = value
+					props.onValueChange?.(value, descending)
 				}}
 				value={props.value}
 			>
@@ -280,10 +269,9 @@ function SortSelector(props: {
 				value={[props.descending ? "descending" : "ascending"]}
 				defaultValue={["descending"]}
 				onValueChange={value => {
-					if (props.onValueChange) {
-						props.onValueChange(order ?? "", value[0] === "descending")
-					}
-					descending = value[0] === "descending"
+					// clicking the active item deselects it: keep the direction
+					if (!value[0]) return
+					props.onValueChange?.(props.value ?? "", value[0] === "descending")
 				}}
 			>
 				<ToggleGroupItem value="descending">

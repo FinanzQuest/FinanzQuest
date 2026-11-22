@@ -39,10 +39,7 @@ export default function StockPicker({
 	const [stocks, setStocks] = useState<Array<Asset>>([])
 
 	useEffect(() => {
-		if (!searchQuery) {
-			setStocks([])
-			return
-		}
+		if (!searchQuery) return
 		// debounce keystrokes; drop responses for an outdated query (a slow
 		// earlier response must not overwrite the current results)
 		let stale = false
@@ -65,6 +62,9 @@ export default function StockPicker({
 		}
 	}, [searchQuery])
 
+	// an empty query shows nothing (derived, no state update needed)
+	const visibleStocks = searchQuery ? stocks : []
+
 	return (
 		<Command shouldFilter={false} className="border-none">
 			<CommandInput
@@ -79,7 +79,7 @@ export default function StockPicker({
 						: "Starte deine Suche..."}
 				</CommandEmpty>
 				<CommandGroup>
-					{stocks.map(stock => {
+					{visibleStocks.map(stock => {
 						const iconUrl = getIconURL(stock.symbol, stock.asset_type, 32)
 						return (
 							<CommandItem

@@ -1,5 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache"
 import { redirect } from "next/navigation"
-import { cache } from "react"
 import { AutoRefresh } from "@/components/auto_refresh"
 import {
 	ErrorCard,
@@ -17,7 +17,7 @@ import {
 } from "@/lib/data/formatter"
 import { getDepotId } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo, msPerDay, toISODateOnly } from "@/lib/util"
-export const revalidate = 60
+import { createPublicClient } from "@/utils/supabase/public"
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const id = Number.parseInt((await props.params).id, 10)
@@ -50,7 +50,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 			<main className="flex flex-row w-full h-full grow shrink justify-center items-center">
 				<ErrorCard
 					className="w-fit"
-					error={error ?? fetchError ?? new Error("Unknown error")}
+					error={error ?? new Error(fetchError ?? "Unknown error")}
 				/>
 			</main>
 		)
@@ -97,16 +97,26 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
 // const dataFetcherUncached = async (user: User, stockId: number) => {}
 
-const fetchStockDataCached = cache(async (id: number) => {
-	return await fetchStockData(
+/**
+ * Prices are public and the same for every user: cached per asset for a
+ * minute across all requests ("use cache"; new 15-minute bars arrive at most
+ * that much later), instead of four queries per user and auto-refresh.
+ * Errors are returned as messages (cache entries must be serializable).
+ */
+async function fetchStockDataCached(id: number) {
+	"use cache"
+	cacheLife("minutes")
+	cacheTag(`asset-${id}`)
+	const { error, ...data } = await fetchStockData(
 		id,
-		undefined,
+		createPublicClient(),
 		getDateCertainDaysAgo(365),
 		getDateCertainDaysAgo(5 * 365),
 		// enough calendar days to cover the last 5 trading days ("5T")
 		getDateCertainDaysAgo(9)
 	)
-})
+	return { ...data, error: error?.message ?? null }
+}
 
 /**
  * Current price, its time, and the reference prices of the current trading

@@ -1,12 +1,14 @@
 import { Minus, TriangleIcon } from "lucide-react"
+import { cacheLife, cacheTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
 import ChangeStat from "@/components/stat/change_stat"
 import type { LeaderboardRow, SearchParams } from "@/database/custom_types"
-import { getServerClient, getUser } from "@/lib/auth"
+import { getUser } from "@/lib/auth"
 import { currencyFormatFixedLength } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { cn } from "@/lib/utils"
+import { createPublicClient } from "@/utils/supabase/public"
 import { Sparkline } from "./sparkline"
 
 export default async function Page(props: {
@@ -146,23 +148,37 @@ function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
 	)
 }
 
-const dataFetcher = async (depotId: number) => {
-	const client = await getServerClient()
-	const { user } = await getUser()
+/**
+ * The leaderboard is public and the same for every user: cached for a
+ * minute across all requests ("use cache"), instead of one query per user
+ * and auto-refresh.
+ */
+async function getLeaderboard(): Promise<{
+	rows: LeaderboardRow[] | null
+	error: string | null
+}> {
+	"use cache"
+	cacheLife("minutes")
+	cacheTag("leaderboard")
+	const { data, error } = await createPublicClient()
+		.schema("depots")
+		.from("leaderboard")
+		.select("*")
+	return {
+		rows: data as LeaderboardRow[] | null,
+		error: error?.message ?? null,
+	}
+}
 
+const dataFetcher = async (depotId: number) => {
+	const { user } = await getUser()
 	if (!user) {
 		redirect("/login")
 	}
 
-	const [depot_entry, leaderboard_response] = await Promise.all([
-		client
-			.schema("depots")
-			.from("leaderboard")
-			.select("*")
-			.eq("id", depotId)
-			.limit(1)
-			.maybeSingle(),
-		client.schema("depots").from("leaderboard").select("*"),
-	])
-	return { leaderboard: leaderboard_response, depot: depot_entry }
+	const { rows, error } = await getLeaderboard()
+	return {
+		leaderboard: { data: rows, error: error ? new Error(error) : null },
+		depot: { data: rows?.find(row => row.id === depotId) ?? null },
+	}
 }

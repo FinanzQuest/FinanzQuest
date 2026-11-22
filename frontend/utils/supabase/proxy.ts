@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { jwtVerify } from "jose"
 import { type NextRequest, NextResponse } from "next/server"
 import type { Database } from "@/database/types"
 
@@ -10,6 +11,37 @@ function isPublic(pathname: string) {
 	return PUBLIC_PATHS.some(
 		path => pathname === path || pathname.startsWith(`${path}/`)
 	)
+}
+
+// GoTrue signs access tokens with the shared JWT secret (HS256). With the
+// secret, the proxy verifies them locally; without it, getClaims() has to ask
+// GoTrue on every request — including every route prefetch.
+const jwtSecret = process.env.SUPABASE_JWT_SECRET
+	? new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET)
+	: null
+
+async function sessionUserId(
+	supabase: SupabaseClient<Database>
+): Promise<string | null> {
+	if (!jwtSecret) {
+		const { data } = await supabase.auth.getClaims()
+		return (data?.claims?.sub as string | undefined) ?? null
+	}
+	// Reads the session cookie; refreshes (one GoTrue call) only when the
+	// access token has expired. The token is then verified here: signature and
+	// expiry. Pages still verify the user with GoTrue once per render.
+	const {
+		data: { session },
+	} = await supabase.auth.getSession()
+	if (!session) return null
+	try {
+		const { payload } = await jwtVerify(session.access_token, jwtSecret, {
+			algorithms: ["HS256"],
+		})
+		return payload.sub ?? null
+	} catch {
+		return null
+	}
 }
 
 /**
@@ -53,10 +85,9 @@ export async function updateSession(request: NextRequest): Promise<{
 		},
 	}) as unknown as SupabaseClient<Database>
 
-	// Nothing between createServerClient and getClaims: it refreshes an
-	// expired session; code in between risks random logouts.
-	const { data } = await supabase.auth.getClaims()
-	const userId = (data?.claims?.sub as string | undefined) ?? null
+	// Nothing between createServerClient and the session check: it refreshes
+	// an expired session; code in between risks random logouts.
+	const userId = await sessionUserId(supabase)
 
 	if (!userId && !isPublic(request.nextUrl.pathname)) {
 		const loginUrl = request.nextUrl.clone()
