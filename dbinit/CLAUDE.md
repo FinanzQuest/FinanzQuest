@@ -8,18 +8,17 @@ the frontend via PostgREST/supabase-js. This repo is the source of truth for
 the database — the frontend's `database/` folder of generated types is
 downstream of this, not the other way around.
 
-**Current state: this repo is mid-reorganization.** Right now the schema is
-spread across ~5 large files that each contain a mix of tables, functions,
-views, and policies. The target structure is one object per file (see
-"Target file structure" below). When touching any file, prefer splitting it
-toward the target structure over adding more to a monolith file — but don't
-do a giant big-bang rewrite unprompted; do it incrementally, file by file,
-as areas get touched, unless explicitly asked to do the full migration in
-one pass.
+**Current state: the reorganization into one object per file is done.**
+The schema lives in the numbered folders (`01-schema` … `12-jobs`, `seed`),
+applied in the order of `manifest.txt` (repository root) on an empty
+database; existing databases are upgraded with `migrations/`. The old
+monolith files (`init.sql`, `functions.sql`, `permissions.sql`, …) were
+removed after checking that every object they created is either in the
+manifest or was deliberately dropped.
 
 ## Target file structure
-One database object per file, organized by kind. Migrating existing
-monolith files into this shape is an ongoing task, not yet finished:
+One database object per file, organized by kind (actual folders are
+numbered, e.g. `03-tables/<schema>/<table>.sql`):
 
 - `tables/<table_name>.sql` — one table definition per file (columns,
   constraints, indexes on that table)
