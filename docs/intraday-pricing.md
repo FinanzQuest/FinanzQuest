@@ -10,7 +10,14 @@ today's value curve, and the stock page shows an intraday chart.
 
 ## Data sources (unchanged providers)
 
-The updater keeps using the two APIs it already calls:
+The updater keeps using the two APIs it already calls. Which one serves an
+asset is stored in `api.assets.price_provider`, set by
+`updater --mode resolve-providers`: Alpaca if it returns daily IEX bars for
+the symbol in the last 30 days, else Yahoo Finance if it does, else NULL (the
+updater skips the asset). Only definitive answers change the column; network
+errors and rate limits keep the stored value. The container resolves assets
+without a provider on start; `run_updater.sh resolve-providers --recheck-all`
+re-checks everything.
 
 | `api.assets.price_provider` | API | Intraday request |
 |---|---|---|

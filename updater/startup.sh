@@ -12,6 +12,9 @@ done
 echo "Starting cron daemon..."
 crond -f -l 2 &
 echo "Running updater at startup..."
+# Assets without a price provider (new, or served by neither API last time):
+# ask Alpaca, then Yahoo Finance. Cheap once everything is resolved.
+/usr/local/bin/run_updater.sh resolve-providers
 /usr/local/bin/run_updater.sh daily
 # Intraday too, on any day: it fetches from the newest stored bar (or the
 # last 30 days on a fresh database), so gaps from downtime are filled.

@@ -92,7 +92,7 @@ export type Database = {
 					id: number
 					last_updated: string | null
 					name: string
-					price_provider: Database["public"]["Enums"]["priceprovider"]
+					price_provider: Database["public"]["Enums"]["priceprovider"] | null
 					symbol: string
 				}
 				Insert: {
@@ -101,7 +101,7 @@ export type Database = {
 					id?: number
 					last_updated?: string | null
 					name: string
-					price_provider: Database["public"]["Enums"]["priceprovider"]
+					price_provider?: Database["public"]["Enums"]["priceprovider"] | null
 					symbol: string
 				}
 				Update: {
@@ -110,7 +110,7 @@ export type Database = {
 					id?: number
 					last_updated?: string | null
 					name?: string
-					price_provider?: Database["public"]["Enums"]["priceprovider"]
+					price_provider?: Database["public"]["Enums"]["priceprovider"] | null
 					symbol?: string
 				}
 				Relationships: []

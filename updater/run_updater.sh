@@ -1,6 +1,8 @@
 #!/bin/sh
-# Usage: run_updater.sh [daily|intraday]   (default: daily)
+# Usage: run_updater.sh [daily|intraday|resolve-providers] [extra updater args]
+#        (default: daily), e.g. run_updater.sh resolve-providers --recheck-all
 MODE="${1:-daily}"
+[ $# -gt 0 ] && shift
 
 # Settings persisted by startup.sh (cron jobs do not inherit the container env).
 [ -f /etc/updater.env ] && . /etc/updater.env
@@ -22,4 +24,5 @@ updater \
   --yf-timeout "$YF_TIMEOUT" \
   --alpaca-timeout "$ALPACA_TIMEOUT" \
   --batch-size "$BATCH_SIZE" \
-  --fetch-chunk-size "$FETCH_CHUNK_SIZE"
+  --fetch-chunk-size "$FETCH_CHUNK_SIZE" \
+  "$@"

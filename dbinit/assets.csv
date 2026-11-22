@@ -21,14 +21,14 @@ id,symbol,name,description,asset_type,price_provider
 20,RER1.F,Eiffage S.A.,Bau - Bauwesen,stock,yahoo
 21,PSN.L,Persimmon plc,Bau - Bauwesen,stock,yahoo
 22,PWR,Quanta Services; Inc.,Bau - Bauwesen,stock,alpaca
-23,SKBSY,Skanska AB,Bau - Bauwesen,stock,alpaca
+23,SKBSY,Skanska AB,Bau - Bauwesen,stock,yahoo
 24,SAX.DE,Strabag SE,Bau - Bauwesen,stock,yahoo
 25,PHM,PulteGroup; Inc.,Bau - Wohnbau,stock,alpaca
-26,AHT.L,Ashtead Group plc,Bau und Bauwirtschaft,stock,yahoo
-27,BDEV.L,Barratt Developments plc,Bau und Bauwirtschaft,stock,yahoo
+26,AHT.L,Ashtead Group plc,Bau und Bauwirtschaft,stock,
+27,BDEV.L,Barratt Developments plc,Bau und Bauwirtschaft,stock,
 28,4BV.F,Bauer AG,Bau und Bauwirtschaft,stock,yahoo
 29,CTEC.L,Conteco Holding A/S,Bau und Bauwirtschaft,stock,yahoo
-30,CRH.L,CRH plc,Bau und Bauwirtschaft,stock,yahoo
+30,CRH.L,CRH plc,Bau und Bauwirtschaft,stock,
 31,FER.MC,Ferrovial; S.A.,Bau und Bauwirtschaft - Bau und Betrieb von Infrastruktur,stock,yahoo
 32,2FB.SG,Fortune Brands Home & Security; Inc.,Bau und Bauwirtschaft - Baustoffe und -ausrüstung,stock,yahoo
 33,FLR,Fluor Corporation,Bau und Bauwirtschaft - Ingenieurdienstleistungen,stock,alpaca
@@ -37,7 +37,7 @@ id,symbol,name,description,asset_type,price_provider
 36,CDI.PA,Cie de Saint-Gobain SA,Baustoffe - Baustoffe und Baumaterialien,stock,yahoo
 37,ROCK-B.CO,Rockwool International A/S,Baustoffe - Dämmstoffe,stock,yahoo
 38,HEI.DE,HeidelbergCement AG,Baustoffe - Zement,stock,yahoo
-39,RMC.BE,Buzzi Unicem S.p.A.,Baustoffe - Zement und Zuschlagstoffe,stock,yahoo
+39,RMC.BE,Buzzi Unicem S.p.A.,Baustoffe - Zement und Zuschlagstoffe,stock,
 40,HOT.DE,Hochtief AG,Bauwesen - Bau und Infrastruktur,stock,yahoo
 41,MAS,Masco Corporation,Bauwesen - Baumaterialien,stock,alpaca
 42,LLD.F,LafargeHolcim Ltd,Bauwesen - Baustoffe,stock,yahoo
@@ -46,7 +46,7 @@ id,symbol,name,description,asset_type,price_provider
 45,LEN,Lennar Corporation,Bauwesen - Wohnbau,stock,alpaca
 46,DHI,D.R. Horton; Inc.,Bauwirtschaft - Wohnbau,stock,alpaca
 47,GIL.DE,Gildan Activewear Inc.,Bekleidung - Bekleidungsindustrie,stock,yahoo
-48,HBI,Hanesbrands Inc.,Bekleidung - Bekleidungsindustrie,stock,alpaca
+48,HBI,Hanesbrands Inc.,Bekleidung - Bekleidungsindustrie,stock,
 49,48CA.F,Canada Goose Holdings Inc.,Bekleidung - Luxus,stock,yahoo
 50,CPRI,Capri Holdings Limited,Bekleidung - Luxusmode,stock,alpaca
 51,BOSS.DE,HUGO BOSS AG,Bekleidung - Mode,stock,yahoo
@@ -70,15 +70,15 @@ id,symbol,name,description,asset_type,price_provider
 69,BIIB,Biogen Inc.,Biotechnologie,stock,alpaca
 70,BMRN,BioMarin Pharmaceutical Inc.,Biotechnologie,stock,alpaca
 71,BSN.F,Biosearch SA,Biotechnologie,stock,yahoo
-72,BLUE,bluebird bio; Inc.,Biotechnologie,stock,alpaca
+72,BLUE,bluebird bio; Inc.,Biotechnologie,stock,
 73,2CV.F,Celyad SA,Biotechnologie,stock,yahoo
 74,MRNA,Moderna; Inc.,Biotechnologie,stock,alpaca
-75,MOR.DE,MorphoSys AG,Biotechnologie,stock,yahoo
+75,MOR.DE,MorphoSys AG,Biotechnologie,stock,
 76,NKTR,Nektar Therapeutics,Biotechnologie,stock,alpaca
 77,NBIX,Neurocrine Biosciences; Inc.,Biotechnologie,stock,alpaca
 78,2NN.MU,Nordic Nanovector ASA,Biotechnologie,stock,yahoo
 79,NZM2.MU,Novozymes A/S,Biotechnologie,stock,yahoo
-80,GLPG.AS,Galapagos NV,Biotechnologie - Biopharmazeutika,stock,yahoo
+80,GLPG.AS,Galapagos NV,Biotechnologie - Biopharmazeutika,stock,
 81,INCY,Incyte Corporation,Biotechnologie - Biopharmazeutika,stock,alpaca
 82,ILMN,Illumina; Inc.,Biotechnologie - Genomik,stock,alpaca
 83,AKZA.AS,Akzo Nobel N.V.,Chemie,stock,yahoo
@@ -129,21 +129,21 @@ id,symbol,name,description,asset_type,price_provider
 128,KSS,Kohl's Corporation,Einzelhandel - Bekleidung,stock,alpaca
 129,L,L Brands; Inc.,Einzelhandel - Bekleidung,stock,alpaca
 130,LREN3.SA,Lojas Renner S.A.,Einzelhandel - Bekleidung,stock,yahoo
-131,JWN,Nordstrom; Inc.,Einzelhandel - Bekleidung,stock,alpaca
+131,JWN,Nordstrom; Inc.,Einzelhandel - Bekleidung,stock,
 132,PUM.DE,Puma SE,Einzelhandel - Bekleidung,stock,yahoo
 133,PVH,PVH Corp,Einzelhandel - Bekleidung,stock,alpaca
 134,RL,Ralph Lauren Corporation,Einzelhandel - Bekleidung,stock,alpaca
 135,ROST,Ross Stores; Inc.,Einzelhandel - Bekleidung,stock,alpaca
-136,SKX,Skechers U.S.A.; Inc.,Einzelhandel - Bekleidung,stock,alpaca
+136,SKX,Skechers U.S.A.; Inc.,Einzelhandel - Bekleidung,stock,
 137,SFIX,Stitch Fix; Inc.,Einzelhandel - Bekleidung,stock,alpaca
 138,TJX,The TJX Companies; Inc.,Einzelhandel - Bekleidung,stock,alpaca
 139,TLX.DE,Tom Tailor Holding SE,Einzelhandel - Bekleidung,stock,yahoo
-140,GPS,Gap Inc.,Einzelhandel - Bekleidung und Accessoires,stock,alpaca
+140,GPS,Gap Inc.,Einzelhandel - Bekleidung und Accessoires,stock,
 141,ZAL.DE,Zalando SE,Einzelhandel - Bekleidung und Accessoires,stock,yahoo
 142,BME.L,B&M European Value Retail SA,Einzelhandel - Discount-Einzelhandel,stock,yahoo
 143,FIVE,Five Below; Inc.,Einzelhandel - Discount-Einzelhandel,stock,alpaca
 144,DLTR,Dollar Tree; Inc.,Einzelhandel - Diskontläden,stock,alpaca
-145,WBA,Walgreens Boots Alliance; Inc.,Einzelhandel - Drogerien und Apotheken,stock,alpaca
+145,WBA,Walgreens Boots Alliance; Inc.,Einzelhandel - Drogerien und Apotheken,stock,
 146,AMZN,Amazon.com; Inc.,Einzelhandel - E-Commerce,stock,alpaca
 147,MELI,MercadoLibre; Inc.,Einzelhandel - E-Commerce,stock,alpaca
 148,PDD,Pinduoduo Inc.,Einzelhandel - E-Commerce,stock,alpaca
@@ -171,11 +171,11 @@ id,symbol,name,description,asset_type,price_provider
 171,FIE.DE,Fielmann AG,Einzelhandel - Optik,stock,yahoo
 172,PNDORA.CO,Pandora A/S,Einzelhandel - Schmuck,stock,yahoo
 173,ULTA,Ulta Beauty; Inc.,Einzelhandel - Schönheitsprodukte,stock,alpaca
-174,FL,Foot Locker; Inc.,Einzelhandel - Schuhe und Sportbekleidung,stock,alpaca
+174,FL,Foot Locker; Inc.,Einzelhandel - Schuhe und Sportbekleidung,stock,
 175,LULU,Lululemon Athletica Inc.,Einzelhandel - Sportbekleidung,stock,alpaca
 176,CA.PA,Carrefour SA,Einzelhandel - Supermärkte,stock,yahoo
 177,M,Macy's; Inc.,Einzelhandel - Warenhäuser,stock,alpaca
-178,VAR1.DE,Varta AG,Elektroindustrie - Elektrogeräte und Instrumente,stock,yahoo
+178,VAR1.DE,Varta AG,Elektroindustrie - Elektrogeräte und Instrumente,stock,
 179,LIGHT.AS,Signify N.V.,Elektronik - Beleuchtung,stock,yahoo
 180,LR.PA,Legrand S.A.,Elektronik - Elektrische Ausrüstung,stock,yahoo
 181,DNQ.F,Datacolor AG,Elektronik - Farbmanagement,stock,yahoo
@@ -185,7 +185,7 @@ id,symbol,name,description,asset_type,price_provider
 185,ASM.AS,ASM International NV,Elektronik - Halbleiterproduktionsausrüstung,stock,yahoo
 186,ASMF.F,ASM Pacific Technology Ltd.,Elektronik - Halbleiterproduktionsausrüstung,stock,yahoo
 187,7752.T,Canon Inc.,Elektronik - Kameras und Drucker,stock,yahoo
-188,IPG,IPG Photonics Corporation,Elektronik - Lasertechnologie,stock,alpaca
+188,IPG,IPG Photonics Corporation,Elektronik - Lasertechnologie,stock,
 189,ASML,ASML Holding N.V.,Elektronik - Lithographieausrüstung für Halbleiter,stock,alpaca
 190,GRMN,Garmin Ltd.,Elektronik - Navigationstechnologie,stock,alpaca
 191,AME,AMETEK; Inc.,Elektronik - Präzisionsinstrumente,stock,alpaca
@@ -196,7 +196,7 @@ id,symbol,name,description,asset_type,price_provider
 196,0006.HK,Power Assets Holdings Limited,Energie,stock,yahoo
 197,NOV,NOV Inc.,Energie - Ausrüstung für Öl- und Gasbohrungen,stock,alpaca
 198,SBO.VI,Schoeller-Bleckmann Oilfield Equipment AG,Energie - Ausrüstung und Dienstleistungen,stock,yahoo
-199,TSCDF,Tesco Corporation,Energie - Ausrüstung und Dienstleistungen,stock,alpaca
+199,TSCDF,Tesco Corporation,Energie - Ausrüstung und Dienstleistungen,stock,yahoo
 200,ESW.F,Ence Energia y Celulosa SA,Energie - Biomasse und Zellstoff,stock,yahoo
 201,CNP,CenterPoint Energy; Inc.,Energie - Elektrizität,stock,alpaca
 202,CMS,CMS Energy Corporation,Energie - Elektrizität,stock,alpaca
@@ -229,7 +229,7 @@ id,symbol,name,description,asset_type,price_provider
 229,GZ5.F,Gazprom PJSC,Energie - Erdgas,stock,yahoo
 230,OKE,ONEOK; Inc.,Energie - Erdgas,stock,alpaca
 231,ENA.F,Enagas SA,Energie - Erdgasinfrastruktur,stock,yahoo
-232,PGS.OL,PGS ASA,Energie - Erdöl und Erdgas,stock,yahoo
+232,PGS.OL,PGS ASA,Energie - Erdöl und Erdgas,stock,
 233,LYV.SG,Orron Energy AB,Energie - Erdöl- und Erdgasexploration,stock,yahoo
 234,NRE.F,Northland Power Inc.,Energie - Erneuerbare Energie,stock,yahoo
 235,ORSTED.CO,Orsted A/S,Energie - Erneuerbare Energie,stock,yahoo
@@ -257,7 +257,7 @@ id,symbol,name,description,asset_type,price_provider
 257,EVD.DE,EVN AG,Energie - Multi-Utilities,stock,yahoo
 258,NTGY.MC,Naturgy Energy Group; S.A.,Energie - Multi-Utilities,stock,yahoo
 259,TTE,TotalEnergies SE,Energie - Multi-Utilities,stock,alpaca
-260,AKRBF,Aker BP ASA,Energie - Öl und Gas,stock,alpaca
+260,AKRBF,Aker BP ASA,Energie - Öl und Gas,stock,yahoo
 261,APA,APA Corporation,Energie - Öl und Gas,stock,alpaca
 262,0883.HK,CNOOC Limited,Energie - Öl und Gas,stock,yahoo
 263,0EBQ.IL,Delek Drilling Limited Partnership,Energie - Öl und Gas,stock,yahoo
@@ -283,7 +283,7 @@ id,symbol,name,description,asset_type,price_provider
 283,UGPA3.SA,Ultrapar Participacoes SA,Energie - Öl und Gas,stock,yahoo
 284,VLO,Valero Energy Corporation,Energie - Öl und Gas,stock,alpaca
 285,YPFD.BA,YPF SA,Energie - Öl und Gas,stock,yahoo
-286,MRO,Marathon Oil Corporation,Energie - Öl und Gas Exploration,stock,alpaca
+286,MRO,Marathon Oil Corporation,Energie - Öl und Gas Exploration,stock,
 287,KMI,Kinder Morgan; Inc.,Energie - Öl und Gas Pipelines,stock,alpaca
 288,BKR,Baker Hughes Company,Energie - Öl- und Gasdienstleistungen,stock,alpaca
 289,HAL,Halliburton Company,Energie - Öl- und Gasdienstleistungen,stock,alpaca
@@ -299,7 +299,7 @@ id,symbol,name,description,asset_type,price_provider
 299,EQT.ST,EQT AB,Energie - Öl- und Gasexploration und -produktion,stock,yahoo
 300,EQNR.OL,Equinor ASA,Energie - Öl- und Gasexploration und -produktion,stock,yahoo
 301,GALP.LS,Galp Energia SGPS SA,Energie - Öl- und Gasexploration und -produktion,stock,yahoo
-302,HES,Hess Corporation,Energie - Öl- und Gasexploration und -produktion,stock,alpaca
+302,HES,Hess Corporation,Energie - Öl- und Gasexploration und -produktion,stock,
 303,MPC,Marathon Petroleum Corporation,Energie - Raffinerien,stock,alpaca
 304,FSLR,First Solar; Inc.,Energie - Solarenergie,stock,alpaca
 305,1AE.F,SMA Solar Technology AG,Energie - Solarenergie,stock,yahoo
@@ -353,7 +353,7 @@ id,symbol,name,description,asset_type,price_provider
 353,GPN,Global Payments Inc.,Finanzdienstleistungen - Zahlungsverarbeitung,stock,alpaca
 354,NEXI.MI,Nexi S.p.A.,Finanzdienstleistungen - Zahlungsverkehr,stock,yahoo
 355,V,Visa Inc.,Finanzdienstleistungen - Zahlungsverkehr,stock,alpaca
-356,0011.HK,Hang Seng Bank Ltd,Finanzen,stock,yahoo
+356,0011.HK,Hang Seng Bank Ltd,Finanzen,stock,
 357,MOV.F,Aareal Bank AG,Finanzen - Banken,stock,yahoo
 358,ABN.AS,ABN AMRO Group N.V.,Finanzen - Banken,stock,yahoo
 359,BMPS.MI,Banca Monte dei Paschi di Siena S.p.A.,Finanzen - Banken,stock,yahoo
@@ -365,11 +365,11 @@ id,symbol,name,description,asset_type,price_provider
 365,BBAS3.SA,Banco do Brasil SA,Finanzen - Banken,stock,yahoo
 366,BMA.BA,Banco Macro SA,Finanzen - Banken,stock,yahoo
 367,0RUG.IL,Bank Hapoalim B.M.,Finanzen - Banken,stock,yahoo
-368,BLMIF,Bank Leumi Le-Israel B.M.,Finanzen - Banken,stock,alpaca
+368,BLMIF,Bank Leumi Le-Israel B.M.,Finanzen - Banken,stock,yahoo
 369,BAC,Bank of America Corporation,Finanzen - Banken,stock,alpaca
-370,BKCYF,Bank of Cyprus Holdings Public Limited Company,Finanzen - Banken,stock,alpaca
-371,BIRG.L,Bank of Ireland Group plc,Finanzen - Banken,stock,yahoo
-372,BK,Bank of New York Mellon Corporation,Finanzen - Banken,stock,alpaca
+370,BKCYF,Bank of Cyprus Holdings Public Limited Company,Finanzen - Banken,stock,yahoo
+371,BIRG.L,Bank of Ireland Group plc,Finanzen - Banken,stock,
+372,BK,Bank of New York Mellon Corporation,Finanzen - Banken,stock,
 373,BARC.L,Barclays PLC,Finanzen - Banken,stock,yahoo
 374,BG.VI,BAWAG Group AG,Finanzen - Banken,stock,yahoo
 376,BNF.SG,BNP Paribas Fortis SA/NV,Finanzen - Banken,stock,yahoo
@@ -382,7 +382,7 @@ id,symbol,name,description,asset_type,price_provider
 383,CFG,Citizens Financial Group; Inc.,Finanzen - Banken,stock,alpaca
 384,CBG.L,Close Brothers Group plc,Finanzen - Banken,stock,yahoo
 385,CMAB.F,Comdirect Bank AG,Finanzen - Banken,stock,yahoo
-386,CMA,Comerica Incorporated,Finanzen - Banken,stock,alpaca
+386,CMA,Comerica Incorporated,Finanzen - Banken,stock,
 387,CBK.DE,Commerzbank AG,Finanzen - Banken,stock,yahoo
 388,ACA.PA,Crédit Agricole S.A.,Finanzen - Banken,stock,yahoo
 389,DANSKE.CO,Danske Bank A/S,Finanzen - Banken,stock,yahoo
@@ -392,9 +392,9 @@ id,symbol,name,description,asset_type,price_provider
 393,FMNB.F,Farmers National Banc Corp,Finanzen - Banken,stock,yahoo
 394,FITB,Fifth Third Bancorp,Finanzen - Banken,stock,alpaca
 395,FBK.MI,FinecoBank Banca Fineco S.p.A.,Finanzen - Banken,stock,yahoo
-396,FRCB,First Republic Bank,Finanzen - Banken,stock,alpaca
+396,FRCB,First Republic Bank,Finanzen - Banken,stock,yahoo
 397,GGAL.BA,Grupo Financiero Galicia S.A.,Finanzen - Banken,stock,yahoo
-398,HAB.DE,Habib Bank AG Zurich,Finanzen - Banken,stock,yahoo
+398,HAB.DE,Habib Bank AG Zurich,Finanzen - Banken,stock,
 399,HBAN,Huntington Bancshares Inc.,Finanzen - Banken,stock,alpaca
 400,1398.HK,Industrial and Commercial Bank of China Limited,Finanzen - Banken,stock,yahoo
 401,INGA.AS,ING Groep N.V.,Finanzen - Banken,stock,yahoo
@@ -406,7 +406,7 @@ id,symbol,name,description,asset_type,price_provider
 407,KDB.F,Kreditanstalt für Wiederaufbau (KfW),Finanzen - Banken,stock,yahoo
 408,MTB,M&T Bank Corporation,Finanzen - Banken,stock,alpaca
 409,MB.MI,Mediobanca Banca di Credito Finanziario S.p.A.,Finanzen - Banken,stock,yahoo
-410,NBNKF,Nordea Bank Abp,Finanzen - Banken,stock,alpaca
+410,NBNKF,Nordea Bank Abp,Finanzen - Banken,stock,yahoo
 411,1NBA.DE,OneSavings Bank plc,Finanzen - Banken,stock,yahoo
 412,PNC,PNC Financial Services Group; Inc.,Finanzen - Banken,stock,alpaca
 413,RBI.VI,Raiffeisen Bank International AG,Finanzen - Banken,stock,yahoo
@@ -415,18 +415,18 @@ id,symbol,name,description,asset_type,price_provider
 416,SEB-A.ST,Skandinaviska Enskilda Banken AB,Finanzen - Banken,stock,yahoo
 417,SK.PA,Société Générale S.A.,Finanzen - Banken,stock,yahoo
 418,STT,State Street Corporation,Finanzen - Banken,stock,alpaca
-419,SIVBQ,SVB Financial Group,Finanzen - Banken,stock,alpaca
+419,SIVBQ,SVB Financial Group,Finanzen - Banken,stock,
 420,SVKB.F,Svenska Handelsbanken AB (publ),Finanzen - Banken,stock,yahoo
 421,SWED-A.ST,Swedbank AB,Finanzen - Banken,stock,yahoo
-422,SYDB.CO,Sydbank A/S,Finanzen - Banken,stock,yahoo
+422,SYDB.CO,Sydbank A/S,Finanzen - Banken,stock,
 423,GS,The Goldman Sachs Group; Inc.,Finanzen - Banken,stock,alpaca
 424,IDVA.SG,Industrivaerden AB,Finanzen - Beteiligungsgesellschaft,stock,yahoo
 425,INVE-B.ST,Investor AB (Class B),Finanzen - Beteiligungsgesellschaft,stock,yahoo
 426,KFI1.F,KAP Beteiligungs-AG,Finanzen - Beteiligungsgesellschaft,stock,yahoo
 427,DBAN.SG,Deutsche Beteiligungs AG,Finanzen - Beteiligungsgesellschaften,stock,yahoo
 428,DEZ.DE,Deutsche Zweitmarkt AG,Finanzen - Beteiligungsgesellschaften,stock,yahoo
-429,NGLB.DE,Naga Group AG,Finanzen - Brokerage,stock,yahoo
-430,EXXRF,Exor NV,Finanzen - Dachgesellschaft,stock,alpaca
+429,NGLB.DE,Naga Group AG,Finanzen - Brokerage,stock,
+430,EXXRF,Exor NV,Finanzen - Dachgesellschaft,stock,yahoo
 431,CGM.F,Cerved Group S.p.A.,Finanzen - Finanzdienstleistungen,stock,yahoo
 432,ERF.PA,Eurazeo SE,Finanzen - Finanzdienstleistungen,stock,yahoo
 433,GBLB.BR,GBL Group SA,Finanzen - Finanzdienstleistungen,stock,yahoo
@@ -443,7 +443,7 @@ id,symbol,name,description,asset_type,price_provider
 444,IVZ,Invesco Ltd.,Finanzen - Investmentfonds,stock,alpaca
 445,JUP.L,Jupiter Fund Management plc,Finanzen - Investmentfonds,stock,yahoo
 446,SMT.L,Scottish Mortgage Investment Trust PLC,Finanzen - Investmentfonds,stock,yahoo
-447,DFS,Discover Financial Services,Finanzen - Kreditkarten,stock,alpaca
+447,DFS,Discover Financial Services,Finanzen - Kreditkarten,stock,
 448,III.L,3i Group plc,Finanzen - Private Equity,stock,yahoo
 449,MCO,Moody's Corporation,Finanzen - Ratingagentur,stock,alpaca
 450,AMP,Ameriprise Financial; Inc.,Finanzen - Vermögensverwaltung,stock,alpaca
@@ -453,7 +453,7 @@ id,symbol,name,description,asset_type,price_provider
 454,BEN,Franklin Resources; Inc.,Finanzen - Vermögensverwaltung,stock,alpaca
 455,NTRS,Northern Trust Corporation,Finanzen - Vermögensverwaltung,stock,alpaca
 456,PVQ.F,Perpetual Ltd,Finanzen - Vermögensverwaltung,stock,yahoo
-457,SDR.L,Schroders plc,Finanzen - Vermögensverwaltung,stock,yahoo
+457,SDR.L,Schroders plc,Finanzen - Vermögensverwaltung,stock,
 458,STJ.L,St. James's Place plc,Finanzen - Vermögensverwaltung,stock,yahoo
 459,APAM.AS,a.s.r. Nederland NV,Finanzen - Versicherung,stock,yahoo
 460,AFL,Aflac Incorporated,Finanzen - Versicherung,stock,alpaca
@@ -467,9 +467,9 @@ id,symbol,name,description,asset_type,price_provider
 468,AIZ,Assicurazioni Generali S.p.A.,Finanzen - Versicherung,stock,alpaca
 469,AV.L,Aviva plc,Finanzen - Versicherung,stock,yahoo
 470,CS.PA,AXA SA,Finanzen - Versicherung,stock,yahoo
-471,EFC1.BE,Baloise Holding AG,Finanzen - Versicherung,stock,yahoo
+471,EFC1.BE,Baloise Holding AG,Finanzen - Versicherung,stock,
 472,BBSE3.SA,BB Seguridade Participacoes SA,Finanzen - Versicherung,stock,yahoo
-473,BEZ.L,Beazley plc,Finanzen - Versicherung,stock,yahoo
+473,BEZ.L,Beazley plc,Finanzen - Versicherung,stock,
 474,2628.HK,China Life Insurance Company Limited,Finanzen - Versicherung,stock,yahoo
 475,CB,Chubb Limited,Finanzen - Versicherung,stock,alpaca
 476,CINF,Cincinnati Financial Corporation,Finanzen - Versicherung,stock,alpaca
@@ -478,7 +478,7 @@ id,symbol,name,description,asset_type,price_provider
 479,GSF.OL,Gjensidige Forsikring ASA,Finanzen - Versicherung,stock,yahoo
 480,LNC,Lincoln National Corporation,Finanzen - Versicherung,stock,alpaca
 481,MAP.MC,Mapfre; S.A.,Finanzen - Versicherung,stock,yahoo
-482,MMC,Marsh & McLennan Companies; Inc.,Finanzen - Versicherung,stock,alpaca
+482,MMC,Marsh & McLennan Companies; Inc.,Finanzen - Versicherung,stock,
 483,MET,MetLife; Inc.,Finanzen - Versicherung,stock,alpaca
 484,2318.HK,Ping An Insurance (Group) Company of China; Ltd.,Finanzen - Versicherung,stock,yahoo
 485,PST.MI,Poste Italiane S.p.A.,Finanzen - Versicherung,stock,yahoo
@@ -487,7 +487,7 @@ id,symbol,name,description,asset_type,price_provider
 488,PRU,Prudential Financial; Inc.,Finanzen - Versicherung,stock,alpaca
 489,SCR.PA,SCOR SE,Finanzen - Versicherung,stock,yahoo
 490,HIG,The Hartford Financial Services Group; Inc.,Finanzen - Versicherung,stock,alpaca
-491,IIA.VI,Vienna Insurance Group AG,Finanzen - Versicherung,stock,yahoo
+491,IIA.VI,Vienna Insurance Group AG,Finanzen - Versicherung,stock,
 492,STB.OL,Storebrand ASA,Finanzen - Versicherungen,stock,yahoo
 493,MA,Mastercard Incorporated,Finanzen - Zahlungsabwicklung,stock,alpaca
 494,AXP,American Express Company,Finanzen - Zahlungsdienste,stock,alpaca
@@ -547,7 +547,7 @@ id,symbol,name,description,asset_type,price_provider
 548,DGX,Quest Diagnostics Incorporated,Gesundheitswesen - Diagnostiklabor,stock,alpaca
 549,DVA,DaVita Inc.,Gesundheitswesen - Dialyse,stock,alpaca
 550,IQV,IQVIA Holdings Inc.,Gesundheitswesen - Forschung und Entwicklung,stock,alpaca
-551,ORP.PA,Orpea SA,Gesundheitswesen - Gesundheitsdienste,stock,yahoo
+551,ORP.PA,Orpea SA,Gesundheitswesen - Gesundheitsdienste,stock,
 552,PER.F,Premier; Inc.,Gesundheitswesen - Gesundheitsdienste,stock,yahoo
 553,UHS,Universal Health Services; Inc.,Gesundheitswesen - Gesundheitsdienste,stock,alpaca
 554,FRA.DE,Fresenius SE & Co. KGaA,Gesundheitswesen - Gesundheitsdienstleistungen,stock,yahoo
@@ -562,7 +562,7 @@ id,symbol,name,description,asset_type,price_provider
 563,CI,Cigna Corporation,Gesundheitswesen - Krankenversicherung,stock,alpaca
 564,HUM,Humana Inc.,Gesundheitswesen - Krankenversicherung,stock,alpaca
 565,MF.PA,Mutualité Française Loire - SSAM,Gesundheitswesen - Krankenversicherung,stock,yahoo
-566,ERFSF,Eurofins Scientific SE,Gesundheitswesen - Labor- und Diagnosedienste,stock,alpaca
+566,ERFSF,Eurofins Scientific SE,Gesundheitswesen - Labor- und Diagnosedienste,stock,yahoo
 567,A,Agilent Technologies; Inc.,Gesundheitswesen - Labortechnik,stock,alpaca
 568,HSIC,Henry Schein; Inc.,Gesundheitswesen - Medizinbedarf,stock,alpaca
 569,NCYT.L,Novacyt S.A.,Gesundheitswesen - Medizinische Diagnose,stock,yahoo
@@ -581,7 +581,7 @@ id,symbol,name,description,asset_type,price_provider
 582,DXCM,DexCom; Inc.,Gesundheitswesen - Medizintechnik,stock,alpaca
 583,EW,Edwards Lifesciences Corporation,Gesundheitswesen - Medizintechnik,stock,alpaca
 584,GETI-B.ST,Getinge AB,Gesundheitswesen - Medizintechnik,stock,yahoo
-585,HOLX,Hologic; Inc.,Gesundheitswesen - Medizintechnik,stock,alpaca
+585,HOLX,Hologic; Inc.,Gesundheitswesen - Medizintechnik,stock,
 586,PHI1.DE,Koninklijke Philips NV,Gesundheitswesen - Medizintechnik,stock,yahoo
 587,MDT,Medtronic plc,Gesundheitswesen - Medizintechnik,stock,alpaca
 588,PKN.SG,PerkinElmer; Inc.,Gesundheitswesen - Medizintechnik,stock,yahoo
@@ -604,7 +604,7 @@ id,symbol,name,description,asset_type,price_provider
 605,JNJ,Johnson & Johnson,Gesundheitswesen - Pharmazeutika,stock,alpaca
 606,MRK,Merck & Co.; Inc.,Gesundheitswesen - Pharmazeutika,stock,alpaca
 607,NVO,Novo Nordisk A/S,Gesundheitswesen - Pharmazeutika,stock,alpaca
-608,ORXOY,Orexo AB,Gesundheitswesen - Pharmazeutika,stock,alpaca
+608,ORXOY,Orexo AB,Gesundheitswesen - Pharmazeutika,stock,yahoo
 609,0M2O.IL,Orion Oyj,Gesundheitswesen - Pharmazeutika,stock,yahoo
 610,PRGO,Perrigo Company plc,Gesundheitswesen - Pharmazeutika,stock,alpaca
 611,PFE,Pfizer Inc.,Gesundheitswesen - Pharmazeutika,stock,alpaca
@@ -629,7 +629,7 @@ id,symbol,name,description,asset_type,price_provider
 630,RI.PA,Pernod Ricard S.A.,Getränke - Spirituosen,stock,yahoo
 631,NHY.OL,Norsk Hydro ASA,Grundstoffe - Aluminium,stock,yahoo
 632,WAC.DE,Wacker Chemie AG,Grundstoffe - Chemikalien,stock,yahoo
-633,KCO.DE,K + S AG,Grundstoffe - Düngemittel,stock,yahoo
+633,KCO.DE,K + S AG,Grundstoffe - Düngemittel,stock,
 634,YAR.OL,Yara International ASA,Grundstoffe - Düngemittel,stock,yahoo
 635,LNZ.VI,Lenzing AG,Grundstoffe - Fasern und Textilien,stock,yahoo
 637,VOE.VI,Voestalpine AG,Grundstoffe - Stahlprodukte,stock,yahoo
@@ -655,7 +655,7 @@ id,symbol,name,description,asset_type,price_provider
 657,ARE,Alexandria Real Estate Equities; Inc.,Immobilien,stock,alpaca
 658,AIV,Apartment Investment and Management Company (Aimco),Immobilien,stock,alpaca
 659,TOWN.VI,Aroundtown SA,Immobilien,stock,yahoo
-660,AVB,AvalonBay Communities; Inc.,Immobilien,stock,alpaca
+660,AVB,AvalonBay Communities; Inc.,Immobilien,stock,
 661,0RH1.IL,Azrieli Group Ltd,Immobilien,stock,yahoo
 662,1109.HK,China Resources Land Limited,Immobilien,stock,yahoo
 663,0101.HK,Hang Lung Group Limited,Immobilien,stock,yahoo
@@ -665,13 +665,13 @@ id,symbol,name,description,asset_type,price_provider
 667,0083.HK,Sino Land Company Limited,Immobilien,stock,yahoo
 668,0016.HK,Sun Hung Kai Properties Limited,Immobilien,stock,yahoo
 669,ENXB.F,Nexity SA,Immobilien - Bau und Entwicklung,stock,yahoo
-670,SPI.VI,S IMMO AG,Immobilien - Büroimmobilien,stock,yahoo
+670,SPI.VI,S IMMO AG,Immobilien - Büroimmobilien,stock,
 671,SLG,SL Green Realty Corp,Immobilien - Büroimmobilien,stock,alpaca
 672,TLG.HM,TLG Immobilien AG,Immobilien - Büroimmobilien,stock,yahoo
 673,CSGP,CoStar Group; Inc.,Immobilien - Daten und Analysen,stock,alpaca
 674,DLR,Digital Realty Trust; Inc.,Immobilien - Datenzentren,stock,alpaca
 675,REG,Regency Centers Corporation,Immobilien - Einzelhandel,stock,alpaca
-676,UNBA.F,Unibail-Rodamco-Westfield SE,Immobilien - Einzelhandelimmobilien,stock,yahoo
+676,UNBA.F,Unibail-Rodamco-Westfield SE,Immobilien - Einzelhandelimmobilien,stock,
 677,VNO,Vornado Realty Trust,Immobilien - Einzelhandelimmobilien,stock,alpaca
 678,FRT,Federal Realty Investment Trust,Immobilien - Einzelhandelsimmobilien,stock,alpaca
 679,KIM,Kimco Realty Corporation,Immobilien - Einzelhandelsimmobilien,stock,alpaca
@@ -680,7 +680,7 @@ id,symbol,name,description,asset_type,price_provider
 682,SPG,Simon Property Group; Inc.,Immobilien - Einzelhandelsimmobilien,stock,alpaca
 684,MULT3.SA,Multiplan Empreendimentos Imobiliários S.A.,Immobilien - Entwicklung und Verwaltung,stock,yahoo
 685,NUVA.DE,Noratis AG,Immobilien - Entwicklung und Verwaltung,stock,yahoo
-686,HCP,HCP; Inc.,Immobilien - Gesundheitswesenimmobilien,stock,alpaca
+686,HCP,HCP; Inc.,Immobilien - Gesundheitswesenimmobilien,stock,
 687,VTR,Ventas; Inc.,Immobilien - Gesundheitswesenimmobilien,stock,alpaca
 688,WELL,Welltower Inc.,Immobilien - Gesundheitswesenimmobilien,stock,alpaca
 689,BXP,Boston Properties; Inc.,Immobilien - Gewerbeimmobilien,stock,alpaca
@@ -695,17 +695,17 @@ id,symbol,name,description,asset_type,price_provider
 698,LAND.L,Land Securities Group plc,Immobilien - Gewerbeimmobilien,stock,yahoo
 699,WY,Weyerhaeuser Company,Immobilien - Holz und Zellstoff,stock,alpaca
 700,HST,Host Hotels & Resorts; Inc.,Immobilien - Hotelimmobilien,stock,alpaca
-701,RDFN,Redfin Corporation,Immobilien - Immobiliendienstleistungen,stock,alpaca
+701,RDFN,Redfin Corporation,Immobilien - Immobiliendienstleistungen,stock,
 702,REY.MI,Reyer Venezia Mestre,Immobilien - Immobiliendienstleistungen,stock,yahoo
 703,IY4.F,Immobilière Dassault SA,Immobilien - Immobilienentwicklung,stock,yahoo
 705,INH.DE,Instone Real Estate Group AG,Immobilien - Immobilienentwicklung,stock,yahoo
-706,SK3.F,SK3 Group AB,Immobilien - Immobilienentwicklung,stock,yahoo
+706,SK3.F,SK3 Group AB,Immobilien - Immobilienentwicklung,stock,
 707,PLD,Prologis; Inc.,Immobilien - Lagerung und Logistik,stock,alpaca
 708,PSA,Public Storage,Immobilien - Lagerung und Logistik,stock,alpaca
 709,O,Realty Income Corporation,Immobilien - Real Estate Investment Trusts,stock,alpaca
 710,EXR,Extra Space Storage Inc.,Immobilien - Self-Storage,stock,alpaca
 711,DWNI.DE,Deutsche Wohnen SE,Immobilien - Wohnimmobilien,stock,yahoo
-712,EQR,Equity Residential,Immobilien - Wohnimmobilien,stock,alpaca
+712,EQR,Equity Residential,Immobilien - Wohnimmobilien,stock,
 713,ESS,Essex Property Trust; Inc.,Immobilien - Wohnimmobilien,stock,alpaca
 714,TEG.DE,TAG Immobilien AG,Immobilien - Wohnimmobilien,stock,yahoo
 715,UDR,UDR; Inc.,Immobilien - Wohnimmobilien,stock,alpaca
@@ -715,11 +715,11 @@ id,symbol,name,description,asset_type,price_provider
 719,UNP,Union Pacific Corporation,Industrie - Bahndienste,stock,alpaca
 720,VOS.DE,Vossloh AG,Industrie - Bahndienste,stock,yahoo
 721,WAB,Wabtec Corporation,Industrie - Bahndienste,stock,alpaca
-722,CCRO3.SA,CCR S.A.,Industrie - Bau und Ingenieurwesen,stock,yahoo
+722,CCRO3.SA,CCR S.A.,Industrie - Bau und Ingenieurwesen,stock,
 723,FAST,Fastenal Company,Industrie - Bau- und Baustoffzulieferung,stock,alpaca
 724,CAT,Caterpillar Inc.,Industrie - Baumaschinen,stock,alpaca
 725,MHK,Mohawk Industries; Inc.,Industrie - Bodenbeläge,stock,alpaca
-726,SCS,Steelcase Inc.,Industrie - Büromöbel,stock,alpaca
+726,SCS,Steelcase Inc.,Industrie - Büromöbel,stock,
 727,AKER.OL,Aker ASA,Industrie - Diversifizierte Industrie,stock,yahoo
 728,HDD.DE,Heidelberger Druckmaschinen AG,Industrie - Druck- und Medientechnologie,stock,yahoo
 729,SND.F,Schneider Electric SE,Industrie - Elektrikausrüstung,stock,yahoo
@@ -753,7 +753,7 @@ id,symbol,name,description,asset_type,price_provider
 757,UPS,United Parcel Service; Inc.,Industrie - Luft- und Raumfahrt und Verteidigung,stock,alpaca
 758,UAL,United Airlines Holdings; Inc.,Industrie - Luftfahrt,stock,alpaca
 759,SKF-B.ST,AB SKF,Industrie - Maschinenbau,stock,yahoo
-760,AA9.BE,Alfa Laval AB,Industrie - Maschinenbau,stock,yahoo
+760,AA9.BE,Alfa Laval AB,Industrie - Maschinenbau,stock,
 761,ANDR.VI,ANDRITZ AG,Industrie - Maschinenbau,stock,yahoo
 762,ATCO-B.ST,Atlas Copco AB,Industrie - Maschinenbau,stock,yahoo
 763,EVK.DE,Aumann AG,Industrie - Maschinenbau,stock,yahoo
@@ -764,7 +764,7 @@ id,symbol,name,description,asset_type,price_provider
 768,PFV.DE,Pfeiffer Vacuum Technology AG,Industrie - Maschinenbau,stock,yahoo
 769,TPE.DE,PVA TePla AG,Industrie - Maschinenbau,stock,yahoo
 770,SAND.ST,Sandvik AB,Industrie - Maschinenbau,stock,yahoo
-771,SHA.DE,Schaeffler AG,Industrie - Maschinenbau,stock,yahoo
+771,SHA.DE,Schaeffler AG,Industrie - Maschinenbau,stock,
 772,SNA,Snap-on Incorporated,Industrie - Maschinenbau,stock,alpaca
 773,SPX.L,Spirax-Sarco Engineering plc,Industrie - Maschinenbau,stock,yahoo
 774,SUY1.F,Sulzer AG,Industrie - Maschinenbau,stock,yahoo
@@ -772,7 +772,7 @@ id,symbol,name,description,asset_type,price_provider
 776,0QN2.L,Interroll Holding AG,Industrie - Materialflusssysteme,stock,yahoo
 777,FTV,Fortive Corporation,Industrie - Mess- und Regeltechnik,stock,alpaca
 778,GE,General Electric Company,Industrie - Mischkonglomerat,stock,alpaca
-779,LEG,Leggett & Platt; Incorporated,Industrie - Möbelkomponenten,stock,alpaca
+779,LEG,Leggett & Platt; Incorporated,Industrie - Möbelkomponenten,stock,
 780,JST.DE,JOST Werke AG,Industrie - Nutzfahrzeugausrüstung,stock,yahoo
 781,PCAR,PACCAR Inc,Industrie - Nutzfahrzeuge,stock,alpaca
 782,FLS,Flowserve Corporation,Industrie - Pumpen und Ventile,stock,alpaca
@@ -799,7 +799,7 @@ id,symbol,name,description,asset_type,price_provider
 803,TXN,Texas Instruments Incorporated,Informationstechnologie - Halbleiter,stock,alpaca
 804,GDDY,GoDaddy Inc.,Informationstechnologie - Internetdienste,stock,alpaca
 805,VRSN,VeriSign; Inc.,Informationstechnologie - Internetdienste,stock,alpaca
-806,YNDX,Yandex N.V.,Informationstechnologie - Internetdienste,stock,alpaca
+806,YNDX,Yandex N.V.,Informationstechnologie - Internetdienste,stock,
 807,DXC,DXC Technology Company,Informationstechnologie - IT-Beratung und -Dienstleistungen,stock,alpaca
 808,GFT.DE,GFT Technologies SE,Informationstechnologie - IT-Beratung und -Dienstleistungen,stock,yahoo
 809,BC8.DE,Bechtle AG,Informationstechnologie - IT-Dienstleistungen,stock,yahoo
@@ -844,7 +844,7 @@ id,symbol,name,description,asset_type,price_provider
 848,PG,Procter & Gamble Co.,Konsumgüter - Haushaltswaren,stock,alpaca
 849,BEI.DE,Beiersdorf AG,Konsumgüter - Hautpflege,stock,yahoo
 851,KMB,Kimberly-Clark Corporation,Konsumgüter - Hygieneprodukte,stock,alpaca
-852,LOR.BE,L'Oreal S.A.,Konsumgüter - Kosmetik,stock,yahoo
+852,LOR.BE,L'Oreal S.A.,Konsumgüter - Kosmetik,stock,
 853,ORK.OL,Orkla ASA,Konsumgüter - Lebensmittel,stock,yahoo
 854,PEP,PepsiCo; Inc.,Konsumgüter - Lebensmittel,stock,alpaca
 855,SJM,The J. M. Smucker Company,Konsumgüter - Lebensmittel,stock,alpaca
@@ -862,7 +862,7 @@ id,symbol,name,description,asset_type,price_provider
 867,ETH-USD,Ethereum (Kryptowährung),Kryptowährung,crypto,yahoo
 868,LINK-USD,Chainlink (Kryptowährung),Kryptowährung - Blockchain,crypto,yahoo
 869,LTC-USD,Litecoin (Kryptowährung),Kryptowährung - Blockchain,crypto,yahoo
-870,UNI-USD,Uniswap,Kryptowährung - Dezentralisierte Finanzen,crypto,yahoo
+870,UNI-USD,Uniswap,Kryptowährung - Dezentralisierte Finanzen,crypto,
 871,KWS.DE,KWS SAAT SE & Co. KGaA,Landwirtschaft - Saatgut,stock,yahoo
 872,MOWI.OL,Mowi ASA,Lebensmittel - Fisch,stock,yahoo
 873,BYND,Beyond Meat; Inc.,Lebensmittel - Fleischersatz,stock,alpaca
@@ -906,12 +906,12 @@ id,symbol,name,description,asset_type,price_provider
 911,EZJ.L,easyJet plc,Luftfahrt - Fluggesellschaft,stock,yahoo
 912,IAG.MC,International Consolidated Airlines Group; S.A.,Luftfahrt - Fluggesellschaft,stock,yahoo
 913,NAS.OL,Norwegian Air Shuttle ASA,Luftfahrt - Fluggesellschaft,stock,yahoo
-914,RYE.F,Ryanair Holdings plc,Luftfahrt - Fluggesellschaften,stock,yahoo
-915,FRU.DE,Fraport AG,Luftfahrt - Flughafenbetreiber,stock,yahoo
+914,RYE.F,Ryanair Holdings plc,Luftfahrt - Fluggesellschaften,stock,
+915,FRU.DE,Fraport AG,Luftfahrt - Flughafenbetreiber,stock,
 916,NOC,Northrop Grumman Corporation,Luftfahrt und Rüstung,stock,alpaca
 917,AF.PA,Air France-KLM,Luftverkehr,stock,yahoo
 918,AAL,American Airlines Group Inc.,Luftverkehr,stock,alpaca
-919,ICLA.F,Cell Impact AB,Maschinenbau - Papierherstellung,stock,yahoo
+919,ICLA.F,Cell Impact AB,Maschinenbau - Papierherstellung,stock,
 920,VMC,Vulcan Materials Company,Materialien - Baustoffe,stock,alpaca
 921,AVY,Avery Dennison Corporation,Materialien - Etiketten und Verpackungen,stock,alpaca
 922,SGL.DE,SGL Carbon SE,Materialien - Kohlenstoffprodukte,stock,yahoo
@@ -921,7 +921,7 @@ id,symbol,name,description,asset_type,price_provider
 926,TS,Tenaris SA,Materialien - Stahlprodukte,stock,alpaca
 927,TKA.DE,Thyssenkrupp AG,Materialien - Stahlprodukte,stock,yahoo
 928,USIM5.SA,Usinas Siderurgicas de Minas Gerais SA,Materialien - Stahlprodukte,stock,yahoo
-929,WRK,WestRock Company,Materialien - Verpackungsprodukte,stock,alpaca
+929,WRK,WestRock Company,Materialien - Verpackungsprodukte,stock,
 930,FOX,Fox Corporation,Medien - Film und Fernsehen,stock,alpaca
 931,IQ,IQIYI Inc.,Medien - Online-Unterhaltung,stock,alpaca
 932,PSM.DE,ProSiebenSat.1 Media SE,Medien - Rundfunk und Unterhaltung,stock,yahoo
@@ -930,7 +930,7 @@ id,symbol,name,description,asset_type,price_provider
 935,VIV.PA,Vivendi SE,Medien - Rundfunk- und Fernsehsender,stock,yahoo
 936,DIS,The Walt Disney Company,Medien - Unterhaltung,stock,alpaca
 937,REN.AS,Relx PLC,Medien - Verlagswesen,stock,yahoo
-938,SCHA.OL,Schibsted ASA,Medien - Verlagswesen,stock,yahoo
+938,SCHA.OL,Schibsted ASA,Medien - Verlagswesen,stock,
 939,NWS,News Corporation,Medien - Zeitungen; Bücher und Zeitschriften,stock,alpaca
 940,BSX,Boston Scientific Corporation,Medizintechnik,stock,alpaca
 941,AFX.DE,Carl Zeiss Meditec AG,Medizintechnik,stock,yahoo
@@ -946,9 +946,9 @@ id,symbol,name,description,asset_type,price_provider
 951,MMM,3M Company,Mischkonzern,stock,alpaca
 952,MONC.MI,Moncler S.p.A.,Mode - Luxus,stock,yahoo
 953,G14.F,Gucci Group N.V.,Mode - Luxusmode,stock,yahoo
-954,JBSS3.SA,JBS S.A.,Nahrungsmittel - Fleischverarbeitung,stock,yahoo
+954,JBSS3.SA,JBS S.A.,Nahrungsmittel - Fleischverarbeitung,stock,
 955,MKC,McCormick & Company; Incorporated,Nahrungsmittel - Gewürze,stock,alpaca
-956,K,Kellogg Company,Nahrungsmittel - Lebensmittelprodukte,stock,alpaca
+956,K,Kellogg Company,Nahrungsmittel - Lebensmittelprodukte,stock,
 957,MDLZ,Mondelez International; Inc.,Nahrungsmittel - Lebensmittelprodukte,stock,alpaca
 958,NESM.SG,Nestlé S.A.,Nahrungsmittel - Lebensmittelprodukte,stock,yahoo
 959,KHC,The Kraft Heinz Company,Nahrungsmittel - Lebensmittelprodukte,stock,alpaca
@@ -958,7 +958,7 @@ id,symbol,name,description,asset_type,price_provider
 963,EXPE,Expedia Group; Inc.,Online-Reiseunternehmen,stock,alpaca
 964,IP,International Paper Company,Papier und Forstprodukte - Verpackung,stock,alpaca
 965,VTRS,Viatris Inc. (ehemals Mylan N.V.),Pharmazeutika,stock,alpaca
-966,VSC.BE,4SC AG,Pharmazie,stock,yahoo
+966,VSC.BE,4SC AG,Pharmazie,stock,
 967,ABBV,AbbVie Inc.,Pharmazie,stock,alpaca
 968,ALK,Alkermes plc,Pharmazie,stock,alpaca
 969,BAYN.DE,Bayer AG,Pharmazie,stock,yahoo
@@ -977,7 +977,7 @@ id,symbol,name,description,asset_type,price_provider
 982,BVB.DE,Borussia Dortmund GmbH & Co. KGaA,Sport - Fußballclub,stock,yahoo
 983,MO,Altria Group; Inc.,Tabak,stock,alpaca
 984,BATS.L,British American Tobacco p.l.c.,Tabak,stock,yahoo
-985,CTAA.F,China Tobacco International (HK) Company Limited,Tabak,stock,yahoo
+985,CTAA.F,China Tobacco International (HK) Company Limited,Tabak,stock,
 986,DDD,3D Systems Corporation,Technologie - 3D-Druck,stock,alpaca
 987,HP,HP Inc.,Technologie - Computer und Drucker,stock,alpaca
 988,LOGI,Logitech International S.A.,Technologie - Computerzubehör,stock,alpaca
@@ -993,9 +993,9 @@ id,symbol,name,description,asset_type,price_provider
 998,MIPS.ST,MIPS AB,Technologie - Halbleiter,stock,yahoo
 999,WAF.DE,Siltronic AG,Technologie - Halbleiter,stock,yahoo
 1000,SWKS,Skyworks Solutions; Inc.,Technologie - Halbleiter,stock,alpaca
-1001,0QQ3.IL,Tower Semiconductor Ltd.,Technologie - Halbleiter,stock,yahoo
+1001,0QQ3.IL,Tower Semiconductor Ltd.,Technologie - Halbleiter,stock,
 1002,SZU.DE,Suess Microtec SE,Technologie - Halbleiterausrüstung,stock,yahoo
-1003,QRVO,Qorvo; Inc.,Technologie - Halbleiterindustrie,stock,alpaca
+1003,QRVO,Qorvo; Inc.,Technologie - Halbleiterindustrie,stock,
 1004,QCOM,Qualcomm Incorporated,Technologie - Halbleiterindustrie,stock,alpaca
 1005,AZZ2.MU,Addtech AB,Technologie - Industrieausrüstung,stock,yahoo
 1006,AKAM,Akamai Technologies; Inc.,Technologie - Internetdienste,stock,alpaca
@@ -1003,9 +1003,9 @@ id,symbol,name,description,asset_type,price_provider
 1008,NTES,NetEase; Inc.,Technologie - Internetdienste,stock,alpaca
 1009,RMV.L,Rightmove plc,Technologie - Internetdienste,stock,yahoo
 1010,SE,Sea Limited,Technologie - Internetdienste,stock,alpaca
-1011,TCEHY,Tencent Holdings Limited,Technologie - Internetdienste,stock,alpaca
+1011,TCEHY,Tencent Holdings Limited,Technologie - Internetdienste,stock,yahoo
 1012,IBM,International Business Machines Corporation,Technologie - IT-Dienstleistungen,stock,alpaca
-1013,ATAZF,Atea ASA,Technologie - IT-Infrastruktur,stock,alpaca
+1013,ATAZF,Atea ASA,Technologie - IT-Infrastruktur,stock,yahoo
 1014,PANW,Palo Alto Networks; Inc.,Technologie - IT-Sicherheit,stock,alpaca
 1015,NOHA.F,Nokia Oyj,Technologie - Kommunikationsausrüstung,stock,yahoo
 1016,DHER.DE,Delivery Hero SE,Technologie - Lebensmittel-Onlineplattform,stock,yahoo
@@ -1013,7 +1013,7 @@ id,symbol,name,description,asset_type,price_provider
 1018,HON,Honeywell International Inc.,Technologie - Mischkonzern,stock,alpaca
 1019,JEN.DE,Jenoptik AG,Technologie - Optik und Photonik,stock,yahoo
 1020,8FS.F,First Sensor AG,Technologie - Sensorik,stock,yahoo
-1021,ANSS,ANSYS; Inc.,Technologie - Simulationssoftware,stock,alpaca
+1021,ANSS,ANSYS; Inc.,Technologie - Simulationssoftware,stock,
 1022,MOMO,Momo Inc.,Technologie - Social Media,stock,alpaca
 1023,ADBE,Adobe Inc.,Technologie - Software,stock,alpaca
 1024,ADSK,Autodesk; Inc.,Technologie - Software,stock,alpaca
@@ -1021,7 +1021,7 @@ id,symbol,name,description,asset_type,price_provider
 1026,4QT1.F,QUADIENT S.A.,Technologie - Software,stock,yahoo
 1027,TEAM,Atlassian Corporation Plc,Technologie - Softwareentwicklung,stock,alpaca
 1028,MSFT,Microsoft Corporation,Technologie - Softwareentwicklung,stock,alpaca
-1029,NWO.DE,Norwood Systems Limited,Technologie - Softwareentwicklung,stock,yahoo
+1029,NWO.DE,Norwood Systems Limited,Technologie - Softwareentwicklung,stock,
 1030,OKL.F,OKTA Inc.,Technologie - Softwareentwicklung,stock,yahoo
 1031,OMU.L,Oxford Metrics plc,Technologie - Softwareentwicklung,stock,yahoo
 1032,RAA.DE,Rational AG,Technologie - Softwareentwicklung,stock,yahoo
@@ -1055,7 +1055,7 @@ id,symbol,name,description,asset_type,price_provider
 1060,LBTYA,Liberty Global plc,Telekommunikation - Kabelnetzbetreiber,stock,alpaca
 1061,ALFA.ST,Millicom International Cellular S.A.,Telekommunikation - Mobilfunk,stock,yahoo
 1062,CLNX.MC,Cellnex Telecom; S.A.,Telekommunikation - Mobilfunkinfrastruktur,stock,yahoo
-1063,JNPR,Juniper Networks; Inc.,Telekommunikation - Netzwerkausrüstung,stock,alpaca
+1063,JNPR,Juniper Networks; Inc.,Telekommunikation - Netzwerkausrüstung,stock,
 1064,MSI,Motorola Solutions; Inc.,Telekommunikation - Netzwerkausrüstung,stock,alpaca
 1065,GI6A.F,Gigaset AG,Telekommunikation - Telekommunikationsausrüstung,stock,yahoo
 1066,ERIC-B.ST,Telefonaktiebolaget LM Ericsson,Telekommunikation - Telekommunikationsausrüstung,stock,yahoo
@@ -1065,7 +1065,7 @@ id,symbol,name,description,asset_type,price_provider
 1070,FRE.DE,Freenet AG,Telekommunikation - Telekommunikationsdienste,stock,yahoo
 1071,KPN.AS,Koninklijke KPN N.V.,Telekommunikation - Telekommunikationsdienste,stock,yahoo
 1072,NOS.LS,NOS; SGPS S.A.,Telekommunikation - Telekommunikationsdienste,stock,yahoo
-1073,OIBR4.SA,Oi S.A.,Telekommunikation - Telekommunikationsdienste,stock,yahoo
+1073,OIBR4.SA,Oi S.A.,Telekommunikation - Telekommunikationsdienste,stock,
 1074,0FBS.IL,Orange Belgium SA,Telekommunikation - Telekommunikationsdienste,stock,yahoo
 1075,ORA,Orange SA,Telekommunikation - Telekommunikationsdienste,stock,alpaca
 1076,PHR.LS,Pharol SGPS SA,Telekommunikation - Telekommunikationsdienste,stock,yahoo
@@ -1080,10 +1080,10 @@ id,symbol,name,description,asset_type,price_provider
 1085,ECOR3.SA,Ecorodovias Infraestrutura e Logistica SA,Transport - Autobahnbetreiber,stock,yahoo
 1086,COME.BA,Corporacion America Airports SA,Transport - Flughäfen,stock,yahoo
 1087,HHFA.DE,Hamburger Hafen und Logistik AG,Transport - Hafenbetreiber,stock,yahoo
-1088,GRPTF,Getlink SE,Transport - Infrastruktur,stock,alpaca
+1088,GRPTF,Getlink SE,Transport - Infrastruktur,stock,yahoo
 1089,BOL.PA,Bollore SA,Transport - Logistik und Energiespeicherung,stock,yahoo
 1090,JBHT,J.B. Hunt Transport Services; Inc.,Transport - Logistikdienstleistungen,stock,alpaca
-1091,KNCAF,Kuehne + Nagel International AG,Transport - Logistikdienstleistungen,stock,alpaca
+1091,KNCAF,Kuehne + Nagel International AG,Transport - Logistikdienstleistungen,stock,yahoo
 1092,LSG.OL,LSG Group,Transport - Luftverkehrsdienstleistungen,stock,yahoo
 1093,FGP.L,FirstGroup plc,Transport - Personenverkehr,stock,yahoo
 1094,CNI,CNI SA,Transport - Schienenverkehr,stock,alpaca
@@ -1094,10 +1094,10 @@ id,symbol,name,description,asset_type,price_provider
 1099,HAG.F,Hapag-Lloyd AG,Transport - Schifffahrt,stock,yahoo
 1100,ODFL,Old Dominion Freight Line; Inc.,Transport - Straßengüterverkehr,stock,alpaca
 1101,RSG,Republic Services; Inc.,Umwelt - Abfallwirtschaft,stock,alpaca
-1102,FLTR.L,Flutter Entertainment plc,Unterhaltung - Glücksspiel,stock,yahoo
+1102,FLTR.L,Flutter Entertainment plc,Unterhaltung - Glücksspiel,stock,
 1103,BILI,Bilibili Inc.,Unterhaltung - Online-Unterhaltung,stock,alpaca
 1104,NFLX,Netflix; Inc.,Unterhaltung - Streaming,stock,alpaca
-1105,EA,Electronic Arts Inc.,Unterhaltung - Videospielentwicklung,stock,alpaca
+1105,EA,Electronic Arts Inc.,Unterhaltung - Videospielentwicklung,stock,
 1106,0027.HK,Galaxy Entertainment Group Limited,Unterhaltung und Freizeit,stock,yahoo
 1107,1928.HK,Sands China Ltd,Unterhaltung und Freizeit,stock,yahoo
 1108,ACN,Accenture plc,Unternehmensberatung; Technologie,stock,alpaca
@@ -1112,8 +1112,8 @@ id,symbol,name,description,asset_type,price_provider
 1117,AENA.MC,Aena S.M.E.; S.A.,Verkehr - Flughäfen,stock,yahoo
 1118,ALO.PA,Alstom S.A.,Verkehr - Schienenverkehr,stock,yahoo
 1119,37C.F,VTG AG,Verkehr - Schienenverkehr,stock,yahoo
-1120,SKG.L,Smurfit Kappa Group plc,Verpackung - Verpackungsindustrie,stock,yahoo
-1121,SEE,Sealed Air Corporation,Verpackung und Behälter - Verpackungsprodukte,stock,alpaca
+1120,SKG.L,Smurfit Kappa Group plc,Verpackung - Verpackungsindustrie,stock,
+1121,SEE,Sealed Air Corporation,Verpackung und Behälter - Verpackungsprodukte,stock,
 1122,SCA-B.ST,Svenska Cellulosa Aktiebolaget SCA (publ),Verpackung und Behälter - Verpackungsprodukte,stock,yahoo
 1123,COR.LS,Corticeira Amorim SGPS SA,Verpackungen - Holzverschlüsse,stock,yahoo
 1124,BALL,Ball Corporation,Verpackungen - Metallverpackungen,stock,alpaca
@@ -1158,7 +1158,7 @@ id,symbol,name,description,asset_type,price_provider
 1163,UBI.PA,Ubisoft Entertainment SA,Zyklus und Automobile - Unterhaltungselektronik,stock,yahoo
 1164,LISPZ.XC,Chocoladefabriken Lindt & Sprüngli AG,Lebensmittel - Süßwaren,stock,yahoo
 "1170","SXR8.DE","S&P 500 ETF (iShares)","Die 500 größten US-Unternehmen – Apple, Microsoft, Amazon & Co.","fund","yahoo"
-"1171","CSPX.MI","S&P 500 ETF (iShares, Mailand)","Wie SXR8.DE, an der Mailänder Börse gelistet","fund","yahoo"
+"1171","CSPX.MI","S&P 500 ETF (iShares, Mailand)","Wie SXR8.DE, an der Mailänder Börse gelistet","fund",
 "1172","EUNL.DE","MSCI World ETF (iShares)","1.400 Unternehmen aus 23 Industrieländern weltweit","fund","yahoo"
 "1173","IWDA.AS","MSCI World ETF (iShares, Amsterdam)","Wie EUNL.DE, an der Amsterdamer Börse gelistet","fund","yahoo"
 "1174","EUNK.DE","MSCI Europe ETF (iShares)","Die größten Unternehmen aus Europa – Nestlé, LVMH, SAP & Co.","fund","yahoo"
@@ -1166,19 +1166,19 @@ id,symbol,name,description,asset_type,price_provider
 "1176","SMEA.MI","MSCI Europe ETF (iShares, Mailand)","Wie EUNK.DE, an der Mailänder Börse gelistet","fund","yahoo"
 "1177","EMIM.AS","Schwellenländer ETF (iShares)","Unternehmen aus Wachstumsmärkten wie China, Indien, Brasilien","fund","yahoo"
 "1178","IS3N.DE","Schwellenländer ETF (iShares, Frankfurt)","Wie EMIM.AS, an der Frankfurter Börse gelistet","fund","yahoo"
-"1179","IVV","S&P 500 ETF (iShares, USA)","Die 500 größten US-Unternehmen, US-gelistete Version","fund","yahoo"
+"1179","IVV","S&P 500 ETF (iShares, USA)","Die 500 größten US-Unternehmen, US-gelistete Version","fund","alpaca"
 "1180","IUSA.L","S&P 500 ETF (iShares, London)","Die 500 größten US-Unternehmen, an der Londoner Börse gelistet","fund","yahoo"
 "1181","SWDA.L","MSCI World ETF (iShares, London)","1.400 Unternehmen weltweit, an der Londoner Börse gelistet","fund","yahoo"
 "1182","SWDA.MI","MSCI World ETF (iShares, Mailand)","1.400 Unternehmen weltweit, an der Mailänder Börse gelistet","fund","yahoo"
 "1183","IWRD.L","MSCI World ETF ausschüttend (iShares)","Wie SWDA.L, zahlt Gewinne regelmäßig aus statt reinvestieren","fund","yahoo"
-"1184","ITOT","US-Gesamtmarkt ETF (iShares)","Fast alle börsennotierten US-Unternehmen in einem ETF","fund","yahoo"
-"1185","AGG","US-Anleihen ETF (iShares)","Viele verschiedene US-Anleihen gebündelt – stabiler als Aktien","fund","yahoo"
-"1186","HDV","Dividenden ETF (iShares)","US-Unternehmen die regelmäßig hohe Dividenden ausschütten","fund","yahoo"
-"1187","DGRO","Dividendenwachstum ETF (iShares)","US-Unternehmen die ihre Dividende jedes Jahr steigern","fund","yahoo"
-"1188","VGK","Europa ETF (Vanguard)","Die größten Unternehmen aus Europa","fund","yahoo"
-"1189","VEA","Industrieländer ETF (Vanguard)","Entwickelte Märkte weltweit außer USA – Europa, Japan, Australien","fund","yahoo"
-"1190","VEU","Welt ohne USA ETF (Vanguard)","Alle Industrieländer und Schwellenländer – nur ohne US-Unternehmen","fund","yahoo"
-"1191","VTI","US-Gesamtmarkt ETF (Vanguard)","Fast alle börsennotierten US-Unternehmen – über 3.500 Firmen","fund","yahoo"
+"1184","ITOT","US-Gesamtmarkt ETF (iShares)","Fast alle börsennotierten US-Unternehmen in einem ETF","fund","alpaca"
+"1185","AGG","US-Anleihen ETF (iShares)","Viele verschiedene US-Anleihen gebündelt – stabiler als Aktien","fund","alpaca"
+"1186","HDV","Dividenden ETF (iShares)","US-Unternehmen die regelmäßig hohe Dividenden ausschütten","fund","alpaca"
+"1187","DGRO","Dividendenwachstum ETF (iShares)","US-Unternehmen die ihre Dividende jedes Jahr steigern","fund","alpaca"
+"1188","VGK","Europa ETF (Vanguard)","Die größten Unternehmen aus Europa","fund","alpaca"
+"1189","VEA","Industrieländer ETF (Vanguard)","Entwickelte Märkte weltweit außer USA – Europa, Japan, Australien","fund","alpaca"
+"1190","VEU","Welt ohne USA ETF (Vanguard)","Alle Industrieländer und Schwellenländer – nur ohne US-Unternehmen","fund","alpaca"
+"1191","VTI","US-Gesamtmarkt ETF (Vanguard)","Fast alle börsennotierten US-Unternehmen – über 3.500 Firmen","fund","alpaca"
 "1192","VWCE.DE","FTSE All-World ETF (Vanguard)","Über 3.700 Unternehmen aus aller Welt – Industrie- und Schwellenländer","fund","yahoo"
 "1193","VWRA.L","FTSE All-World ETF (Vanguard, London)","Wie VWCE.DE, an der Londoner Börse gelistet","fund","yahoo"
 "1194","VHVE.MI","Industrieländer ETF (Vanguard, Mailand)","Entwickelte Märkte weltweit, an der Mailänder Börse gelistet","fund","yahoo"

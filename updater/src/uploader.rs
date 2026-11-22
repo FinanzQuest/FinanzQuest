@@ -63,12 +63,23 @@ pub enum PriceProvider {
     Yahoo,
 }
 
+impl PriceProvider {
+    /// The enum label in the database.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            PriceProvider::Alpaca => "alpaca",
+            PriceProvider::Yahoo => "yahoo",
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Asset {
     pub symbol: String,
     pub id: i64,
     pub last_updated: Option<time::Date>,
-    pub price_provider: PriceProvider,
+    /// `None`: no provider serves this asset (see `--mode resolve-providers`)
+    pub price_provider: Option<PriceProvider>,
 }
 
 pub async fn fetch_assets(pool: &PgPool) -> Result<Vec<Asset>, sqlx::Error> {

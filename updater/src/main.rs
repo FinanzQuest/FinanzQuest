@@ -7,6 +7,7 @@ mod alpaca;
 mod priceframe;
 use alpaca::AlpacaClient;
 
+mod providers;
 mod yf;
 
 use crate::{
@@ -22,6 +23,10 @@ enum Mode {
     /// Intraday bars into api.asset_prices_intraday (see `intraday_window`),
     /// rolled up into today's partial daily candle afterwards
     Intraday,
+    /// Sets api.assets.price_provider from what the APIs serve: Alpaca if it
+    /// has daily bars for the symbol, else Yahoo Finance, else NULL. Checks
+    /// assets without a provider, or all with --recheck-all.
+    ResolveProviders,
 }
 
 /// Intraday fetch window, ending at `now`. Normally from 00:00 UTC of the
@@ -71,6 +76,10 @@ struct Args {
     /// bars (first start, or after downtime). Matches the 30-day retention.
     #[arg(long, default_value_t = 30)]
     backfill_days: u16,
+    /// --mode resolve-providers: re-check every asset, not only those without
+    /// a provider
+    #[arg(long)]
+    recheck_all: bool,
 }
 
 #[tokio::main]
@@ -86,6 +95,7 @@ async fn main() -> anyhow::Result<()> {
         mode,
         interval_minutes,
         backfill_days,
+        recheck_all,
     } = Args::parse();
 
     let now = time::OffsetDateTime::now_utc();
@@ -105,11 +115,29 @@ async fn main() -> anyhow::Result<()> {
     println!("DONE");
 
     print!("Fetching assets from database: ");
-    let (yf_assets, al_assets) = uploader::fetch_assets(&pool)
-        .await?
-        .into_iter()
-        .partition::<Vec<Asset>, _>(|asset| asset.price_provider == PriceProvider::Yahoo);
+    let assets = uploader::fetch_assets(&pool).await?;
     println!("DONE");
+
+    if mode == Mode::ResolveProviders {
+        let assets = assets
+            .into_iter()
+            .filter(|asset| recheck_all || asset.price_provider.is_none())
+            .collect();
+        return resolve_providers(&pool, &client, assets, now, al_timeout).await;
+    }
+
+    let (mut yf_assets, mut al_assets) = (Vec::new(), Vec::new());
+    let mut skipped = 0;
+    for asset in assets {
+        match asset.price_provider {
+            Some(PriceProvider::Yahoo) => yf_assets.push(asset),
+            Some(PriceProvider::Alpaca) => al_assets.push(asset),
+            None => skipped += 1,
+        }
+    }
+    if skipped > 0 {
+        println!("Skipping {skipped} assets without a price provider.");
+    }
 
     let al_symbols = symbol_list(&al_assets);
     let (yf_requests, yf_config, al_query, target) = match mode {
@@ -159,6 +187,7 @@ async fn main() -> anyhow::Result<()> {
                 Target::Intraday,
             )
         }
+        Mode::ResolveProviders => unreachable!("returned above"),
     };
     let uploader = Uploader::new(pool.clone(), batch_size, target).await?;
 
@@ -205,6 +234,63 @@ async fn main() -> anyhow::Result<()> {
     // trigger on api.asset_prices, and the database's hourly job
     // (depots.refresh_depot_values) closes the previous days.
 
+    Ok(())
+}
+
+async fn resolve_providers(
+    pool: &sqlx::PgPool,
+    client: &AlpacaClient,
+    assets: Vec<Asset>,
+    now: time::OffsetDateTime,
+    alpaca_delay: Duration,
+) -> anyhow::Result<()> {
+    use providers::{Check, decide};
+
+    println!("Resolving price providers for {} assets.", assets.len());
+    let alpaca = providers::check_alpaca(client, &symbol_list(&assets), now, alpaca_delay).await;
+    let not_on_alpaca: Vec<Asset> = assets
+        .iter()
+        .filter(|asset| alpaca.get(&asset.symbol) == Some(&Check::Missing))
+        .cloned()
+        .collect();
+    println!(
+        "Alpaca: {} found, {} missing; checking those on Yahoo Finance.",
+        alpaca.values().filter(|c| **c == Check::Found).count(),
+        not_on_alpaca.len()
+    );
+    let yahoo = providers::check_yahoo(not_on_alpaca, now).await;
+
+    let mut decided = Vec::new();
+    let mut counts: std::collections::BTreeMap<&str, usize> = Default::default();
+    for asset in &assets {
+        let missing = Check::Unknown("not checked".into());
+        let result = decide(
+            alpaca.get(&asset.symbol).unwrap_or(&missing),
+            yahoo.get(&asset.symbol),
+        );
+        match result {
+            Ok(provider) => {
+                *counts
+                    .entry(provider.map_or("none", PriceProvider::as_str))
+                    .or_default() += 1;
+                if provider != asset.price_provider {
+                    println!(
+                        "{}: {} -> {}",
+                        asset.symbol,
+                        asset.price_provider.map_or("none", PriceProvider::as_str),
+                        provider.map_or("none", PriceProvider::as_str)
+                    );
+                }
+                decided.push((asset.id, provider));
+            }
+            Err(reason) => {
+                *counts.entry("unchanged (inconclusive)").or_default() += 1;
+                eprintln!("{}: kept, inconclusive ({reason})", asset.symbol);
+            }
+        }
+    }
+    let changed = providers::store(pool, &decided).await?;
+    println!("Result: {counts:?}; {changed} rows changed.");
     Ok(())
 }
 

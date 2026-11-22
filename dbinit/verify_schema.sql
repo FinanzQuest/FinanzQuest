@@ -362,8 +362,8 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'api' AND table_name = 'assets' AND column_name = 'price_provider'
-      AND udt_name = 'priceprovider' AND is_nullable = 'NO'
-  ) THEN fails := fails || 'column api.assets.price_provider (PriceProvider NOT NULL)'; END IF;
+      AND udt_name = 'priceprovider' AND is_nullable = 'YES'
+  ) THEN fails := fails || 'column api.assets.price_provider (PriceProvider, nullable)'; END IF;
 
   -- =========================================================================
   -- RESULT
