@@ -92,10 +92,10 @@ const formatDate = (dateString: string) => {
 	}).format(date)
 }
 
-const handleError = ({ error }: { error?: Error | null }) => {
+// server actions return plain { message } errors (Error objects do not serialize)
+const handleError = ({ error }: { error?: { message: string } | null }) => {
 	if (error) {
-		console.error(error)
-		toast.error(`${error.name && `${error.name}: `}${error.message}`)
+		toast.error(error.message)
 	}
 }
 

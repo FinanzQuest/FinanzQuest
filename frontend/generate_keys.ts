@@ -32,5 +32,5 @@ const adminKey = await new jose.SignJWT({
 console.log(`
 NEXT_PUBLIC_SUPABASE_URL=${url}
 NEXT_PUBLIC_SUPABASE_ANON_KEY=${anonKey}
-NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=${adminKey}
+SUPABASE_SERVICE_ROLE_KEY=${adminKey}
 `)

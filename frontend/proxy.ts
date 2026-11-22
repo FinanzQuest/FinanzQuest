@@ -1,73 +1,43 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
-import type { NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { updateSession } from "@/utils/supabase/proxy"
-import type { Database } from "./database/types"
 import { getDepotDefaultId } from "./lib/db"
 import { decodeDepotCookie } from "./lib/depot_cookie/encode"
 import { newActiveDepotCookie } from "./lib/depot_cookie/server"
-import { createClient } from "./utils/supabase/server"
 
-async function tryGetDepotFromCookie(request: NextRequest) {
-	const cookie = request.cookies.get("activeDepotId")
-	if (!cookie) {
-		return null
-	}
-	const client = await createClient()
-	const userId = (await client.auth.getUser()).data.user?.id
-	if (!userId) {
-		return null
-	}
-	const { depotId, valid } = await decodeDepotCookie(cookie.value, userId)
-	if (!valid) {
-		console.log("cookie invalid", cookie.value, userId)
-		return null
-	}
-	console.log("cookie valid", cookie.value, userId)
-	return depotId
+const DEPOT_COOKIE = "activeDepotId"
+
+function depotFromSearchParams(request: NextRequest) {
+	const value = request.nextUrl.searchParams.get("depot")
+	if (!value) return null
+	const parsed = Number.parseInt(value, 10)
+	return Number.isNaN(parsed) ? null : parsed
 }
 
-async function tryGetDepotFromSearchParams(request: NextRequest) {
-	const depotId = request.nextUrl.searchParams.get("depot")
-	if (!depotId) {
-		return null
-	}
-	const parsedDepotId = Number.parseInt(depotId, 10)
-	if (Number.isNaN(parsedDepotId)) {
-		return null
-	}
-
-	return parsedDepotId
+async function hasValidDepotCookie(request: NextRequest, userId: string) {
+	const cookie = request.cookies.get(DEPOT_COOKIE)
+	if (!cookie) return false
+	return (await decodeDepotCookie(cookie.value, userId)).valid
 }
 
-async function tryUpdateDepotId(
-	client: SupabaseClient<Database>,
-	response: NextResponse,
-	depotId: number
-) {
-	const userId = (await client.auth.getUser()).data.user?.id
-	if (!userId) {
-		return false
-	}
-	const cookie = await newActiveDepotCookie(depotId, userId)
-	response.cookies.set(cookie.name, cookie.value)
-	return true
-}
-
+/**
+ * Per request: one session check (updateSession), then the active-depot
+ * cookie — only written when ?depot= selects a depot or the cookie is missing
+ * or belongs to another user; otherwise the request costs no extra round trip.
+ */
 export async function proxy(request: NextRequest) {
-	const response = await updateSession(request)
-	const client = await createClient()
-	const depotId = await tryGetDepotFromSearchParams(request)
-		.then(depotId => {
-			console.log("depotId proxy is ", depotId)
-			return depotId ?? tryGetDepotFromCookie(request)
-		})
-		.then(async depotId => {
-			console.log("depotId proxy is ", depotId)
-			return depotId ?? (await getDepotDefaultId(client)).depotId
-		})
+	const { response, supabase, userId } = await updateSession(request)
+	if (!userId || response.headers.has("location")) {
+		return response
+	}
 
-	if (depotId) {
-		await tryUpdateDepotId(client, response, depotId)
+	let depotId = depotFromSearchParams(request)
+	if (depotId === null && !(await hasValidDepotCookie(request, userId))) {
+		depotId = (await getDepotDefaultId(supabase, userId)).depotId
+	}
+
+	if (depotId !== null) {
+		const cookie = await newActiveDepotCookie(depotId, userId)
+		response.cookies.set(cookie)
 	}
 	return response
 }
@@ -75,11 +45,8 @@ export async function proxy(request: NextRequest) {
 export const config = {
 	matcher: [
 		/*
-		 * Match all request paths except for the ones starting with:
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
-		 * Feel free to modify this pattern to include more paths.
+		 * All paths except static files and images. Prefetches and RSC
+		 * requests still pass through: keep this function cheap.
 		 */
 		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
 	],

@@ -1,69 +1,59 @@
 "use server"
 
+// Teacher actions. Every export is a public server action endpoint, so each
+// one checks the caller's role first — with the caller's own session (the
+// RLS-bound server client), never with the service-role client — and only
+// then uses the service-role client for the GoTrue admin API.
+
 import type { Client } from "@/database/custom_types"
 import { createClient as createAdminClient } from "@/utils/supabase/admin"
 import { createClient as createServerClient } from "@/utils/supabase/server"
 import { hasSpecialRoles } from "./db"
 
-export async function deleteUser(id: string) {
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
+type ActionResult = { error?: { message: string } | null }
+
+/** The caller's server client if they are a teacher, else an error. */
+async function requireTeacher(): Promise<
+	{ client: Client; error: null } | { client: null; error: { message: string } }
+> {
+	const client = await createServerClient()
+	const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
+	if (error || !hasPermission) {
+		return {
+			client: null,
+			error: { message: error?.message ?? "Could not verify permissions" },
 		}
 	}
-
-	const { error } = await client.auth.admin.deleteUser(id)
-
-	return {
-		error,
-	}
+	return { client, error: null }
 }
 
-export async function banUser(id: string, ban_duration: string) {
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-	const { error } = await client.auth.admin.updateUserById(id, {
-		ban_duration,
-	})
-
-	return {
-		error,
-	}
+/** Plain, serializable error for the client. */
+function result(error: { message: string } | null | undefined): ActionResult {
+	return error ? { error: { message: error.message } } : {}
 }
 
-export async function unbanUser(id: string) {
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-	const { error } = await client.auth.admin.updateUserById(id, {
-		ban_duration: "none",
-	})
-
-	return {
-		error,
-	}
+export async function deleteUser(id: string): Promise<ActionResult> {
+	const { error } = await requireTeacher()
+	if (error) return { error }
+	const admin = await createAdminClient()
+	return result((await admin.auth.admin.deleteUser(id)).error)
 }
 
-type UpdateUserOptions = Parameters<
-	Client["auth"]["admin"]["updateUserById"]
->[1]
+export async function banUser(
+	id: string,
+	ban_duration: string
+): Promise<ActionResult> {
+	const { error } = await requireTeacher()
+	if (error) return { error }
+	const admin = await createAdminClient()
+	return result(
+		(await admin.auth.admin.updateUserById(id, { ban_duration })).error
+	)
+}
+
+export async function unbanUser(id: string): Promise<ActionResult> {
+	return banUser(id, "none")
+}
 
 export async function updateUser(
 	id: string,
@@ -74,68 +64,32 @@ export async function updateUser(
 		email: string | null
 		user_name: string | null
 	}>
-) {
+): Promise<ActionResult> {
 	if (!email && !user_name) {
 		return {}
 	}
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
+	const { error } = await requireTeacher()
+	if (error) return { error }
 
-	// const {
-	//   data: { user },
-	//   error: userError,
-	// } = await client.auth.admin.getUserById(id);
-
-	// if (userError || !user) {
-	//   return { error: userError ?? new Error("User not found") };
-	// }
-
-	const attributes: UpdateUserOptions = {
+	const admin = await createAdminClient()
+	const { error: updateError } = await admin.auth.admin.updateUserById(id, {
 		...(email && { email }),
 		user_metadata: {
-			// ...user.user_metadata // you could do that but its actually not necessary
 			...(email && { email }),
 			...(user_name && { name: user_name }),
 		},
-	}
-
-	const { error: updateError } = await client.auth.admin.updateUserById(
-		id,
-		attributes
-	)
-
-	if (updateError) {
-		return { error: updateError }
-	}
-	return {}
+	})
+	return result(updateError)
 }
 
-export async function changePassword(id: string, password: string) {
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-
-	const { error: updateError } = await client.auth.admin.updateUserById(id, {
-		password,
-	})
-
-	if (updateError) {
-		return { error: updateError }
-	}
-	return {}
+export async function changePassword(
+	id: string,
+	password: string
+): Promise<ActionResult> {
+	const { error } = await requireTeacher()
+	if (error) return { error }
+	const admin = await createAdminClient()
+	return result((await admin.auth.admin.updateUserById(id, { password })).error)
 }
 
 export async function newUser({
@@ -146,133 +100,74 @@ export async function newUser({
 	email: string
 	password: string
 	user_name: string
-}) {
-	const client = await createAdminClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-
-	const { error: createError } = await client.auth.admin.createUser({
+}): Promise<ActionResult> {
+	const { error } = await requireTeacher()
+	if (error) return { error }
+	const admin = await createAdminClient()
+	const { error: createError } = await admin.auth.admin.createUser({
 		email,
 		password,
-		user_metadata: {
-			name: user_name,
-		},
+		user_metadata: { name: user_name },
 	})
-
-	if (createError) {
-		return { error: createError }
-	}
-	return {}
+	return result(createError)
 }
 
-export async function grantTeacher(user_id: string) {
-	const client = await createServerClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
+// The rest goes through checked database functions with the caller's own
+// session; the role check here only gives a clear error early.
 
-	const { error: updateError } = await client
-		.schema("users")
-		.rpc("grant_teacher", { p_user_id: user_id })
-
-	if (updateError) {
-		return { error: updateError }
-	}
-	return {}
-}
-export async function revokeTeacher(user_id: string) {
-	const client = await createServerClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-
-	const { error: updateError } = await client
-		.schema("users")
-		.rpc("revoke_teacher", { p_user_id: user_id })
-
-	if (updateError) {
-		return { error: updateError }
-	}
-	return {}
+export async function grantTeacher(user_id: string): Promise<ActionResult> {
+	const { client, error } = await requireTeacher()
+	if (error) return { error }
+	return result(
+		(await client.schema("users").rpc("grant_teacher", { p_user_id: user_id }))
+			.error
+	)
 }
 
-export async function changeBudget(depot_id: number, budget: number) {
-	const client = await createServerClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-
-	const { error: updateError } = await client
-		.schema("depots")
-		.rpc("change_budget", { p_depot_id: depot_id, p_budget: budget })
-
-	if (updateError) {
-		return { error: updateError }
-	}
-	return {}
+export async function revokeTeacher(user_id: string): Promise<ActionResult> {
+	const { client, error } = await requireTeacher()
+	if (error) return { error }
+	return result(
+		(await client.schema("users").rpc("revoke_teacher", { p_user_id: user_id }))
+			.error
+	)
 }
 
-export async function deleteDepot(depot_id: number) {
-	const client = await createServerClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
-
-	const { error: deleteError } = await client
-		.schema("depots")
-		.from("depots")
-		.delete()
-		.eq("id", depot_id)
-
-	if (deleteError) {
-		return { error: deleteError }
-	}
-	return {}
+export async function changeBudget(
+	depot_id: number,
+	budget: number
+): Promise<ActionResult> {
+	const { client, error } = await requireTeacher()
+	if (error) return { error }
+	return result(
+		(
+			await client
+				.schema("depots")
+				.rpc("change_budget", { p_depot_id: depot_id, p_budget: budget })
+		).error
+	)
 }
 
-export async function grantReward(depot_id: number, amount: number) {
-	const client = await createServerClient()
-	{
-		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
-		if (error || !hasPermission) {
-			return {
-				error: error || new Error("Could not verify permissions"),
-			}
-		}
-	}
+export async function deleteDepot(depot_id: number): Promise<ActionResult> {
+	const { client, error } = await requireTeacher()
+	if (error) return { error }
+	return result(
+		(await client.schema("depots").from("depots").delete().eq("id", depot_id))
+			.error
+	)
+}
 
-	const { error: grantError } = await client
-		.schema("depots")
-		.rpc("grant_reward", { p_depot_id: depot_id, p_amount: amount })
-
-	if (grantError) {
-		return { error: grantError }
-	}
-	return {}
+export async function grantReward(
+	depot_id: number,
+	amount: number
+): Promise<ActionResult> {
+	const { client, error } = await requireTeacher()
+	if (error) return { error }
+	return result(
+		(
+			await client
+				.schema("depots")
+				.rpc("grant_reward", { p_depot_id: depot_id, p_amount: amount })
+		).error
+	)
 }

@@ -1,4 +1,4 @@
-"use server"
+import "server-only"
 import { cookies } from "next/headers"
 import { decodeDepotCookie, encodeDepotCookie } from "./encode"
 

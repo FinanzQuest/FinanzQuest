@@ -1,86 +1,40 @@
-"use server"
+import "server-only"
 import type { SearchParams } from "@/database/custom_types"
-import { createClient } from "@/utils/supabase/server"
+import { getServerClient, getUser } from "./auth"
 import { getDepotDefaultId } from "./db"
 import { getActiveDepotId } from "./depot_cookie/server"
 
-export async function getDepotIdWithInspect(params: SearchParams) {
-	const client = await createClient()
-
-	if (params.inspect_depot) {
-		const parsedDepotId = parseInt(params.inspect_depot, 10)
-		if (!Number.isNaN(parsedDepotId)) {
-			return {
-				depotId: parsedDepotId,
-				error: null,
-				noDepot: null,
-				isInspect: true,
-			}
-		}
-	}
-
-	if (params.depot) {
-		const parsedDepotId = parseInt(params.depot, 10)
-		if (!Number.isNaN(parsedDepotId)) {
-			return {
-				depotId: parsedDepotId,
-				error: null,
-				noDepot: null,
-				isInspect: false,
-			}
-		}
-	}
-
-	const userId = (await client.auth.getUser()).data.user?.id
-
-	if (userId) {
-		const depotId = await getActiveDepotId(userId)
-		if (depotId) {
-			return {
-				depotId,
-				error: null,
-				noDepot: null,
-				isInspect: false,
-			}
-		}
-	}
-
-	const defaultRes = await getDepotDefaultId(client)
-
-	if (defaultRes.error) {
-		console.log("got error", defaultRes.noDepot)
-		return {
-			depotId: null,
-			error: defaultRes.error,
-			noDepot: defaultRes.noDepot,
-			isInspect: false,
-		}
-	}
-
-	console.log("default depot:", defaultRes)
-
-	return {
-		depotId: defaultRes.depotId,
-		error: null,
-		noDepot: defaultRes.depotId === null || defaultRes.depotId === undefined,
-		isInspect: false,
-	}
+function parseDepotParam(value: string | null | undefined) {
+	if (!value) return null
+	const parsed = Number.parseInt(value, 10)
+	return Number.isNaN(parsed) ? null : parsed
 }
 
-export async function getDepotId() {
-	const client = await createClient()
-	const userId = (await client.auth.getUser()).data.user?.id
+/** Depot of the page: ?inspect_depot, ?depot, the depot cookie, the user's first depot. */
+export async function getDepotIdWithInspect(params: SearchParams) {
+	const inspected = parseDepotParam(params.inspect_depot)
+	if (inspected !== null) {
+		return { depotId: inspected, error: null, noDepot: null, isInspect: true }
+	}
 
-	if (userId) {
-		const depotId = await getActiveDepotId(userId)
+	const requested = parseDepotParam(params.depot)
+	if (requested !== null) {
+		return { depotId: requested, error: null, noDepot: null, isInspect: false }
+	}
+
+	return { ...(await getDepotId()), isInspect: false }
+}
+
+/** The active depot from the cookie, else the user's first depot. */
+export async function getDepotId() {
+	const { user } = await getUser()
+
+	if (user) {
+		const depotId = await getActiveDepotId(user.id)
 		if (depotId) {
-			return {
-				depotId,
-				error: null,
-				noDepot: null,
-			}
+			return { depotId, error: null, noDepot: null }
 		}
 	}
 
-	return await getDepotDefaultId(client)
+	return await getDepotDefaultId(await getServerClient(), user?.id)
 }

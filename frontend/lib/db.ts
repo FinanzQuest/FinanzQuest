@@ -2,8 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import type { SpecialRole } from "@/database/custom_types"
 import type { Database } from "@/database/types"
 
-export async function getDepotDefaultId(client: SupabaseClient<Database>) {
-	const { error: userIdError, userId } = await getUserId(client)
+export async function getDepotDefaultId(
+	client: SupabaseClient<Database>,
+	knownUserId?: string
+) {
+	const { error: userIdError, userId } = knownUserId
+		? { error: null, userId: knownUserId }
+		: await getUserId(client)
 	if (userIdError)
 		return {
 			error: userIdError,

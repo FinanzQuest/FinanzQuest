@@ -33,8 +33,6 @@ export default function SignUpForm() {
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		const error = await signUpRedirect(data.fullName, data.email, data.password)
 
-		console.error(error)
-
 		if (error) {
 			toast("Failed to sign up", {
 				description: error.message,

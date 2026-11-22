@@ -1,79 +1,71 @@
-// @ts-nocheck
-// biome-ignore-all lint: default by supabase
 import { createServerClient } from "@supabase/ssr"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
+import type { Database } from "@/database/types"
 
-export async function updateSession(request: NextRequest) {
-	let supabaseResponse = NextResponse.next({
-		request,
-	})
+/** Reachable without a session (login, sign-up, e-mail confirmation, errors). */
+const PUBLIC_PATHS = ["/login", "/signup", "/confirm", "/error"]
 
-	// With Fluid compute, don't put this client in a global environment
-	// variable. Always create a new one on each request.
+function isPublic(pathname: string) {
+	return PUBLIC_PATHS.some(
+		path => pathname === path || pathname.startsWith(`${path}/`)
+	)
+}
+
+/**
+ * Refreshes the Supabase session cookies and checks the session once per
+ * request. Returns the response to send (with refreshed cookies, or a redirect
+ * to /login), the request-bound client and the user id for further work.
+ */
+export async function updateSession(request: NextRequest): Promise<{
+	response: NextResponse
+	supabase: SupabaseClient<Database>
+	userId: string | null
+}> {
+	let response = NextResponse.next({ request })
 
 	const url = process.env.NEXT_PUBLIC_SUPABASE_SERVER_URL
 	const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-	if (!url) {
-		throw new Error("Missing Supabase URL")
+	if (!url || !key) {
+		throw new Error("Missing Supabase credentials")
 	}
 
-	if (!key) {
-		throw new Error("Missing Supabase key")
-	}
-
-	const supabase = createServerClient(url, key, {
+	const supabase = createServerClient<Database>(url, key, {
 		cookies: {
 			getAll() {
 				return request.cookies.getAll()
 			},
-			setAll(cookiesToSet) {
-				cookiesToSet.forEach(({ name, value }) =>
+			setAll(
+				cookiesToSet: {
+					name: string
+					value: string
+					options: Parameters<NextResponse["cookies"]["set"]>[2]
+				}[]
+			) {
+				for (const { name, value } of cookiesToSet) {
 					request.cookies.set(name, value)
-				)
-				supabaseResponse = NextResponse.next({
-					request,
-				})
-				cookiesToSet.forEach(({ name, value, options }) =>
-					supabaseResponse.cookies.set(name, value, options)
-				)
+				}
+				response = NextResponse.next({ request })
+				for (const { name, value, options } of cookiesToSet) {
+					response.cookies.set(name, value, options)
+				}
 			},
 		},
-	})
+	}) as unknown as SupabaseClient<Database>
 
-	// Do not run code between createServerClient and
-	// supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-	// issues with users being randomly logged out.
-
-	// IMPORTANT: If you remove getClaims() and you use server-side rendering
-	// with the Supabase client, your users may be randomly logged out.
+	// Nothing between createServerClient and getClaims: it refreshes an
+	// expired session; code in between risks random logouts.
 	const { data } = await supabase.auth.getClaims()
+	const userId = (data?.claims?.sub as string | undefined) ?? null
 
-	const user = data?.claims
-
-	if (
-		!user &&
-		!request.nextUrl.pathname.startsWith("/login") &&
-		!request.nextUrl.pathname.startsWith("/signup")
-	) {
-		// no user, potentially respond by redirecting the user to the login page
-		const url = request.nextUrl.clone()
-		url.pathname = "/login"
-		return NextResponse.redirect(url)
+	if (!userId && !isPublic(request.nextUrl.pathname)) {
+		const loginUrl = request.nextUrl.clone()
+		loginUrl.pathname = "/login"
+		loginUrl.search = ""
+		return { response: NextResponse.redirect(loginUrl), supabase, userId }
 	}
 
-	// IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-	// creating a new response object with NextResponse.next() make sure to:
-	// 1. Pass the request in it, like so:
-	//    const myNewResponse = NextResponse.next({ request })
-	// 2. Copy over the cookies, like so:
-	//    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-	// 3. Change the myNewResponse object to fit your needs, but avoid changing
-	//    the cookies!
-	// 4. Finally:
-	//    return myNewResponse
-	// If this is not done, you may be causing the browser and server to go out
-	// of sync and terminate the user's session prematurely!
-
-	return supabaseResponse
+	// Callers must return this response (or copy its cookies), otherwise the
+	// refreshed session is lost and the user gets logged out.
+	return { response, supabase, userId }
 }
