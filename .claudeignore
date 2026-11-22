@@ -1,0 +1,21 @@
+# Paths Claude should not search or read. Single source of truth:
+# `.ignore` is a symlink to this file, so ripgrep-based Grep/Glob honor it.
+# Read access to the big ones is additionally denied in .claude/settings.json.
+# (Everything in .gitignore — node_modules, .next, target, .env* — is skipped already.)
+
+# local tooling / sessions
+.direnv/
+.helix/
+.claude/worktrees
+
+# lockfiles & generated data
+*.lock
+dbinit/assets.csv
+updater/a.txt
+
+# binary assets
+*.png
+*.ico
+
+# vendored agent skills for other tools (duplicates of frontend/.claude/skills)
+frontend/.agents/

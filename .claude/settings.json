@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "agent": "coordinator",
+  "permissions": {
+    "deny": [
+      "Read(**/target/**)",
+      "Read(**/.next/**)",
+      "Read(**/.direnv/**)",
+      "Read(**/*.lock)",
+      "Read(**/dbinit/assets.csv)",
+      "Read(**/updater/a.txt)",
+      "Read(**/frontend/.agents/**)"
+    ]
+  }
+}
