@@ -422,6 +422,12 @@ BEGIN
   IF NOT has_function_privilege('anon', 'api.find_assets(text, assettype[], text[], text[], text[], text[], text, text, boolean, integer, integer)', 'EXECUTE')
     THEN fails := fails || 'grant EXECUTE api.find_assets to anon'; END IF;
 
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM pg_views WHERE schemaname = 'api' AND viewname = 'fund_holdings_linked')
+    THEN fails := fails || 'view api.fund_holdings_linked'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('anon', 'api.fund_holdings_linked', 'SELECT') THEN fails := fails || 'grant SELECT api.fund_holdings_linked to anon'; END IF;
+
   -- =========================================================================
   -- RESULT
   -- =========================================================================

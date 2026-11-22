@@ -3,7 +3,8 @@ import { createPublicClient } from "@/utils/supabase/public"
 
 type Api = Database["api"]
 export type Fund = Api["Tables"]["funds"]["Row"]
-export type FundHolding = Api["Tables"]["fund_holdings"]["Row"]
+/** a position with the matching stock's asset_id (api.fund_holdings_linked) */
+export type FundHolding = Api["Views"]["fund_holdings_linked"]["Row"]
 export type FundCountry = Api["Tables"]["fund_countries"]["Row"]
 export type StockDetails = Api["Tables"]["asset_details"]["Row"]
 export type Performance =
@@ -50,7 +51,7 @@ export async function fetchAssetDetails(id: number): Promise<AssetDetails> {
 		const [fund, holdings, countries] = await Promise.all([
 			api.from("funds").select("*").eq("id", fundId).single(),
 			api
-				.from("fund_holdings")
+				.from("fund_holdings_linked")
 				.select("*")
 				.eq("fund_id", fundId)
 				.order("position"),

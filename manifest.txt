@@ -117,6 +117,7 @@ dbinit/05-materialized-views/api/asset_stats.sql
 dbinit/04-functions/api/find_assets.sql
 
 # --- 06-views ----------------------------------------------------------------
+dbinit/06-views/api/fund_holdings_linked.sql
 dbinit/06-views/depots/current_values.sql
 dbinit/06-views/depots/values.sql
 dbinit/06-views/depots/aggregated_values.sql
@@ -175,6 +176,7 @@ dbinit/10-grants/api/asset_moving_averages.sql
 dbinit/10-grants/api/find_assets.sql
 dbinit/10-grants/api/asset_facets.sql
 dbinit/10-grants/api/asset_stats.sql
+dbinit/10-grants/api/fund_holdings_linked.sql
 dbinit/10-grants/depots/depots.sql
 dbinit/10-grants/depots/transactions.sql
 dbinit/10-grants/depots/holdings.sql

@@ -85,6 +85,13 @@ export type Database = {
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
+					{
+						foreignKeyName: "asset_details_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: true
+						referencedRelation: "fund_holdings_linked"
+						referencedColumns: ["asset_id"]
+					},
 				]
 			}
 			asset_prices: {
@@ -130,6 +137,13 @@ export type Database = {
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
+					{
+						foreignKeyName: "assetprices_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
+						referencedRelation: "fund_holdings_linked"
+						referencedColumns: ["asset_id"]
+					},
 				]
 			}
 			asset_prices_intraday: {
@@ -174,6 +188,13 @@ export type Database = {
 						isOneToOne: false
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "asset_prices_intraday_asset_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
+						referencedRelation: "fund_holdings_linked"
+						referencedColumns: ["asset_id"]
 					},
 				]
 			}
@@ -379,6 +400,13 @@ export type Database = {
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
+					{
+						foreignKeyName: "latest_prices_asset_fkey"
+						columns: ["asset_id"]
+						isOneToOne: true
+						referencedRelation: "fund_holdings_linked"
+						referencedColumns: ["asset_id"]
+					},
 				]
 			}
 		}
@@ -426,6 +454,13 @@ export type Database = {
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
+					{
+						foreignKeyName: "assetprices_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
+						referencedRelation: "fund_holdings_linked"
+						referencedColumns: ["asset_id"]
+					},
 				]
 			}
 			asset_stats: {
@@ -439,6 +474,27 @@ export type Database = {
 					sparkline: number[] | null
 				}
 				Relationships: []
+			}
+			fund_holdings_linked: {
+				Row: {
+					asset_id: number | null
+					country: string | null
+					fund_id: number | null
+					name: string | null
+					position: number | null
+					sector: string | null
+					ticker: string | null
+					weight: number | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: "fund_holdings_fund_id_fkey"
+						columns: ["fund_id"]
+						isOneToOne: false
+						referencedRelation: "funds"
+						referencedColumns: ["id"]
+					},
+				]
 			}
 		}
 		Functions: {

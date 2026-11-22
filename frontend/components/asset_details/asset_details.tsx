@@ -7,6 +7,7 @@ import {
 	type Performance,
 } from "@/database/fetch_asset_details"
 import { compactMoneyString, currencyFormat } from "@/lib/cash_display_string"
+import { getStockPagePath } from "@/lib/get_stock_path"
 import { type Fact, FactGrid, toneOf } from "./facts"
 import {
 	countryName,
@@ -175,12 +176,21 @@ function FundDetails({
 		{ label: "ISIN", value: fund.isin },
 	]
 
-	const topHoldings: Share[] = holdings.slice(0, SHOWN).map(h => ({
-		key: String(h.position),
-		label: holdingName(h.name),
-		detail: sectorName(h.sector),
-		weight: h.weight,
-	}))
+	// view columns are typed nullable; name and weight are NOT NULL in the table
+	const topHoldings: Share[] = holdings.slice(0, SHOWN).flatMap(h =>
+		h.name == null || h.weight == null
+			? []
+			: [
+					{
+						key: String(h.position),
+						label: holdingName(h.name),
+						detail: sectorName(h.sector),
+						weight: h.weight,
+						// the stock's own page, when it is in the database
+						href: h.asset_id != null ? getStockPagePath(h.asset_id) : null,
+					},
+				]
+	)
 	const named = countries.filter(c => c.country !== "ZZ")
 	const shownCountries = named.slice(0, SHOWN)
 	const rest = countries
