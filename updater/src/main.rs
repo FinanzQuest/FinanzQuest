@@ -120,21 +120,9 @@ async fn main() -> anyhow::Result<()> {
     }
     uploader.finish().await?;
 
-    let pool = sqlx::postgres::PgPoolOptions::new()
-        .max_connections(4)
-        .connect(db_url.as_str())
-        .await?;
-
-    sqlx::query!("REFRESH MATERIALIZED VIEW depots.aggregated_transactions_mat")
-        .execute(&pool)
-        .await
-        .map_err(|e| {
-            anyhow::Error::from(e).context("Error updating aggregated transactions mat view")
-        })?;
-    sqlx::query!("REFRESH MATERIALIZED VIEW depots.position_values_mat")
-        .execute(&pool)
-        .await
-        .map_err(|e| anyhow::Error::from(e).context("Error updating position values mat view"))?;
+    // Depot values need no refresh here: api.latest_prices is updated by a
+    // trigger on api.asset_prices, and the database's hourly job
+    // (depots.refresh_depot_values) closes the previous days.
 
     Ok(())
 }
