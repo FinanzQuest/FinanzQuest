@@ -50,22 +50,24 @@ fn intraday_window(
     (start.max(limit), now)
 }
 
+/// Every setting can come from its environment variable (preferred for the
+/// secrets: command-line arguments are visible in the process list).
 #[derive(clap::Parser, Debug)]
 struct Args {
-    #[arg(short, long)]
+    #[arg(short, long, env = "DB_URL", hide_env_values = true)]
     db_url: String,
 
-    #[arg(long, default_value_t = 1_000)]
+    #[arg(long, env = "YF_TIMEOUT", default_value_t = 1_000)]
     yf_timeout: usize,
-    #[arg(long, default_value_t = 1_000)]
+    #[arg(long, env = "ALPACA_TIMEOUT", default_value_t = 1_000)]
     alpaca_timeout: usize,
-    #[arg(long)]
+    #[arg(long, env = "ALPACA_SECRET_KEY", hide_env_values = true)]
     alpaca_secret_key: String,
-    #[arg(long)]
+    #[arg(long, env = "ALPACA_KEY_ID", hide_env_values = true)]
     alpaca_key_id: String,
-    #[arg(long, default_value_t = 10_000)]
+    #[arg(long, env = "BATCH_SIZE", default_value_t = 10_000)]
     batch_size: usize,
-    #[arg(long, default_value_t = 10)]
+    #[arg(long, env = "FETCH_CHUNK_SIZE", default_value_t = 10)]
     fetch_chunk_size: usize,
     #[arg(long, value_enum, default_value_t = Mode::Daily)]
     mode: Mode,

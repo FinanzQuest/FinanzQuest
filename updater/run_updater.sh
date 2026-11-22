@@ -16,13 +16,6 @@ if ! flock -n 9; then
   exit 0
 fi
 
-updater \
-  --mode "$MODE" \
-  --db-url "$DB_URL" \
-  --alpaca-secret-key "$ALPACA_SECRET_KEY" \
-  --alpaca-key-id "$ALPACA_KEY_ID" \
-  --yf-timeout "$YF_TIMEOUT" \
-  --alpaca-timeout "$ALPACA_TIMEOUT" \
-  --batch-size "$BATCH_SIZE" \
-  --fetch-chunk-size "$FETCH_CHUNK_SIZE" \
-  "$@"
+# Settings and secrets come from the environment (DB_URL, ALPACA_*, ...):
+# arguments would show up in the process list.
+updater --mode "$MODE" "$@"
