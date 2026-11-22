@@ -11,7 +11,16 @@
       "Bash(curl -s -o /dev/null -w \"final:%{url_effective} code:%{http_code}\\\\n\" -L http://localhost:3000)",
       "Bash(awk '/position_profits/,/^[[:space:]]*}/' /home/johannes/FinanzQuest/frontend/database/types.ts)",
       "Bash(biome check *)",
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Read(//home/johannes/**)",
+      "Read(//home/johannes/FinanzQuest/**)",
+      "Bash(git -C /home/johannes/FinanzQuest status --short)",
+      "Bash(git -C /home/johannes/FinanzQuest ls-files manifest.txt)",
+      "Bash(git -C /home/johannes/FinanzQuest ls-files)",
+      "Bash(bash /tmp/dbinit_validate.sh)",
+      "mcp__memory__create_entities",
+      "mcp__memory__create_relations",
+      "Bash(git -C dbinit status --short)"
     ]
   }
 }
