@@ -108,6 +108,21 @@ SELECT pg_temp.check(NOT pg_temp.as_user(:t, $$SELECT * FROM users.admin_overvie
 SELECT pg_temp.check(NOT pg_temp.as_user(:t, $$SELECT depots.grant_reward(991002, 50)$$), 'teacher can grant a reward');
 SELECT pg_temp.check((SELECT cash FROM depots.depots WHERE id = 991002) = 10050, 'reward lands in depots.cash');
 
+-- Admin accounts: teachers manage students, not admins.
+INSERT INTO auth.users (id) VALUES ('bbbbbbbb-0000-0000-0000-0000000000aa'), ('bbbbbbbb-0000-0000-0000-0000000000ab'),
+  ('bbbbbbbb-0000-0000-0000-0000000000ac');  -- ac: a student without a depot
+INSERT INTO users.special_roles (user_id, user_role) VALUES
+  ('bbbbbbbb-0000-0000-0000-0000000000aa', 'admin'), ('bbbbbbbb-0000-0000-0000-0000000000aa', 'teacher'),
+  ('bbbbbbbb-0000-0000-0000-0000000000ab', 'admin');
+SELECT pg_temp.check(pg_temp.as_user(:t,
+  $$SELECT users.revoke_teacher('bbbbbbbb-0000-0000-0000-0000000000aa')$$), 'teacher cannot revoke an admin''s teacher role');
+SELECT pg_temp.check(pg_temp.as_user(:t,
+  $$SELECT users.grant_teacher('bbbbbbbb-0000-0000-0000-0000000000ab')$$), 'teacher cannot change an admin''s roles');
+SELECT pg_temp.check(NOT pg_temp.as_user(:t,
+  $$SELECT users.grant_teacher('bbbbbbbb-0000-0000-0000-0000000000ac')$$), 'teacher can still make a student a teacher');
+SELECT pg_temp.check(NOT pg_temp.as_user('bbbbbbbb-0000-0000-0000-0000000000aa',
+  $$SELECT users.grant_teacher('bbbbbbbb-0000-0000-0000-0000000000ab')$$), 'admin can change an admin''s roles');
+
 -- ---------------------------------------------------------------------------
 -- Depot creation.
 -- ---------------------------------------------------------------------------

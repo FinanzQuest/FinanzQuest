@@ -27,13 +27,52 @@ async function requireTeacher(): Promise<
 	return { client, error: null }
 }
 
+/**
+ * requireTeacher() plus protection of admin accounts: only admins may delete,
+ * ban, edit, re-password or change the roles of an admin. Fails closed if the
+ * target's roles cannot be read (teachers may read all roles via RLS).
+ */
+async function requireTeacherFor(
+	targetUserId: string
+): Promise<
+	{ client: Client; error: null } | { client: null; error: { message: string } }
+> {
+	const checked = await requireTeacher()
+	if (checked.error) return checked
+	const { client } = checked
+
+	const [{ data: targetRoles, error: rolesError }, callerIsAdmin] =
+		await Promise.all([
+			client
+				.schema("users")
+				.from("special_roles")
+				.select("user_role")
+				.eq("user_id", targetUserId),
+			hasSpecialRoles(["admin"], client),
+		])
+	if (rolesError || callerIsAdmin.error) {
+		return {
+			client: null,
+			error: { message: "Could not verify the account's roles" },
+		}
+	}
+	const targetIsAdmin = (targetRoles ?? []).some(r => r.user_role === "admin")
+	if (targetIsAdmin && !callerIsAdmin.hasPermission) {
+		return {
+			client: null,
+			error: { message: "Admin-Konten können nur von Admins geändert werden" },
+		}
+	}
+	return { client, error: null }
+}
+
 /** Plain, serializable error for the client. */
 function result(error: { message: string } | null | undefined): ActionResult {
 	return error ? { error: { message: error.message } } : {}
 }
 
 export async function deleteUser(id: string): Promise<ActionResult> {
-	const { error } = await requireTeacher()
+	const { error } = await requireTeacherFor(id)
 	if (error) return { error }
 	const admin = await createAdminClient()
 	return result((await admin.auth.admin.deleteUser(id)).error)
@@ -43,7 +82,7 @@ export async function banUser(
 	id: string,
 	ban_duration: string
 ): Promise<ActionResult> {
-	const { error } = await requireTeacher()
+	const { error } = await requireTeacherFor(id)
 	if (error) return { error }
 	const admin = await createAdminClient()
 	return result(
@@ -68,7 +107,7 @@ export async function updateUser(
 	if (!email && !user_name) {
 		return {}
 	}
-	const { error } = await requireTeacher()
+	const { error } = await requireTeacherFor(id)
 	if (error) return { error }
 
 	const admin = await createAdminClient()
@@ -86,7 +125,7 @@ export async function changePassword(
 	id: string,
 	password: string
 ): Promise<ActionResult> {
-	const { error } = await requireTeacher()
+	const { error } = await requireTeacherFor(id)
 	if (error) return { error }
 	const admin = await createAdminClient()
 	return result((await admin.auth.admin.updateUserById(id, { password })).error)
@@ -116,7 +155,7 @@ export async function newUser({
 // session; the role check here only gives a clear error early.
 
 export async function grantTeacher(user_id: string): Promise<ActionResult> {
-	const { client, error } = await requireTeacher()
+	const { client, error } = await requireTeacherFor(user_id)
 	if (error) return { error }
 	return result(
 		(await client.schema("users").rpc("grant_teacher", { p_user_id: user_id }))
@@ -125,7 +164,7 @@ export async function grantTeacher(user_id: string): Promise<ActionResult> {
 }
 
 export async function revokeTeacher(user_id: string): Promise<ActionResult> {
-	const { client, error } = await requireTeacher()
+	const { client, error } = await requireTeacherFor(user_id)
 	if (error) return { error }
 	return result(
 		(await client.schema("users").rpc("revoke_teacher", { p_user_id: user_id }))
