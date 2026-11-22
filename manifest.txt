@@ -45,6 +45,8 @@ dbinit/03-tables/api/assets.sql
 dbinit/03-tables/api/asset_prices.sql
 dbinit/03-tables/api/asset_prices_intraday.sql
 dbinit/03-tables/api/latest_prices.sql
+# default of depots.depots.name (reads no tables, so it can come first)
+dbinit/04-functions/depots/random_depot_name.sql
 dbinit/03-tables/depots/depots.sql
 dbinit/03-tables/depots/savings_plans.sql
 dbinit/03-tables/depots/savings_plans_budget.sql

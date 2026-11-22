@@ -966,6 +966,7 @@ export type Database = {
 					cash_start: number
 					created: string
 					id: number
+					name: string
 					users: string[]
 				}
 				Insert: {
@@ -973,6 +974,7 @@ export type Database = {
 					cash_start: number
 					created: string
 					id?: number
+					name?: string
 					users: string[]
 				}
 				Update: {
@@ -980,6 +982,7 @@ export type Database = {
 					cash_start?: number
 					created?: string
 					id?: number
+					name?: string
 					users?: string[]
 				}
 				Relationships: []
@@ -1254,6 +1257,7 @@ export type Database = {
 					cash_start: number | null
 					id: number | null
 					monthly_budget: number | null
+					name: string | null
 					position_count: number | null
 					transaction_count: number | null
 					user_ids: string[] | null
@@ -1268,6 +1272,7 @@ export type Database = {
 					cash_start: number | null
 					created: string | null
 					id: number | null
+					name: string | null
 					prev_rank: number | null
 					profit_from_start: number | null
 					rank: number | null
@@ -1412,6 +1417,7 @@ export type Database = {
 					cash_start: number
 					id: number
 					monthly_budget: number
+					name: string
 					position_count: number
 					transaction_count: number
 					user_ids: string[]
@@ -1472,7 +1478,11 @@ export type Database = {
 				Returns: undefined
 			}
 			is_depot_member: { Args: { depot_id: number }; Returns: boolean }
-			new_depot_for_user: { Args: { p_user_id: string }; Returns: number }
+			new_depot_for_user: {
+				Args: { p_name?: string; p_user_id: string }
+				Returns: number
+			}
+			random_depot_name: { Args: never; Returns: string }
 			rebuild_depot_values: {
 				Args: { p_depot_id?: number; p_from?: string }
 				Returns: undefined

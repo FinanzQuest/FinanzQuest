@@ -107,7 +107,7 @@ BEGIN
   -- =========================================================================
   -- FUNCTIONS + PROCEDURES  (04-functions/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.buy_asset','depots.sell_asset','depots.check_savings_budget','api.on_asset_prices_change','api.rebuild_latest_prices','api.daily_price_as_of','api.rollup_intraday','depots.get_intraday_values','users.is_superuser_session','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
+  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.buy_asset','depots.sell_asset','depots.check_savings_budget','api.on_asset_prices_change','api.rebuild_latest_prices','api.daily_price_as_of','api.rollup_intraday','depots.get_intraday_values','users.is_superuser_session','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.random_depot_name','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_proc p JOIN pg_namespace s ON s.oid = p.pronamespace
@@ -330,9 +330,9 @@ BEGIN
   n := n + 1;
   IF NOT has_function_privilege('authenticated', 'users.has_any_role(users.special_role[])', 'EXECUTE') THEN fails := fails || 'grant EXECUTE users.has_any_role to authenticated'; END IF;
   n := n + 1;
-  IF NOT has_function_privilege('authenticated', 'depots.new_depot_for_user(uuid)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.new_depot_for_user to authenticated'; END IF;
+  IF NOT has_function_privilege('authenticated', 'depots.new_depot_for_user(uuid, text)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.new_depot_for_user to authenticated'; END IF;
   n := n + 1;
-  IF has_function_privilege('anon', 'depots.new_depot_for_user(uuid)', 'EXECUTE') THEN fails := fails || 'expected no EXECUTE on depots.new_depot_for_user for anon'; END IF;
+  IF has_function_privilege('anon', 'depots.new_depot_for_user(uuid, text)', 'EXECUTE') THEN fails := fails || 'expected no EXECUTE on depots.new_depot_for_user for anon'; END IF;
   n := n + 1;
   IF has_function_privilege('anon', 'depots.buy_asset(bigint,bigint,numeric)', 'EXECUTE') THEN fails := fails || 'expected no EXECUTE on depots.buy_asset for anon'; END IF;
 
@@ -370,6 +370,13 @@ BEGIN
   -- =========================================================================
   n := n + 1;
   IF NOT EXISTS (SELECT 1 FROM api.assets) THEN fails := fails || 'seed data (api.assets is empty)'; END IF;
+
+  n := n + 1;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'depots' AND table_name = 'depots' AND column_name = 'name'
+      AND is_nullable = 'NO' AND column_default LIKE '%random_depot_name%'
+  ) THEN fails := fails || 'column depots.depots.name (NOT NULL, random default)'; END IF;
 
   n := n + 1;
   IF NOT EXISTS (

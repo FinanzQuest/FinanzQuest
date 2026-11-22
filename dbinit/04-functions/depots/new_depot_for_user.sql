@@ -7,7 +7,7 @@
 -- create a depot for themselves, admins/teachers for anyone.
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION depots.new_depot_for_user(p_user_id uuid)
+CREATE OR REPLACE FUNCTION depots.new_depot_for_user(p_user_id uuid, p_name text DEFAULT NULL)
 RETURNS bigint
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -25,8 +25,10 @@ BEGIN
     RAISE EXCEPTION 'Unauthorized: can only create a depot for yourself' USING ERRCODE = '42501';
   END IF;
 
-  INSERT INTO depots.depots (created, cash, cash_start, users)
-  VALUES (NOW(), 50000, 50000, ARRAY[p_user_id])
+  -- empty / missing name -> random friendly name (column default)
+  INSERT INTO depots.depots (created, cash, cash_start, users, name)
+  VALUES (NOW(), 50000, 50000, ARRAY[p_user_id],
+          COALESCE(NULLIF(btrim(p_name), ''), depots.random_depot_name()))
   RETURNING id INTO v_depot_id;
 
   RETURN v_depot_id;

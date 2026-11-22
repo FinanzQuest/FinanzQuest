@@ -42,7 +42,8 @@ SELECT
        THEN DENSE_RANK() OVER (ORDER BY b.history[1] DESC NULLS LAST)
   END                                                AS prev_rank,
   ARRAY[b.value] || COALESCE(b.history, '{}')        AS sparkline,
-  COALESCE(u.users, '{}')                            AS users
+  COALESCE(u.users, '{}')                            AS users,
+  d.name
 FROM base b
 JOIN depots.depots d ON d.id = b.depot_id
 LEFT JOIN (

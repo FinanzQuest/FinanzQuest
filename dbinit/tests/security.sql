@@ -130,11 +130,19 @@ SELECT pg_temp.check(pg_temp.as_user(:s1,
   $$SELECT depots.new_depot_for_user('bbbbbbbb-0000-0000-0000-000000000002')$$), 'student cannot create a depot for someone else');
 SELECT pg_temp.check(NOT pg_temp.as_user(:s1,
   $$SELECT depots.new_depot_for_user('bbbbbbbb-0000-0000-0000-000000000001')$$), 'student can create their own depot');
+SELECT pg_temp.check(NOT pg_temp.as_user(:s1,
+  $$SELECT depots.new_depot_for_user('bbbbbbbb-0000-0000-0000-000000000001', '  Mein Sparschwein  ')$$), 'student can name a new depot');
+SELECT pg_temp.check(EXISTS (SELECT 1 FROM depots.depots WHERE name = 'Mein Sparschwein'
+                             AND users = '{bbbbbbbb-0000-0000-0000-000000000001}'), '... stored trimmed');
+SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM depots.depots WHERE btrim(name) = '' OR name ~ '^[0-9]+$'),
+  'every depot has a (non-numeric) name');
+SELECT pg_temp.check(pg_temp.as_user(:s1,
+  $$SELECT depots.new_depot_for_user('bbbbbbbb-0000-0000-0000-000000000001', repeat('x', 41))$$), 'depot names are at most 40 characters');
 SELECT pg_temp.check(
-  (SELECT cash_start = 50000 AND cash = 50000 FROM depots.depots
+  (SELECT bool_and(cash_start = 50000 AND cash = 50000) FROM depots.depots
    WHERE users = '{bbbbbbbb-0000-0000-0000-000000000001}' AND id <> 991001),
   '... with the standard starting cash');
-SELECT pg_temp.check(NOT has_function_privilege('anon', 'depots.new_depot_for_user(uuid)', 'EXECUTE'),
+SELECT pg_temp.check(NOT has_function_privilege('anon', 'depots.new_depot_for_user(uuid, text)', 'EXECUTE'),
   'anon cannot create depots');
 
 -- ---------------------------------------------------------------------------

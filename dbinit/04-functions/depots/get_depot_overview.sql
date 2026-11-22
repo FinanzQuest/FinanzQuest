@@ -16,7 +16,8 @@ CREATE OR REPLACE FUNCTION depots.get_depot_overview() RETURNS TABLE(
     user_names text[],
     user_ids uuid[],
     all_ids uuid[],
-    monthly_budget int
+    monthly_budget int,
+    name text
 ) AS $$
     BEGIN
         IF NOT (users.has_any_role('admin', 'teacher') OR users.is_superuser_session()) THEN
@@ -34,7 +35,8 @@ CREATE OR REPLACE FUNCTION depots.get_depot_overview() RETURNS TABLE(
             u.user_names,
             u.user_ids,
             d.users as all_ids,
-            dsb.budget as monthly_budget
+            dsb.budget as monthly_budget,
+            d.name
         FROM depots.depots AS d
         LEFT JOIN depots.transactions AS dt
         ON dt.depot_id = d.id
