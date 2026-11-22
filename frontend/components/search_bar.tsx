@@ -52,7 +52,7 @@ export function SearchBarPopOut({ doRedirect, triggerRender }: PopOutProps) {
 	return (
 		<>
 			{trigger}
-			<CommandDialog open={open} onOpenChange={setOpen}>
+			<CommandDialog open={open} onOpenChange={setOpen} className="sm:max-w-2xl">
 				<AssetPicker
 					onSelect={handleAssetSelect}
 					searchQuery={searchQuery}
