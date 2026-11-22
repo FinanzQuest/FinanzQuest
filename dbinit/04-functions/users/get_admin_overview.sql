@@ -37,7 +37,9 @@ BEGIN
         roles.user_roles,
         roles.role_granted_at,
         COUNT(DISTINCT d.id) AS depot_count,
-        COUNT(DISTINCT (p.depot_id, p.asset_id)) AS position_count,
+        -- FILTER: without holdings the LEFT JOIN yields (NULL, NULL), a row
+        -- value that is not NULL itself and would count as one position
+        COUNT(DISTINCT (p.depot_id, p.asset_id)) FILTER (WHERE p.depot_id IS NOT NULL) AS position_count,
         COUNT(DISTINCT t.id) AS transaction_count
     FROM auth.users AS au
     LEFT JOIN LATERAL (
