@@ -3,31 +3,48 @@ FROM node:24-alpine AS base
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile
+# yarn.lock is Yarn 4 (berry); the image's bundled Yarn 1 cannot read it.
+# Corepack provides the version from package.json "packageManager".
+# The local Nix Yarn writes lockfile metadata v9 and the setting
+# approvedGitRepositories, both unknown to upstream Yarn 4.13: the setting is
+# dropped (no git dependencies) and the install may rewrite the lockfile
+# metadata inside the image (same resolutions), hence no --immutable.
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN corepack enable && sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && yarn install
 
 FROM deps AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# URLs are public build arguments. JWT_SECRET arrives as a BuildKit secret
+# (compose.yml: build.secrets), so it is never stored in a layer or in the
+# image history. The build only needs the public values Next.js inlines
+# (URLs, anon key); the service-role key is generated at container start from
+# the runtime JWT_SECRET (see CMD), and .env.local is removed before the
+# layer is committed.
 ARG API_URL_SERVER
 ARG API_URL_CLIENT
-ARG JWT_SECRET
 
 RUN apk add --no-cache openssl
 COPY generate_keys.sh ./
-RUN sh generate_keys.sh "$API_URL_SERVER" "$API_URL_CLIENT" "$JWT_SECRET" > .env.local
-RUN yarn build
+RUN --mount=type=secret,id=jwt_secret,required=true \
+    sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && \
+    sh generate_keys.sh "$API_URL_SERVER" "$API_URL_CLIENT" "$(cat /run/secrets/jwt_secret)" > keys.env && \
+    grep -v '^SUPABASE_SERVICE_ROLE_KEY=' keys.env > .env.local && \
+    rm keys.env && \
+    yarn build && \
+    rm -f .env.local .next/standalone/.env*
 
 FROM base AS dev
 WORKDIR /app
+RUN corepack enable
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN touch /app/.env.local
+RUN sed -i '/^approvedGitRepositories:/,/^$/d' .yarnrc.yml && touch /app/.env.local
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
@@ -44,10 +61,8 @@ RUN mkdir -p /app && \
     touch /app/.env.local && \
     chown -R nextjs:nodejs /app
 
-ARG API_URL_SERVER
-ARG API_URL_CLIENT
-ARG JWT_SECRET
-
+# Runtime configuration (API_URL_SERVER, API_URL_CLIENT, JWT_SECRET) comes
+# from the container environment, not from build arguments.
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static

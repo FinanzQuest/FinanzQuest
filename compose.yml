@@ -36,7 +36,9 @@ services:
       args:
         API_URL_SERVER: ${API_URL_SERVER}
         API_URL_CLIENT: ${API_URL_CLIENT}
-        JWT_SECRET: ${JWT_SECRET}
+      # build-time secret, never stored in the image (see frontend/Dockerfile)
+      secrets:
+        - jwt_secret
     depends_on:
       db:
         condition: service_healthy
@@ -48,3 +50,7 @@ services:
       - API_URL_SERVER=${API_URL_SERVER}
       - API_URL_CLIENT=${API_URL_CLIENT}
       - JWT_SECRET=${JWT_SECRET}
+
+secrets:
+  jwt_secret:
+    environment: JWT_SECRET
