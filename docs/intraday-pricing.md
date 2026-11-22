@@ -85,5 +85,11 @@ No change for buy/sell signatures: they already read `api.latest_prices`.
 
 ## Migration
 
-`dbinit/migrations/2026-11-24_intraday_prices.sql` (after the two earlier
-migrations), then deploy the updater image with the new cron entries.
+`dbinit/migrations/2026-11-24_ledger_lockdown_intraday.sql` takes a database
+on the old matview schema to the current manifest in one transaction (ledger,
+write lockdown, numeric money, intraday prices). It also cleans up a database
+on which db-init re-applied the new manifest over the old schema. Then deploy
+the updater image with the new cron entries.
+
+db-init applies `manifest.txt` only to an empty database (no
+`depots.depots`); existing databases are upgraded with `dbinit/migrations/`.

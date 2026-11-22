@@ -14,6 +14,17 @@ set -eu
 MANIFEST="${MANIFEST:-/init/manifest.txt}"
 BASE="${BASE:-/init}"
 
+# db-init runs on every `docker compose up`. The manifest builds a fresh
+# database; re-applying it over an existing (possibly older) schema half-applies
+# the new objects. Existing databases are upgraded with dbinit/migrations/.
+# FORCE_MANIFEST=1 re-applies anyway (e.g. after an init that failed midway).
+initialised=$(psql -Atc "SELECT to_regclass('depots.depots') IS NOT NULL")   # set -e: stop if unreachable
+if [ "${FORCE_MANIFEST:-0}" != "1" ] && [ "$initialised" = "t" ]; then
+  echo "Database already initialised (depots.depots exists): skipping manifest."
+  echo "Apply pending files from dbinit/migrations/ to upgrade an existing database."
+  exit 0
+fi
+
 while IFS= read -r line; do
   # skip blank lines and comments
   case "$line" in
