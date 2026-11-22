@@ -61,6 +61,7 @@ impl PriceFrame {
         self.tstamp.append(&mut v.tstamp);
         self.length += v.length;
     }
+    #[allow(clippy::too_many_arguments)] // one argument per column
     pub fn push_row(
         &mut self,
         symbol: String,
@@ -79,10 +80,6 @@ impl PriceFrame {
         self.low.push(low);
         self.volume.push(volume);
         self.length += 1
-    }
-
-    pub fn len(&self) -> usize {
-        self.length
     }
 
     pub fn is_empty(&self) -> bool {

@@ -55,7 +55,7 @@ impl Uploader {
 }
 
 pub fn is_symbol_yfinance(symbol: impl AsRef<str>) -> bool {
-    symbol.as_ref().contains(&['.', '-'])
+    symbol.as_ref().contains(['.', '-'])
 }
 
 #[derive(Clone)]
@@ -84,10 +84,23 @@ pub async fn fetch_assets(pool: &PgPool) -> Result<Vec<Asset>, sqlx::Error> {
 /// Rolls the intraday bars of every UTC day >= `from` up into daily candles
 /// in api.asset_prices. Returns the number of daily rows written.
 pub async fn rollup_intraday(pool: &PgPool, from: time::Date) -> Result<i32, sqlx::Error> {
-    let written = sqlx::query_scalar!(r#"SELECT api.rollup_intraday($1::date) AS "written!""#, from)
-        .fetch_one(pool)
-        .await?;
+    let written = sqlx::query_scalar!(
+        r#"SELECT api.rollup_intraday($1::date) AS "written!""#,
+        from
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(written)
+}
+
+/// Time of the newest intraday bar of any asset, `None` if there are none.
+pub async fn latest_intraday_bar(
+    pool: &PgPool,
+) -> Result<Option<time::OffsetDateTime>, sqlx::Error> {
+    // not a query! macro: needs no offline (.sqlx) metadata
+    sqlx::query_scalar("SELECT max(tstamp) FROM api.asset_prices_intraday")
+        .fetch_one(pool)
+        .await
 }
 
 pub fn symbol_list(assets: &[Asset]) -> Vec<String> {
@@ -150,8 +163,9 @@ async fn insert_batch(
 ) -> Result<(), sqlx::Error> {
     let tstamp = tstamp as &[time::OffsetDateTime];
     match target {
-        Target::Daily => sqlx::query!(
-            r#"
+        Target::Daily => {
+            sqlx::query!(
+                r#"
         INSERT INTO api.asset_prices (asset_id, tstamp, open, high, low, close, volume)
         SELECT a.id, d.tstamp, d.open, d.high, d.low, d.close, d.volume
         FROM UNNEST(
@@ -171,18 +185,20 @@ async fn insert_batch(
             close       = EXCLUDED.close,
             volume      = EXCLUDED.volume;
             "#,
-            symbol,
-            tstamp,
-            open,
-            high,
-            low,
-            close,
-            volume,
-        )
-        .execute(pool)
-        .await?,
-        Target::Intraday => sqlx::query!(
-            r#"
+                symbol,
+                tstamp,
+                open,
+                high,
+                low,
+                close,
+                volume,
+            )
+            .execute(pool)
+            .await?
+        }
+        Target::Intraday => {
+            sqlx::query!(
+                r#"
         INSERT INTO api.asset_prices_intraday (asset_id, tstamp, open, high, low, close, volume)
         SELECT a.id, d.tstamp, d.open, d.high, d.low, d.close, d.volume
         FROM UNNEST(
@@ -202,16 +218,17 @@ async fn insert_batch(
             close       = EXCLUDED.close,
             volume      = EXCLUDED.volume;
             "#,
-            symbol,
-            tstamp,
-            open,
-            high,
-            low,
-            close,
-            volume,
-        )
-        .execute(pool)
-        .await?,
+                symbol,
+                tstamp,
+                open,
+                high,
+                low,
+                close,
+                volume,
+            )
+            .execute(pool)
+            .await?
+        }
     };
 
     println!("Inserted {length} {} rows ({target:?})", close.len());

@@ -19,20 +19,30 @@ mod uploader;
 enum Mode {
     /// Daily candles since the last update into api.asset_prices
     Daily,
-    /// Intraday bars of yesterday and today into api.asset_prices_intraday,
+    /// Intraday bars into api.asset_prices_intraday (see `intraday_window`),
     /// rolled up into today's partial daily candle afterwards
     Intraday,
 }
 
-/// Intraday fetch window: from 00:00 UTC of the previous day (so a missed run
-/// heals itself) until `now`.
-fn intraday_window(now: time::OffsetDateTime) -> (time::OffsetDateTime, time::OffsetDateTime) {
+/// Intraday fetch window, ending at `now`. Normally from 00:00 UTC of the
+/// previous day, so a missed run heals itself. If the newest bar in the
+/// database (`latest_bar`) is older, the window starts at that bar's day, and
+/// without any bars it starts `backfill_days` back — never further, since
+/// older bars fall out of the 30-day retention anyway.
+fn intraday_window(
+    now: time::OffsetDateTime,
+    latest_bar: Option<time::OffsetDateTime>,
+    backfill_days: u16,
+) -> (time::OffsetDateTime, time::OffsetDateTime) {
+    let midnight = |date| time::OffsetDateTime::new_utc(date, time::Time::MIDNIGHT);
     let now = now.to_offset(time::UtcOffset::UTC);
-    let start_day = now.date().previous_day().expect("date out of range");
-    (
-        time::OffsetDateTime::new_utc(start_day, time::Time::MIDNIGHT),
-        now,
-    )
+    let yesterday = midnight(now.date().previous_day().expect("date out of range"));
+    let limit = midnight(now.date() - time::Duration::days(backfill_days.into()));
+    let start = match latest_bar {
+        None => limit,
+        Some(bar) => midnight(bar.to_offset(time::UtcOffset::UTC).date()).min(yesterday),
+    };
+    (start.max(limit), now)
 }
 
 #[derive(clap::Parser, Debug)]
@@ -40,13 +50,13 @@ struct Args {
     #[arg(short, long)]
     db_url: String,
 
-    #[arg(short, long, default_value_t = 1_000)]
+    #[arg(long, default_value_t = 1_000)]
     yf_timeout: usize,
-    #[arg(short, long, default_value_t = 1_000)]
+    #[arg(long, default_value_t = 1_000)]
     alpaca_timeout: usize,
-    #[arg(short, long)]
+    #[arg(long)]
     alpaca_secret_key: String,
-    #[arg(short, long)]
+    #[arg(long)]
     alpaca_key_id: String,
     #[arg(long, default_value_t = 10_000)]
     batch_size: usize,
@@ -57,6 +67,10 @@ struct Args {
     /// Bar size in minutes for --mode intraday
     #[arg(long, default_value_t = 15)]
     interval_minutes: u8,
+    /// --mode intraday: how far back to fetch when the database has no recent
+    /// bars (first start, or after downtime). Matches the 30-day retention.
+    #[arg(long, default_value_t = 30)]
+    backfill_days: u16,
 }
 
 #[tokio::main]
@@ -71,10 +85,10 @@ async fn main() -> anyhow::Result<()> {
         fetch_chunk_size,
         mode,
         interval_minutes,
+        backfill_days,
     } = Args::parse();
 
     let now = time::OffsetDateTime::now_utc();
-    let window = intraday_window(now);
 
     let yf_timeout = Duration::from_millis(yf_timeout as u64);
     let al_timeout = Duration::from_millis(alpaca_timeout as u64);
@@ -113,28 +127,38 @@ async fn main() -> anyhow::Result<()> {
             },
             Target::Daily,
         ),
-        Mode::Intraday => (
-            yf_assets
-                .into_iter()
-                .map(|asset| yf::FetchRequest::for_window(asset, window))
-                .collect(),
-            yf::FetchConfig {
-                interval: format!("{interval_minutes}m"),
-                ..Default::default()
-            },
-            alpaca::QueryParams {
-                timeframe: alpaca::Timeframe::Minutes(interval_minutes),
-                start: Some(alpaca::DateTime::DateTime(window.0)),
-                currency: Some(alpaca::Currency::EUR),
-                // Same adjustment as the daily bars: rollup_intraday writes
-                // these into api.asset_prices, so they must be on the same
-                // (split/dividend adjusted) scale as the daily history.
-                adjustment: Some(alpaca::Adjustment::All),
-                feed: Some(Feed::Iex),
-                ..Default::default()
-            },
-            Target::Intraday,
-        ),
+        Mode::Intraday => {
+            let latest = uploader::latest_intraday_bar(&pool).await?;
+            let window = intraday_window(now, latest, backfill_days);
+            println!(
+                "Intraday window: {} .. {} (newest bar in the database: {})",
+                window.0,
+                window.1,
+                latest.map_or_else(|| "none".into(), |t| t.to_string())
+            );
+            (
+                yf_assets
+                    .into_iter()
+                    .map(|asset| yf::FetchRequest::for_window(asset, window))
+                    .collect(),
+                yf::FetchConfig {
+                    interval: format!("{interval_minutes}m"),
+                    ..Default::default()
+                },
+                alpaca::QueryParams {
+                    timeframe: alpaca::Timeframe::Minutes(interval_minutes),
+                    start: Some(alpaca::DateTime::DateTime(window.0)),
+                    currency: Some(alpaca::Currency::EUR),
+                    // Same adjustment as the daily bars: rollup_intraday writes
+                    // these into api.asset_prices, so they must be on the same
+                    // (split/dividend adjusted) scale as the daily history.
+                    adjustment: Some(alpaca::Adjustment::All),
+                    feed: Some(Feed::Iex),
+                    ..Default::default()
+                },
+                Target::Intraday,
+            )
+        }
     };
     let uploader = Uploader::new(pool.clone(), batch_size, target).await?;
 
@@ -171,7 +195,9 @@ async fn main() -> anyhow::Result<()> {
     uploader.finish().await?;
 
     if mode == Mode::Intraday {
-        let written = uploader::rollup_intraday(&pool, window.0.date()).await?;
+        // Only today's (still open) candle: closed days keep the provider's
+        // official daily bar written by the nightly run, also after a backfill.
+        let written = uploader::rollup_intraday(&pool, now.date()).await?;
         println!("Rolled intraday bars up into {written} daily rows.");
     }
 
@@ -188,23 +214,58 @@ mod tests {
     use time::macros::datetime;
 
     #[test]
+    fn cli_definition_is_valid() {
+        use clap::CommandFactory;
+        Args::command().debug_assert();
+    }
+
+    #[test]
     fn window_starts_at_midnight_utc_of_previous_day() {
         let now = datetime!(2026-11-22 14:37:12 UTC);
-        assert_eq!(intraday_window(now), (datetime!(2026-11-21 00:00 UTC), now));
+        let latest = Some(datetime!(2026-11-22 14:30 UTC));
+        assert_eq!(
+            intraday_window(now, latest, 30),
+            (datetime!(2026-11-21 00:00 UTC), now)
+        );
     }
 
     #[test]
     fn window_normalises_offset_to_utc() {
         // 00:30 in Berlin is still the previous day in UTC.
         let now = datetime!(2026-11-22 00:30 +1);
-        let (start, end) = intraday_window(now);
+        let (start, end) = intraday_window(now, Some(now), 30);
         assert_eq!(start, datetime!(2026-11-20 00:00 UTC));
         assert_eq!(end, now);
     }
 
     #[test]
     fn window_crosses_month_boundary() {
-        let (start, _) = intraday_window(datetime!(2026-12-01 07:00 UTC));
+        let now = datetime!(2026-12-01 07:00 UTC);
+        let (start, _) = intraday_window(now, Some(now), 30);
         assert_eq!(start, datetime!(2026-11-30 00:00 UTC));
+    }
+
+    #[test]
+    fn empty_database_backfills_the_full_range() {
+        let now = datetime!(2026-11-22 09:00 UTC);
+        let (start, _) = intraday_window(now, None, 30);
+        assert_eq!(start, datetime!(2026-10-23 00:00 UTC));
+    }
+
+    #[test]
+    fn gap_is_refetched_from_the_newest_bars_day() {
+        // updater was down since Tuesday afternoon
+        let now = datetime!(2026-11-22 09:00 UTC);
+        let latest = Some(datetime!(2026-11-17 15:45 UTC));
+        let (start, _) = intraday_window(now, latest, 30);
+        assert_eq!(start, datetime!(2026-11-17 00:00 UTC));
+    }
+
+    #[test]
+    fn long_gap_is_capped_at_the_backfill_range() {
+        let now = datetime!(2026-11-22 09:00 UTC);
+        let latest = Some(datetime!(2026-08-01 15:45 UTC));
+        let (start, _) = intraday_window(now, latest, 30);
+        assert_eq!(start, datetime!(2026-10-23 00:00 UTC));
     }
 }

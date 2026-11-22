@@ -36,7 +36,7 @@ pub enum Error {
         response: serde_json::Value,
     },
     #[error("Yahoo Finance error: {0}")]
-    YFinanceError(Value),
+    YFinance(Value),
     #[error("Rate limited")]
     RateLimited,
     #[error("Symbol not found: {0}")]
@@ -48,11 +48,6 @@ pub enum Error {
 }
 
 impl Error {
-    /// Should we retry this error?
-    pub fn is_retryable(&self) -> bool {
-        matches!(self, Error::RateLimited | Error::Reqwest(_))
-    }
-
     /// Should we skip this symbol entirely?
     pub fn is_fatal(&self) -> bool {
         matches!(
@@ -162,11 +157,11 @@ async fn fetch_once(
                 } else if code == "Too Many Requests" {
                     Error::RateLimited
                 } else {
-                    Error::YFinanceError(Value::Object(e.clone()))
+                    Error::YFinance(Value::Object(e.clone()))
                 },
             );
         }
-        Some(v) if !v.is_null() => return Err(Error::YFinanceError(v.clone())),
+        Some(v) if !v.is_null() => return Err(Error::YFinance(v.clone())),
         _ => {}
     }
 

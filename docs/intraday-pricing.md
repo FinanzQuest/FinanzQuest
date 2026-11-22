@@ -19,8 +19,12 @@ The updater keeps using the two APIs it already calls:
 
 The nightly run (`--mode daily`, cron 01:00 UTC) stays as it is: adjusted daily
 bars into `api.asset_prices`. A new run mode `--mode intraday` (cron every
-15 minutes, Mon–Fri 07:00–21:45 UTC, covering EU and US sessions) fetches the
-last two days of 15-minute bars.
+15 minutes, Mon–Fri 07:00–21:45 UTC, covering EU and US sessions) fetches
+15-minute bars from 00:00 UTC of the previous day. If the newest stored bar is
+older (downtime), it starts at that bar's day instead, and on an empty table it
+backfills `--backfill-days` (default 30, the retention). The container runs
+the intraday mode once on startup as well, so a fresh or stale database gets
+its intraday history without waiting for the next weekday.
 
 ## Database
 
@@ -45,9 +49,10 @@ api.asset_prices_intraday + ledger ─▶ depots.get_intraday_values(depot)  (to
   15-minute bars of day D, and the next day's bars outrank it again.
 - **`api.rollup_intraday(p_from date)`** upserts the partial daily bar
   (first open, max high, min low, last close, summed volume) for every day
-  ≥ `p_from` into `api.asset_prices`. The intraday run calls it after each
-  upload, so the daily chart and the "today" change have a current candle.
-  The nightly run later overwrites it with the provider's adjusted daily bar.
+  ≥ `p_from` into `api.asset_prices`. The intraday run calls it for today
+  after each upload, so the daily chart and the "today" change have a current
+  candle; closed days keep the provider's official bar. The nightly run later
+  overwrites today's candle with the provider's adjusted daily bar.
 - **`depots.get_intraday_values(p_depot_id, p_since)`** returns the depot's
   value at every 15-minute bar time since `p_since` (default: start of today)
   plus a final point at `now()`, which equals `depots.current_values`.

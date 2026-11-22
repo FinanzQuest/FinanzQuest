@@ -13,7 +13,7 @@ pub mod params {
     }
 
     #[derive(Clone, Debug)]
-    #[allow(unused)]
+    #[allow(unused, clippy::upper_case_acronyms)] // spelled as the API expects
     pub enum Currency {
         EUR,
         USD,
@@ -233,90 +233,6 @@ impl AlpacaClient {
             .await?;
 
         Ok(response)
-    }
-
-    /// Fetches all pages automatically, returns bars grouped by symbol
-    pub async fn fetch_all_bars(
-        &self,
-        symbols: Vec<String>,
-        query: QueryParams,
-    ) -> anyhow::Result<HashMap<String, Vec<Bar>>> {
-        let mut all_bars: HashMap<String, Vec<Bar>> = HashMap::new();
-        let mut page_token = query.page_token;
-
-        loop {
-            let request = AlpacaRequest {
-                symbols: symbols.clone(),
-                query: QueryParams {
-                    timeframe: query.timeframe,
-                    start: query.start.clone(),
-                    end: query.end.clone(),
-                    asof: query.asof,
-                    feed: query.feed,
-                    currency: query.currency.clone(),
-                    adjustment: query.adjustment,
-                    limit: query.limit.or(Some(10000)),
-                    page_token: page_token,
-                    sort: query.sort,
-                },
-            };
-
-            let response = self.fetch_bars(request).await?;
-
-            for (symbol, bars) in response.bars {
-                all_bars.entry(symbol).or_default().extend(bars);
-            }
-
-            match response.next_page_token {
-                Some(token) => page_token = Some(token),
-                None => {
-                    break;
-                }
-            }
-        }
-
-        Ok(all_bars)
-    }
-
-    pub fn stream_bars(
-        &self,
-        symbols: Vec<String>,
-        query: QueryParams,
-    ) -> impl tokio_stream::Stream<Item = anyhow::Result<HashMap<String, Vec<Bar>>>> {
-        async_stream::stream! {
-
-            let mut page_token = query.page_token;
-            loop {
-                let request = AlpacaRequest {
-                    symbols: symbols.clone(),
-                    query: QueryParams {
-                        limit: query.limit.or(Some(10000)),
-                        page_token: page_token.clone(),
-                        timeframe:  query.timeframe,
-                        start:      query.start.clone(),
-                        end:        query.end.clone(),
-                        asof:       query.asof,
-                        feed:       query.feed,
-                        currency:   query.currency.clone(),
-                        adjustment: query.adjustment,
-                        sort:       query.sort,
-                    },
-                };
-
-                match self.fetch_bars(request).await {
-                    Err(e) => { yield Err(e); break; }
-                    Ok(response) => {
-                        let next = response.next_page_token.clone();
-                        yield Ok(response.bars);
-
-                        match next {
-                            Some(token) => page_token = Some(token),
-                            None => break,
-                        }
-                    }
-                }
-            }
-        }
     }
 
     pub fn stream_bars_chunked(
