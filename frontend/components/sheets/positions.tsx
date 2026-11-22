@@ -18,14 +18,16 @@ interface props extends ComponentPropsWithoutRef<"div"> {
 export function PositionSheet({ className }: props) {
 	return (
 		<Sheet>
-			<SheetTrigger asChild>
-				<Button
-					variant={"outline"}
-					className={cn("text-muted-foreground text-sm", className)}
-				>
-					show more
-				</Button>
-			</SheetTrigger>
+			<SheetTrigger
+				render={
+					<Button
+						variant={"outline"}
+						className={cn("text-muted-foreground text-sm", className)}
+					>
+						show more
+					</Button>
+				}
+			/>
 			<SheetContent>
 				<SheetHeader>
 					<SheetTitle>Are you absolutely sure?</SheetTitle>

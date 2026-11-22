@@ -2,12 +2,6 @@
 
 import type { ComponentPropsWithoutRef } from "react"
 import StockChartContainer from "@/components/charts/container"
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from "@/components/ui/card"
 import type { PlainPrice } from "@/database/custom_types"
 import { cn } from "@/lib/utils"
 

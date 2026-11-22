@@ -1,10 +1,10 @@
 "use client"
 import type React from "react"
+import type { TooltipContentProps, TooltipValueType } from "recharts"
 import {
 	Area,
 	AreaChart as RechartsAreaChart,
 	ReferenceLine,
-	type Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts"
@@ -128,7 +128,10 @@ export default function AreaChart<T extends Record<string, number | string>>({
 	)
 }
 
-type CustomTooltipProps = React.ComponentProps<typeof Tooltip> & {
+// injected by recharts when passed as <Tooltip content={<CustomTooltip />} />
+type CustomTooltipProps = Partial<
+	TooltipContentProps<TooltipValueType, string>
+> & {
 	timeAxis?: TimeAxis
 }
 

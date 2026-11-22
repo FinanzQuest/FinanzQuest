@@ -10,7 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import type { Asset, Depot, DepotPosition } from "@/database/custom_types"
-import { currencyFormat, to_display_string } from "@/lib/cash_display_string"
+import { currencyFormat } from "@/lib/cash_display_string"
 import { getIconURL } from "@/lib/icon_url"
 import { numberFormat, quoteTimeString } from "@/lib/util"
 import { cn } from "@/lib/utils"

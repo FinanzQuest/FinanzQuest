@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Inter as FontSans } from "next/font/google"
 import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 

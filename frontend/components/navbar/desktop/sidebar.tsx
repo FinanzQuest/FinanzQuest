@@ -96,7 +96,9 @@ function NavItems({
 					))}
 				</SidebarMenu>
 			</SidebarGroup>
-			{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
+			{collapsed && (
+				<Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />
+			)}
 		</div>
 	))
 }
@@ -170,7 +172,9 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 						</SidebarMenu>
 					)}
 
-					{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
+					{collapsed && (
+						<Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />
+					)}
 					{collapsed && (
 						<SidebarGroup>
 							<SidebarMenu>
@@ -193,7 +197,9 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 							</SidebarMenu>
 						</SidebarGroup>
 					)}
-					{collapsed && <Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />}
+					{collapsed && (
+						<Separator className="w-[calc(100%-4*var(--spacing))]! mx-auto" />
+					)}
 					<NavItems tree={tree} collapsed={collapsed} />
 				</SidebarContent>
 

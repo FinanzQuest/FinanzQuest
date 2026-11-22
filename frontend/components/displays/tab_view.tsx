@@ -262,6 +262,7 @@ function SortSelector(props: {
 		<div className="flex flex-row gap-2">
 			<Select
 				onValueChange={value => {
+					if (value === null) return
 					if (props.onValueChange) {
 						props.onValueChange(value, descending)
 					}

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import {
 	Bar,
-	BarChart,
 	CartesianGrid,
 	ComposedChart,
 	Legend,

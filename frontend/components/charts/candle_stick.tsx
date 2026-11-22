@@ -1,12 +1,12 @@
 "use client"
 import type React from "react"
+import type { TooltipContentProps, TooltipValueType } from "recharts"
 import {
 	Bar,
 	Cell,
 	ComposedChart,
 	ErrorBar,
 	Line,
-	type Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts"
@@ -122,7 +122,10 @@ export default function CandleStickChart<T extends BarDataT>({
 	)
 }
 
-type CustomToolTipProps = React.ComponentProps<typeof Tooltip> & {
+// injected by recharts when passed as <Tooltip content={<CustomTooltip />} />
+type CustomToolTipProps = Partial<
+	TooltipContentProps<TooltipValueType, string>
+> & {
 	timeAxis?: TimeAxis
 }
 

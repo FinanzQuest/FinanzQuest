@@ -630,12 +630,14 @@ function DotsMenu({
 		<>
 			{dialogs}
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button variant="outline" size="icon">
-						<MoreVertical className="size-4" />
-						<span className="sr-only">Aktionen öffnen</span>
-					</Button>
-				</DropdownMenuTrigger>
+				<DropdownMenuTrigger
+					render={
+						<Button variant="outline" size="icon">
+							<MoreVertical className="size-4" />
+							<span className="sr-only">Aktionen öffnen</span>
+						</Button>
+					}
+				/>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem>
 						<Link

@@ -66,7 +66,7 @@ export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
 
 	const trigger = collapsed ? (
 		<SelectTrigger className="aspect-square! focus:ring-transparent! flex flex-row py-2 h-fit p-0">
-				<Briefcase className="shrink-0 size-6" />
+			<Briefcase className="shrink-0 size-6" />
 		</SelectTrigger>
 	) : (
 		<SelectTrigger className="rounded-t-none! focus:ring-transparent! w-full">
@@ -78,6 +78,7 @@ export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
 		<Select
 			value={activeDepotId?.toString()}
 			onValueChange={async value => {
+				if (value === null) return
 				const client = createClient()
 				const userId = (await client.auth.getUser()).data.user?.id
 				const id = parseInt(value, 10)

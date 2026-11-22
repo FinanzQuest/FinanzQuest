@@ -10,6 +10,7 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { SearchParams } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
@@ -17,7 +18,6 @@ import { formatDateString } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
 import NewEntryDialog from "./new_dialog"
 import { SavingsPlanTable } from "./table"
-import { ScrollArea } from "@/components/ui/scroll-area"
 export default async function Page(props: {
 	searchParams: Promise<SearchParams>
 }) {

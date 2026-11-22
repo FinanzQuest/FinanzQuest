@@ -206,7 +206,7 @@ export function SavingsPlanTable({
 				<Checkbox
 					checked={
 						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected())
+						table.getIsSomePageRowsSelected()
 					}
 					onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
 					aria-label="Alle auswählen"

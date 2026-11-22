@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.5/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -17,7 +17,8 @@
 			"!.direnv",
 			"!.git",
 			"!.github",
-			"!.vercel"
+			"!.vercel",
+			"!next-env.d.ts"
 		]
 	},
 	"formatter": {
@@ -27,7 +28,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"preset": "recommended"
 		}
 	},
 	"json": {

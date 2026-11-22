@@ -7,7 +7,7 @@ import {
 	StockPositionCard,
 } from "@/components/cards/cards"
 import { ChartCard } from "@/components/cards/client"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { DepotPosition, LatestPrice } from "@/database/custom_types"
 import { fetchStockData } from "@/database/fetch_stock_data"
 import {

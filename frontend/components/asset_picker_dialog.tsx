@@ -54,47 +54,50 @@ export default function AssetPickerDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogTrigger disabled={disabled} asChild>
-				<Button
-					variant="outline"
-					className={cn(
-						className,
-						"w-full justify-start",
-						disabled ? "border-transparent bg-transparent" : "border"
-					)}
-					type="button"
-				>
-					{selectedAsset ? (
-						<div className="flex items-center gap-2 w-full">
-							{iconUrl ? (
-								<Image
-									src={iconUrl}
-									alt={selectedAsset.symbol}
-									width={32}
-									height={32}
-									className="rounded size-5"
-								/>
-							) : (
-								""
-							)}
-							<span className="font-medium ">{selectedAsset.symbol}</span>
-							{displayName ? (
-								<>
-									<span className="text-muted-foreground">-</span>
-									<span className="overflow-hidden text-ellipsis whitespace-nowrap">
-										{selectedAsset.name}
-									</span>
-								</>
-							) : null}
-						</div>
-					) : (
-						<div className="flex items-center gap-2 text-muted-foreground">
-							<Search className="h-4 w-4" />
-							<span>Wähle ein Wertpapier aus</span>
-						</div>
-					)}
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				disabled={disabled}
+				render={
+					<Button
+						variant="outline"
+						className={cn(
+							className,
+							"w-full justify-start",
+							disabled ? "border-transparent bg-transparent" : "border"
+						)}
+						type="button"
+					>
+						{selectedAsset ? (
+							<div className="flex items-center gap-2 w-full">
+								{iconUrl ? (
+									<Image
+										src={iconUrl}
+										alt={selectedAsset.symbol}
+										width={32}
+										height={32}
+										className="rounded size-5"
+									/>
+								) : (
+									""
+								)}
+								<span className="font-medium ">{selectedAsset.symbol}</span>
+								{displayName ? (
+									<>
+										<span className="text-muted-foreground">-</span>
+										<span className="overflow-hidden text-ellipsis whitespace-nowrap">
+											{selectedAsset.name}
+										</span>
+									</>
+								) : null}
+							</div>
+						) : (
+							<div className="flex items-center gap-2 text-muted-foreground">
+								<Search className="h-4 w-4" />
+								<span>Wähle ein Wertpapier aus</span>
+							</div>
+						)}
+					</Button>
+				}
+			/>
 			<DialogContent className="max-w-[600px] p-2">
 				<StockPicker
 					value={value}

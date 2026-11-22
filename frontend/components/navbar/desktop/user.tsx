@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import { LogOut, UserIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { logout } from "@/app/(auth)/actions"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -14,16 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { Database } from "@/database/types"
 import { createClient } from "@/utils/supabase/client"
-
-function getInitials(name: string) {
-	const words = name.split(/(\s+)|(-)/)
-	if (words.length === 1) return words[0].charAt(0).toUpperCase()
-
-	const first = words[0].charAt(0).toUpperCase()
-	const last = words[words.length - 1].charAt(0).toUpperCase()
-
-	return `${first}${last}`
-}
 
 export default function User({ collapsed }: { collapsed?: boolean }) {
 	const client = createClient()
@@ -62,23 +51,19 @@ export default function User({ collapsed }: { collapsed?: boolean }) {
 			<DropdownMenuContent side="right" align="start" sideOffset={10}>
 				<DropdownMenuGroup>
 					<DropdownMenuLabel>
-							<div className="text-base text-foreground">{userData?.name}</div>
-							<div>
-								{userData?.email}
-							</div>
+						<div className="text-base text-foreground">{userData?.name}</div>
+						<div>{userData?.email}</div>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem variant="destructive" onClick={() => logout()}>
-							<LogOut />
-							Logout
+						<LogOut />
+						Logout
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
 }
-
-
 
 export async function dataFetcher(client: SupabaseClient<Database>) {
 	const {

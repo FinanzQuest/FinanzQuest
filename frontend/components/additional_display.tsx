@@ -20,11 +20,13 @@ export default function AdditionalContent({
 }: props) {
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Button className="text-muted-foreground" variant={"outline"}>
-					{buttonTitle}
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button className="text-muted-foreground" variant={"outline"}>
+						{buttonTitle}
+					</Button>
+				}
+			/>
 
 			<DialogContent className={className}>
 				<DialogHeader>

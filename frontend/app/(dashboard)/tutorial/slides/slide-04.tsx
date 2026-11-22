@@ -19,6 +19,10 @@ import {
 	SlideSection,
 } from "./slide-layout"
 
+/** base-ui Slider reports a number, or an array for range sliders */
+const sliderValue = (value: number | readonly number[]) =>
+	typeof value === "number" ? value : value[0]
+
 function calcGrowth(startCapital: number, rate: number, years: number) {
 	return Array.from({ length: years + 1 }, (_, i) => ({
 		year: i,
@@ -171,7 +175,7 @@ export function Slide04() {
 							max={10000}
 							step={100}
 							value={[startCapital]}
-							onValueChange={([v]) => setStartCapital(v)}
+							onValueChange={v => setStartCapital(sliderValue(v))}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -184,7 +188,7 @@ export function Slide04() {
 							max={12}
 							step={0.5}
 							value={[rate]}
-							onValueChange={([v]) => setRate(v)}
+							onValueChange={v => setRate(sliderValue(v))}
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -197,7 +201,7 @@ export function Slide04() {
 							max={50}
 							step={1}
 							value={[years]}
-							onValueChange={([v]) => setYears(v)}
+							onValueChange={v => setYears(sliderValue(v))}
 						/>
 					</div>
 				</div>

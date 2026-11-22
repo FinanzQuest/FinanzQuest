@@ -14,7 +14,7 @@ export function NewUserDialog({
 	onSubmit,
 	trigger,
 }: {
-	trigger?: React.ReactNode
+	trigger?: React.ReactElement
 	onSubmit?: (data: {
 		user_name: string
 		email: string
@@ -25,9 +25,9 @@ export function NewUserDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				{trigger ?? <Button variant="outline">Neuer Benutzer</Button>}
-			</DialogTrigger>
+			<DialogTrigger
+				render={trigger ?? <Button variant="outline">Neuer Benutzer</Button>}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Neuer Benutzer</DialogTitle>

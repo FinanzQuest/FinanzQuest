@@ -29,12 +29,15 @@ export default function NewEntryDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger render={trigger || (
-					<Button variant="outline" size="icon">
-						<Plus className="h-4 w-4" />
-					</Button>
-				)}>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					trigger || (
+						<Button variant="outline" size="icon">
+							<Plus className="h-4 w-4" />
+						</Button>
+					)
+				}
+			></DialogTrigger>
 			<DialogContent className="overflow-clip">
 				<DialogHeader>
 					<DialogTitle>Neuer Eintrag</DialogTitle>

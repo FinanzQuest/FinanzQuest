@@ -19,15 +19,12 @@ export default function IntervalControls(props: {
 	))
 	return (
 		<ToggleGroup
-			defaultValue={keys[0]}
-			onValueChange={key => {
-				const value = props.intervals[key]
-				if (props.onChange) {
-					props.onChange(key, value)
-				}
+			defaultValue={keys.slice(0, 1)}
+			onValueChange={([key]) => {
+				if (key === undefined) return
+				props.onChange?.(key, props.intervals[key])
 			}}
 			className={props.className}
-			type="single"
 		>
 			{items}
 		</ToggleGroup>

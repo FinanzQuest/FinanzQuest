@@ -34,10 +34,7 @@ interface PopOutProps extends Props, ComponentPropsWithoutRef<"div"> {
 	triggerRender: ({ onClick }: { onClick: () => void }) => React.ReactNode
 }
 
-export function SearchBarPopOut({
-	doRedirect,
-	triggerRender,
-}: PopOutProps) {
+export function SearchBarPopOut({ doRedirect, triggerRender }: PopOutProps) {
 	const [open, setOpen] = useState(false)
 	const [searchQuery, setSearchQuery] = useState("")
 	const router = useRouter()

@@ -150,7 +150,10 @@ function Description({
 				<HoverCardContent className="w-fit rounded-lg overflow-hidden">
 					<div className="flex flex-row gap-2">
 						<span className="number tabular-nums">
-							${Math.abs(transaction.amount * (transaction.price ?? 0)).toFixed(2)}
+							$
+							{Math.abs(transaction.amount * (transaction.price ?? 0)).toFixed(
+								2
+							)}
 						</span>
 						<span>{buy ? "+" : "-"}</span>
 						<span className="number tabular-nums">

@@ -133,10 +133,12 @@ export default function NewEntryForm({
 							<FormLabel>Frequenz</FormLabel>
 							<FormControl>
 								<ToggleGroup
-									type="single"
 									className="w-full flex flex-row justify-start gap-3 "
-									onValueChange={field.onChange}
-									defaultValue={field.value}
+									value={[field.value]}
+									onValueChange={value => {
+										// clicking the active item deselects it — keep the period
+										if (value[0]) field.onChange(value[0])
+									}}
 								>
 									<ToggleGroupItem value="daily">Täglich</ToggleGroupItem>
 									<ToggleGroupItem value="weekly">Wöchentlich</ToggleGroupItem>

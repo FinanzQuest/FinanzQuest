@@ -2,7 +2,6 @@ import "../container.css"
 
 import type React from "react"
 import { Suspense } from "react"
-import Tooltip from "@/components/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import PageLoader from "../../loaders/page_loader"
