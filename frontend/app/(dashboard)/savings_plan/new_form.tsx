@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { useActiveDepotId } from "@/lib/depot_cookie/client"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 
 type Props = {
+	/** depot shown on the page (not the cookie: ?depot= may differ) */
+	depotId: number
 	limit?: number
 	onSuccessAction?: () => void
 	className?: string
@@ -44,12 +45,12 @@ function getFormSchema(limit?: number) {
 }
 
 export default function NewEntryForm({
+	depotId,
 	limit,
 	onSuccessAction: onSuccess,
 	className,
 }: Props) {
 	const client = createClient()
-	const activeDepotId = useActiveDepotId(client)
 	const formSchema = getFormSchema(limit)
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -60,12 +61,8 @@ export default function NewEntryForm({
 		},
 	})
 	async function onSubmit(data: z.infer<typeof formSchema>) {
-		if (!activeDepotId) {
-			toast.error("Bitte wähle ein Depot aus")
-			return
-		}
 		const { error } = await client.schema("depots").rpc("upsert_savings_plan", {
-			p_depot_id: activeDepotId,
+			p_depot_id: depotId,
 			p_asset_id: data.asset_id,
 			p_worth: data.worth,
 			p_frequency: data.frequency,

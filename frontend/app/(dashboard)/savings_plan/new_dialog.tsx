@@ -14,8 +14,10 @@ import {
 import NewEntryForm from "./new_form"
 
 export default function NewEntryDialog({
+	depotId,
 	trigger,
 }: {
+	depotId: number
 	trigger?: React.ReactElement
 }) {
 	const [isOpen, setIsOpen] = useState(false)
@@ -50,6 +52,7 @@ export default function NewEntryDialog({
 					/>
 				</DialogHeader>
 				<NewEntryForm
+					depotId={depotId}
 					className="w-full overflow-hidden px-px"
 					onSuccessAction={handleSuccessAction}
 				/>

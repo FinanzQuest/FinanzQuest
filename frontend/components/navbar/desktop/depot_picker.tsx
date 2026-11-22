@@ -1,7 +1,6 @@
 "use client"
 import { Briefcase } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
 	Select,
 	SelectContent,
@@ -9,60 +8,26 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import type { Depot } from "@/database/custom_types"
-import { getUserId } from "@/lib/db"
-import { getActiveDepotId, setDepotCookie } from "@/lib/depot_cookie/client"
-import { createClient } from "@/utils/supabase/client"
 
-async function fetchDepots() {
-	const client = createClient()
-	const { error, userId } = await getUserId(client)
-	if (error) {
-		return { error, data: null }
-	}
-	return await client
-		.schema("depots")
-		.from("depots")
-		.select("*")
-		.contains("users", [userId])
-}
-
-export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
+/**
+ * Switches the active depot. The list and the cookie's depot come from the
+ * dashboard layout (server); selecting navigates with ?depot=, and the proxy
+ * stores the choice in the activeDepotId cookie for later pages.
+ */
+export default function DepotPicker({
+	collapsed,
+	depotIds,
+	activeDepotId,
+}: {
+	collapsed?: boolean
+	depotIds: number[]
+	activeDepotId: number | null
+}) {
 	const router = useRouter()
+	const pathname = usePathname()
 	const searchParams = useSearchParams()
-	const [activeDepotId, setActiveDepotId] = useState<number | null>(null)
-	const [depots, setDepots] = useState<Depot[] | null>([])
-
-	function setDepot(id: number, userId: string) {
-		setDepotCookie(id, userId)
-		router.push(`?depot=${id}`)
-		router.refresh()
-	}
-
-	useEffect(() => {
-		fetchDepots().then(res => {
-			if (res.error) {
-				console.error(res.error)
-				setDepots(null)
-				return
-			}
-			setDepots(res.data)
-		})
-	}, [])
-
-	useEffect(() => {
-		;(async () => {
-			const client = createClient()
-			const userId = (await client.auth.getUser()).data.user?.id
-
-			if (!userId) return
-
-			const depot = await getActiveDepotId(userId, searchParams.get("depot"))
-			if (depot) {
-				setActiveDepotId(depot)
-			}
-		})()
-	}, [searchParams])
+	const fromUrl = Number.parseInt(searchParams.get("depot") ?? "", 10)
+	const active = Number.isNaN(fromUrl) ? activeDepotId : fromUrl
 
 	const trigger = collapsed ? (
 		<SelectTrigger className="aspect-square! focus:ring-transparent! flex flex-row py-2 h-fit p-0">
@@ -76,23 +41,20 @@ export default function DepotPicker({ collapsed }: { collapsed?: boolean }) {
 
 	return (
 		<Select
-			value={activeDepotId?.toString()}
-			onValueChange={async value => {
+			value={active?.toString() ?? null}
+			onValueChange={value => {
 				if (value === null) return
-				const client = createClient()
-				const userId = (await client.auth.getUser()).data.user?.id
-				const id = parseInt(value, 10)
-				if (id && userId) {
-					setActiveDepotId(id)
-					setDepot(id, userId)
-				}
+				const params = new URLSearchParams(searchParams)
+				params.set("depot", value)
+				params.delete("inspect_depot")
+				router.push(`${pathname}?${params}`)
 			}}
 		>
 			{trigger}
 			<SelectContent align="start" side="right" sideOffset={10}>
-				{depots?.map(depot => (
-					<SelectItem key={depot.id} value={depot.id.toString()}>
-						Depot {depot.id}
+				{depotIds.map(id => (
+					<SelectItem key={id} value={id.toString()}>
+						Depot {id}
 					</SelectItem>
 				))}
 			</SelectContent>

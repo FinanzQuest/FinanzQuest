@@ -39,23 +39,30 @@ export default function StockPicker({
 	const [stocks, setStocks] = useState<Array<Asset>>([])
 
 	useEffect(() => {
-		const fetchStocks = async () => {
-			if (searchQuery === "" || !searchQuery) {
-				setStocks([])
-				return
-			}
+		if (!searchQuery) {
+			setStocks([])
+			return
+		}
+		// debounce keystrokes; drop responses for an outdated query (a slow
+		// earlier response must not overwrite the current results)
+		let stale = false
+		const timer = setTimeout(async () => {
 			const { assets, error, success } = await getStockFromSearchString(
 				searchQuery,
 				5
 			)
+			if (stale) return
 			if (error) {
 				console.error("Failed to fetch data from database", error)
 			}
 			if (success) {
 				setStocks(assets)
 			}
+		}, 200)
+		return () => {
+			stale = true
+			clearTimeout(timer)
 		}
-		fetchStocks().catch(console.error)
 	}, [searchQuery])
 
 	return (

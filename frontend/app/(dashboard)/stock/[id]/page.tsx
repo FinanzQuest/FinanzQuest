@@ -10,13 +10,13 @@ import { ChartCard } from "@/components/cards/client"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { DepotPosition, LatestPrice } from "@/database/custom_types"
 import { fetchStockData } from "@/database/fetch_stock_data"
+import { getServerClient, getUser } from "@/lib/auth"
 import {
 	formatter as formatPrices,
 	intradayFormatter,
 } from "@/lib/data/formatter"
 import { getDepotId } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo, msPerDay, toISODateOnly } from "@/lib/util"
-import { createClient } from "@/utils/supabase/server"
 export const revalidate = 60
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
@@ -150,8 +150,8 @@ function getQuote(
 }
 
 const dataFetcher = async (stockId: number, depotId: number) => {
-	const client = await createClient()
-	const user = (await client.auth.getUser()).data.user
+	const client = await getServerClient()
+	const { user } = await getUser()
 	if (!user) redirect("/auth/login")
 
 	const { data: depot, error: depotError } = await client

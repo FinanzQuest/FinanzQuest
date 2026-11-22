@@ -113,7 +113,8 @@ function sortProcessedPositions(
 			(descending ? -1 : 1) * (a.symbol ?? "").localeCompare(b.symbol ?? ""),
 	}
 
-	return positions.sort(sort_funcs[mode] ?? sort_funcs.profit)
+	// copy: sorting in place would mutate the positions prop
+	return [...positions].sort(sort_funcs[mode] ?? sort_funcs.profit)
 }
 
 type AssetTypeWithOther = AssetType | "other"

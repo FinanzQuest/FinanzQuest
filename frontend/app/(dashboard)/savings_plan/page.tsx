@@ -92,6 +92,7 @@ export default async function Page(props: {
 								<EmptyContent>
 									{!isInspect && (
 										<NewEntryDialog
+											depotId={depotId}
 											trigger={<Button>Eintrag hinzufügen</Button>}
 										/>
 									)}
@@ -100,6 +101,7 @@ export default async function Page(props: {
 						</Empty>
 					) : (
 						<SavingsPlanTable
+							depotId={depotId}
 							className="bg-background !rounded-lg"
 							monthlyBudget={budget?.monthly_expenses ?? undefined}
 							data={data}

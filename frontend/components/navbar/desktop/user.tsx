@@ -1,6 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
+"use client"
 import { LogOut, UserIcon } from "lucide-react"
-import { useEffect, useState } from "react"
 import { logout } from "@/app/(auth)/actions"
 import {
 	DropdownMenu,
@@ -11,25 +10,16 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Database } from "@/database/types"
-import { createClient } from "@/utils/supabase/client"
 
-export default function User({ collapsed }: { collapsed?: boolean }) {
-	const client = createClient()
-	const [userData, setUserData] = useState<
-		Awaited<ReturnType<typeof dataFetcher>>["data"] | null
-	>(null)
-
-	useEffect(() => {
-		dataFetcher(client).then(result => {
-			if (result.error) {
-				console.error(result.error)
-			} else {
-				setUserData(result.data)
-			}
-		})
-	}, [client])
-
+export default function User({
+	collapsed,
+	user,
+}: {
+	collapsed?: boolean
+	/** loaded by the dashboard layout */
+	user: { name: string | null; email: string | null } | null
+}) {
+	const userData = user
 	const trigger = collapsed ? (
 		<DropdownMenuTrigger className="aspect-square rounded-lg flex flex-row outline-none text-sm border-input gap-1 items-center overflow-hidden">
 			<UserIcon className="size-6 mx-auto my-auto" />
@@ -63,27 +53,4 @@ export default function User({ collapsed }: { collapsed?: boolean }) {
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
-}
-
-export async function dataFetcher(client: SupabaseClient<Database>) {
-	const {
-		data: { user },
-		error,
-	} = await client.auth.getUser()
-
-	if (error) {
-		return { error, data: null }
-	}
-
-	if (!user) {
-		return { error: new Error("User not found"), data: null }
-	}
-
-	return {
-		data: {
-			name: user.user_metadata.name,
-			email: user.email,
-		},
-		error: null,
-	}
 }

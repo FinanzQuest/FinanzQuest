@@ -1,6 +1,5 @@
 "use client"
 
-import type { SupabaseClient } from "@supabase/supabase-js"
 import {
 	ArrowLeftRight,
 	Home,
@@ -14,7 +13,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"
 import { SearchBarPopOut } from "@/components/search_bar"
 import { Button } from "@/components/ui/button"
@@ -33,13 +32,19 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from "@/components/ui/sidebar"
-import type { Database } from "@/database/types"
-import { hasSpecialRoles } from "@/lib/db"
 import { cn } from "@/lib/utils"
 import logo from "@/public/logo.svg"
 import logo_full from "@/public/logo_full.svg"
-import { createClient } from "@/utils/supabase/client"
 import User from "./user"
+
+/** Loaded once on the server by the dashboard layout. */
+export interface SidebarData {
+	user: { name: string | null; email: string | null } | null
+	isTeacher: boolean
+	depotIds: number[]
+	/** active depot from the cookie; ?depot= in the URL takes precedence */
+	activeDepotId: number | null
+}
 
 interface ItemT {
 	title: string
@@ -85,7 +90,7 @@ function NavItems({
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton
 								variant={collapsed ? "outline" : "default"}
-								render={<a href={item.url} />}
+								render={<Link href={item.url} />}
 								tooltip={item.title}
 								size="default"
 							>
@@ -104,7 +109,13 @@ function NavItems({
 }
 
 // ── Desktop sidebar (collapsible icon) ───────────────────────────────────────
-function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
+function DesktopSidebar({
+	tree,
+	data,
+}: {
+	tree: Record<string, Array<ItemT>>
+	data: SidebarData
+}) {
 	const { state } = useSidebar()
 	const collapsed = state === "collapsed"
 
@@ -209,9 +220,13 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 						collapsed ? "gap-2" : "gap-0"
 					)}
 				>
-					<Suspense fallback={<div>Loading...</div>}>
-						<User collapsed={collapsed} />
-						<DepotPicker collapsed={collapsed} />
+					<User collapsed={collapsed} user={data.user} />
+					<Suspense fallback={null}>
+						<DepotPicker
+							collapsed={collapsed}
+							depotIds={data.depotIds}
+							activeDepotId={data.activeDepotId}
+						/>
 					</Suspense>
 				</SidebarFooter>
 			</Sidebar>
@@ -220,7 +235,13 @@ function DesktopSidebar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 }
 
 // ── iPad portrait: topbar + hamburger sheet ──────────────────────────────────
-function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
+function MobileTopbar({
+	tree,
+	data,
+}: {
+	tree: Record<string, Array<ItemT>>
+	data: SidebarData
+}) {
 	const [open, setOpen] = useState(false)
 
 	return (
@@ -289,9 +310,12 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 							</nav>
 						</div>
 						<div className="border-t px-3 py-3 flex flex-col gap-2">
+							<User user={data.user} />
 							<Suspense fallback={null}>
-								<User />
-								<DepotPicker />
+								<DepotPicker
+									depotIds={data.depotIds}
+									activeDepotId={data.activeDepotId}
+								/>
 							</Suspense>
 						</div>
 					</SheetContent>
@@ -306,25 +330,16 @@ function MobileTopbar({ tree }: { tree: Record<string, Array<ItemT>> }) {
 // We control "landscape only" via a media query wrapper in the layout instead.
 
 // ── Main export ──────────────────────────────────────────────────────────────
-export function AppSidebar() {
-	const [isTeacher, setIsTeacher] = useState(false)
-
-	useEffect(() => {
-		const client: SupabaseClient<Database> = createClient()
-		hasSpecialRoles(["teacher"], client).then(result => {
-			setIsTeacher(result.hasPermission)
-		})
-	}, [])
-
-	const tree = useNavTree(isTeacher)
+export function AppSidebar({ data }: { data: SidebarData }) {
+	const tree = useNavTree(data.isTeacher)
 
 	return (
 		<>
 			{/* Portrait mobile/iPad: topbar */}
-			<MobileTopbar tree={tree} />
+			<MobileTopbar tree={tree} data={data} />
 
 			{/* Landscape iPad + Desktop: collapsible sidebar */}
-			<DesktopSidebar tree={tree} />
+			<DesktopSidebar tree={tree} data={data} />
 		</>
 	)
 }

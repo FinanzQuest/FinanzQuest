@@ -18,6 +18,7 @@ import type {
 	SearchParams,
 	Transaction,
 } from "@/database/custom_types"
+import { getServerClient, getUser } from "@/lib/auth"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { getStockPagePath } from "@/lib/get_stock_path"
 import { getIconURL } from "@/lib/icon_url"
@@ -28,7 +29,6 @@ import {
 	toISODateOnly,
 } from "@/lib/util"
 import { cn } from "@/lib/utils"
-import { createClient } from "@/utils/supabase/server"
 
 type TransactionWithAssetPosition = Transaction & PositionSummary
 
@@ -237,8 +237,8 @@ function TransactionItem({
 }
 
 const dataFetcher = async (depotId?: number) => {
-	const client = await createClient()
-	const user = (await client.auth.getUser()).data.user
+	const client = await getServerClient()
+	const { user } = await getUser()
 	if (!user) {
 		redirect("/login")
 	}

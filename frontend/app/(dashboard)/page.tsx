@@ -1,5 +1,4 @@
 "use server"
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { AutoRefresh } from "@/components/auto_refresh"
 import { ErrorCard } from "@/components/cards/cards"
@@ -10,6 +9,7 @@ import ChangeStat from "@/components/stat/change_stat"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { PositionSummary, SearchParams } from "@/database/custom_types"
 import type { DepotValuePoint } from "@/database/depots"
+import { getServerClient, getUser } from "@/lib/auth"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import {
@@ -18,7 +18,6 @@ import {
 	startOfTradingDaysAgo,
 	toISODateOnly,
 } from "@/lib/util"
-import { createClient } from "@/utils/supabase/server"
 import DepotValueChart from "./depot_value_chart"
 
 export default async function Page({
@@ -26,18 +25,15 @@ export default async function Page({
 }: {
 	searchParams: Promise<SearchParams>
 }) {
-	const cookieStore = await cookies()
-	console.log("activeDepotId", cookieStore.get("activeDepotId")?.value)
 	const params = await searchParams
-	const res = await getDepotIdWithInspect(params)
-	console.log("get_depot_response:", res)
-	const { depotId, error: depotIdError, noDepot } = res
+	const {
+		depotId,
+		error: depotIdError,
+		noDepot,
+	} = await getDepotIdWithInspect(params)
 
 	if (noDepot) {
-		console.log("no depot found redirecting")
 		redirect("/new_depot")
-	} else {
-		console.log(depotId)
 	}
 
 	if (depotIdError || !depotId) {
@@ -48,10 +44,6 @@ export default async function Page({
 	if (fres.error) {
 		return <ErrorCard error={fres.error} />
 	}
-
-	// if (fres.noDepot) {
-	// 	redirect("/new_depot")
-	// }
 
 	if (fres.depot === null) {
 		return <ErrorCard error={new Error("Depot nicht gefunden")} />
@@ -128,8 +120,8 @@ export default async function Page({
 }
 
 const dataFetcher = async (depotId: number) => {
-	const client = await createClient()
-	const user = (await client.auth.getUser()).data.user
+	const client = await getServerClient()
+	const { user } = await getUser()
 	if (!user) {
 		redirect("/auth/login")
 	}

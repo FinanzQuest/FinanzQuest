@@ -65,12 +65,15 @@ import { createClient } from "@/utils/supabase/client"
 import NewEntryDialog from "./new_dialog"
 
 interface EditableTableProps {
+	/** depot shown on the page; new entries go there */
+	depotId: number
 	data: SavingsPlanWithAsset[]
 	monthlyBudget?: number
 	className?: string
 }
 
 export function SavingsPlanTable({
+	depotId,
 	data,
 	monthlyBudget,
 	className,
@@ -527,6 +530,7 @@ export function SavingsPlanTable({
 			<ButtonGroup className="flex flex-row justify-stretch *:grow w-full">
 				<ButtonGroup>
 					<NewEntryDialog
+						depotId={depotId}
 						trigger={
 							<Button size="icon">
 								<Plus />
