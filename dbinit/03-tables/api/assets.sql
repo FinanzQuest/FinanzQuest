@@ -1,7 +1,10 @@
 -- =============================================================================
 -- api.assets
 -- Depends on: public.AssetType (02-types/asset_type.sql),
+--             public.PriceProvider (02-types/price_provider.sql),
 --             pg_trgm extension (01-schema/extensions.sql)
+-- price_provider: the market data API the updater fetches this asset from.
+-- No default: a new asset has to say where its prices come from.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS api.assets (
@@ -11,6 +14,7 @@ CREATE TABLE IF NOT EXISTS api.assets (
   description text,
   asset_type  AssetType NOT NULL,
   last_updated date,
+  price_provider PriceProvider NOT NULL,
   CONSTRAINT AssetInfo_pkey          PRIMARY KEY (id),
   CONSTRAINT AssetInfo_unique_symbol UNIQUE (symbol)
 );

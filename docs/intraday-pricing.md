@@ -12,10 +12,10 @@ today's value curve, and the stock page shows an intraday chart.
 
 The updater keeps using the two APIs it already calls:
 
-| Provider | Assets | Intraday request |
+| `api.assets.price_provider` | API | Intraday request |
 |---|---|---|
-| Alpaca market data v2 (`/v2/stocks/bars`, IEX feed) | US stocks/ETFs | `timeframe=15Min`, `start` = start of the window |
-| Yahoo Finance chart API (`/v8/finance/chart/{symbol}`) | symbols with `.`/`-`, funds | `interval=15m`, `period1/period2` = window |
+| `alpaca` | Alpaca market data v2 (`/v2/stocks/bars`, IEX feed) | `timeframe=15Min`, `start` = start of the window |
+| `yahoo` | Yahoo Finance chart API (`/v8/finance/chart/{symbol}`) | `interval=15m`, `period1/period2` = window |
 
 The nightly run (`--mode daily`, cron 01:00 UTC) stays as it is: adjusted daily
 bars into `api.asset_prices`. A new run mode `--mode intraday` (cron every

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, symbol, last_updated, asset_type::TEXT as \"asset_type!\" FROM api.assets;",
+  "query": "SELECT id, symbol, last_updated, price_provider AS \"price_provider: PriceProvider\" FROM api.assets;",
   "describe": {
     "columns": [
       {
@@ -20,8 +20,18 @@
       },
       {
         "ordinal": 3,
-        "name": "asset_type!",
-        "type_info": "Text"
+        "name": "price_provider: PriceProvider",
+        "type_info": {
+          "Custom": {
+            "name": "priceprovider",
+            "kind": {
+              "Enum": [
+                "alpaca",
+                "yahoo"
+              ]
+            }
+          }
+        }
       }
     ],
     "parameters": {
@@ -31,8 +41,8 @@
       false,
       false,
       true,
-      null
+      false
     ]
   },
-  "hash": "a64f1482a40c7a3560ddeca6891e295d704f81510345b6800ac6a23107071e76"
+  "hash": "f27351238aeb84f33adf5e7aac24b1e04414d23070cb7269b6f7bbad90b73135"
 }

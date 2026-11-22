@@ -92,6 +92,7 @@ export type Database = {
 					id: number
 					last_updated: string | null
 					name: string
+					price_provider: Database["public"]["Enums"]["priceprovider"]
 					symbol: string
 				}
 				Insert: {
@@ -100,6 +101,7 @@ export type Database = {
 					id?: number
 					last_updated?: string | null
 					name: string
+					price_provider: Database["public"]["Enums"]["priceprovider"]
 					symbol: string
 				}
 				Update: {
@@ -108,6 +110,7 @@ export type Database = {
 					id?: number
 					last_updated?: string | null
 					name?: string
+					price_provider?: Database["public"]["Enums"]["priceprovider"]
 					symbol?: string
 				}
 				Relationships: []
@@ -2170,6 +2173,7 @@ export type Database = {
 		}
 		Enums: {
 			assettype: "commodity" | "crypto" | "fund" | "stock"
+			priceprovider: "alpaca" | "yahoo"
 			savingsperiod: "annually" | "monthly" | "weekly" | "daily"
 		}
 		CompositeTypes: {
@@ -2440,6 +2444,7 @@ export const Constants = {
 	public: {
 		Enums: {
 			assettype: ["commodity", "crypto", "fund", "stock"],
+			priceprovider: ["alpaca", "yahoo"],
 			savingsperiod: ["annually", "monthly", "weekly", "daily"],
 		},
 	},

@@ -34,6 +34,7 @@ dbinit/01-schema/schemas.sql
 
 # --- 02-types ----------------------------------------------------------------
 dbinit/02-types/asset_type.sql
+dbinit/02-types/price_provider.sql
 dbinit/02-types/profile_ref.sql
 dbinit/02-types/savings_period.sql
 dbinit/02-types/special_role.sql

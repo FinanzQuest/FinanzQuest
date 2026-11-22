@@ -11,7 +11,7 @@ mod yf;
 
 use crate::{
     alpaca::Feed,
-    uploader::{Asset, Target, Uploader, symbol_list},
+    uploader::{Asset, PriceProvider, Target, Uploader, symbol_list},
 };
 mod uploader;
 
@@ -108,7 +108,7 @@ async fn main() -> anyhow::Result<()> {
     let (yf_assets, al_assets) = uploader::fetch_assets(&pool)
         .await?
         .into_iter()
-        .partition::<Vec<Asset>, _>(|asset| asset.is_yfinance());
+        .partition::<Vec<Asset>, _>(|asset| asset.price_provider == PriceProvider::Yahoo);
     println!("DONE");
 
     let al_symbols = symbol_list(&al_assets);

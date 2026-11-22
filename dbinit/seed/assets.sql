@@ -6,4 +6,4 @@
 -- this statement needs its path updated — see init.sh note.
 -- =============================================================================
 
-COPY api.assets (id, symbol, name, description, asset_type) FROM '/docker-entrypoint-initdb.d/data/assets.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+COPY api.assets (id, symbol, name, description, asset_type, price_provider) FROM '/docker-entrypoint-initdb.d/data/assets.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');

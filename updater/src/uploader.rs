@@ -54,8 +54,13 @@ impl Uploader {
     }
 }
 
-pub fn is_symbol_yfinance(symbol: impl AsRef<str>) -> bool {
-    symbol.as_ref().contains(['.', '-'])
+/// Market data API an asset's prices come from (`public.PriceProvider`,
+/// column api.assets.price_provider).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, sqlx::Type)]
+#[sqlx(type_name = "priceprovider", rename_all = "lowercase")]
+pub enum PriceProvider {
+    Alpaca,
+    Yahoo,
 }
 
 #[derive(Clone)]
@@ -63,19 +68,13 @@ pub struct Asset {
     pub symbol: String,
     pub id: i64,
     pub last_updated: Option<time::Date>,
-    pub asset_type: String,
-}
-
-impl Asset {
-    pub fn is_yfinance(&self) -> bool {
-        is_symbol_yfinance(&self.symbol) || self.asset_type == "fund"
-    }
+    pub price_provider: PriceProvider,
 }
 
 pub async fn fetch_assets(pool: &PgPool) -> Result<Vec<Asset>, sqlx::Error> {
     sqlx::query_as!(
         Asset,
-        r#"SELECT id, symbol, last_updated, asset_type::TEXT as "asset_type!" FROM api.assets;"#
+        r#"SELECT id, symbol, last_updated, price_provider AS "price_provider: PriceProvider" FROM api.assets;"#
     )
     .fetch_all(pool)
     .await

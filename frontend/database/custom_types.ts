@@ -6,7 +6,11 @@ export type SearchParams = {
 	inspect_depot?: string | null
 }
 export type StockPrice = Database["api"]["Tables"]["asset_prices"]["Row"]
-export type Asset = Database["api"]["Tables"]["assets"]["Row"]
+// price_provider is ingestion detail (which API the updater uses), not shown
+export type Asset = Omit<
+	Database["api"]["Tables"]["assets"]["Row"],
+	"price_provider"
+>
 export type LatestPrice = Database["api"]["Tables"]["latest_prices"]["Row"]
 
 export type NonNullableRow<T> = {

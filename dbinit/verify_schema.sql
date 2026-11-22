@@ -48,7 +48,7 @@ BEGIN
   -- =========================================================================
   -- TYPES  (02-types/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['public.assettype','public.savingsperiod','depots.transactiontype','users.special_role','users.profile_ref'] LOOP
+  FOREACH _ IN ARRAY ARRAY['public.assettype','public.priceprovider','public.savingsperiod','depots.transactiontype','users.special_role','users.profile_ref'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_type t JOIN pg_namespace s ON s.oid = t.typnamespace
@@ -357,6 +357,13 @@ BEGIN
   -- =========================================================================
   n := n + 1;
   IF NOT EXISTS (SELECT 1 FROM api.assets) THEN fails := fails || 'seed data (api.assets is empty)'; END IF;
+
+  n := n + 1;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'api' AND table_name = 'assets' AND column_name = 'price_provider'
+      AND udt_name = 'priceprovider' AND is_nullable = 'NO'
+  ) THEN fails := fails || 'column api.assets.price_provider (PriceProvider NOT NULL)'; END IF;
 
   -- =========================================================================
   -- RESULT
