@@ -15,6 +15,7 @@ import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import {
 	getDateCertainDaysAgo,
 	quoteTimeString,
+	startOfTradingDaysAgo,
 	toISODateOnly,
 } from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
@@ -95,6 +96,8 @@ export default async function Page({
 					</div>
 				</div>
 				<DepotValueChart
+					depotId={depotId}
+					hasIntraday={fres.hasIntraday}
 					valuesYear={(fres.depotValues ?? []) as DepotValuePoint[]}
 					valuesIntraday={fres.intradayValues ?? []}
 					treeChart={
@@ -165,17 +168,31 @@ const dataFetcher = async (depotId: number) => {
 						.filter(p => p.current_amount > 0)
 						.map(p => p.asset_id)
 					if (res.error || assetIds.length === 0) {
-						return { ...res, quoteTime: null }
+						return { ...res, quoteTime: null, hasIntraday: false }
 					}
-					const { data: latest } = await client
-						.schema("api")
-						.from("latest_prices")
-						.select("tstamp")
-						.in("asset_id", assetIds)
-						.order("tstamp", { ascending: false })
-						.limit(1)
-						.maybeSingle()
-					return { ...res, quoteTime: latest?.tstamp ?? null }
+					const [{ data: latest }, { data: bar }] = await Promise.all([
+						client
+							.schema("api")
+							.from("latest_prices")
+							.select("tstamp")
+							.in("asset_id", assetIds)
+							.order("tstamp", { ascending: false })
+							.limit(1)
+							.maybeSingle(),
+						// any intraday bar of a held asset -> offer intraday ranges
+						client
+							.schema("api")
+							.from("asset_prices_intraday")
+							.select("asset_id")
+							.in("asset_id", assetIds)
+							.limit(1)
+							.maybeSingle(),
+					])
+					return {
+						...res,
+						quoteTime: latest?.tstamp ?? null,
+						hasIntraday: bar !== null,
+					}
 				}),
 			depots
 				.from("values")
@@ -184,8 +201,12 @@ const dataFetcher = async (depotId: number) => {
 				.gte("tstamp", tstamp)
 				.order("tstamp"),
 			depots.from("aggregated_values").select().eq("depot_id", depot.id),
-			// default p_since: start of today (UTC) -> first point = previous close
-			depots.rpc("get_intraday_values", { p_depot_id: depot.id }),
+			// "1T": the current trading day (Friday on weekends); first point =
+			// the previous close
+			depots.rpc("get_intraday_values", {
+				p_depot_id: depot.id,
+				p_since: startOfTradingDaysAgo(1).toISOString(),
+			}),
 		])
 
 	// intraday values only feed the "Heute" range; without them the chart
@@ -203,6 +224,7 @@ const dataFetcher = async (depotId: number) => {
 		depotAggValues: valueAggResponse.data,
 		intradayValues: intradayResponse.data,
 		quoteTime: positionResponse.quoteTime,
+		hasIntraday: positionResponse.hasIntraday,
 		ownedByUser,
 		noDepot: false,
 	}

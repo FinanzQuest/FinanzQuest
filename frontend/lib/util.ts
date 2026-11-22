@@ -159,6 +159,12 @@ const weekdayTimeFormat = Intl.DateTimeFormat("de-DE", {
 	timeZone: marketTimeZone,
 })
 
+const dayMonthFormat = Intl.DateTimeFormat("de-DE", {
+	day: "2-digit",
+	month: "2-digit",
+	timeZone: marketTimeZone,
+})
+
 const marketDateFormat = Intl.DateTimeFormat("de-DE", {
 	day: "2-digit",
 	month: "2-digit",
@@ -197,14 +203,32 @@ export function quoteTimeString(date: Date): string {
 	return toDateTimeString(date)
 }
 
-/** How a chart's time axis labels its ticks. */
-export type TimeAxis = "date" | "time" | "weekdayTime"
+/**
+ * How a chart's time axis labels its ticks: "date" (daily data), "time"
+ * (one trading day), "weekdayTime" (a few days of intraday bars), "dateTime"
+ * (weeks of intraday bars: date ticks, date + time in the tooltip).
+ */
+export type TimeAxis = "date" | "time" | "weekdayTime" | "dateTime"
 
 export function timeAxisTick(timestamp: string, axis: TimeAxis = "date") {
 	const date = new Date(timestamp)
 	if (axis === "time") return toTimeString(date)
 	if (axis === "weekdayTime") return toWeekdayTimeString(date)
+	if (axis === "dateTime") return dayMonthFormat.format(date)
 	return relativeDateStringCompact(date)
+}
+
+/** Start (00:00 UTC) of the trading day `days` weekdays back, today = 1. */
+export function startOfTradingDaysAgo(days: number, now = new Date()): Date {
+	const date = new Date(
+		Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+	)
+	let remaining = days
+	for (;;) {
+		const weekday = date.getUTCDay()
+		if (weekday !== 0 && weekday !== 6 && --remaining <= 0) return date
+		date.setUTCDate(date.getUTCDate() - 1)
+	}
 }
 
 export function timeAxisLabel(timestamp: string, axis: TimeAxis = "date") {

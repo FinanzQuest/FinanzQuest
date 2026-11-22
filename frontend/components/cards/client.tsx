@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 type CardProps = ComponentPropsWithoutRef<"div">
 
 interface ChartCardProps extends CardProps {
+	assetId: number
 	prices: PlainPrice[]
 	pricesWeekly: PlainPrice[]
 	pricesIntraday1d?: PlainPrice[]
@@ -22,6 +23,7 @@ interface ChartCardProps extends CardProps {
 }
 
 export function ChartCard({
+	assetId,
 	prices,
 	pricesWeekly,
 	pricesIntraday1d,
@@ -34,6 +36,7 @@ export function ChartCard({
 	return (
 		<div className={cn(className)}>
 			<StockChartContainer
+				assetId={assetId}
 				prices={prices}
 				pricesWeekly={pricesWeekly}
 				pricesIntraday1d={pricesIntraday1d}

@@ -5,80 +5,117 @@ import {
 	TableCellsMerge,
 } from "lucide-react"
 import type React from "react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import {
+	IntervallPickerControlled,
+	type IntervalOption,
+	maxIntradayDays,
+} from "@/components/cards/pick_intervall"
 import AreaChart from "@/components/charts/area"
 import ChartContainer from "@/components/charts/primitive/container"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type DepotValuePoint, processDepotValues } from "@/database/depots"
 import { calculateOffset } from "@/lib/data/data_utils"
-import { getDateCertainDaysAgo, type TimeAxis, toISODateOnly } from "@/lib/util"
+import { useIntradayPreference } from "@/lib/use_intraday_preference"
+import {
+	getDateCertainDaysAgo,
+	startOfTradingDaysAgo,
+	type TimeAxis,
+	toISODateOnly,
+} from "@/lib/util"
+import { supabase } from "@/utils/supabase/client"
 
-type Range = "1d" | "1m" | "1y"
-
-const ranges: Array<{ name: Range; display: string }> = [
-	{ name: "1d", display: "Heute" },
-	{ name: "1m", display: "1M" },
-	{ name: "1y", display: "1J" },
+const depotIntervals: IntervalOption[] = [
+	{ name: "1d", display: "1T", days: 1, intradayOnly: true },
+	{ name: "5d", display: "5T", days: 5, intradayOnly: true },
+	{ name: "1m", display: "1M", days: 30 },
+	{ name: "1y", display: "1J", days: 365 },
 ]
 
 interface DepotValueChartProps {
+	depotId: number
 	/** depots.values of the last year (one row per day, incl. live today) */
 	valuesYear: DepotValuePoint[]
-	/** depots.get_intraday_values: previous close, 15-min points, now */
+	/** depots.get_intraday_values since the current trading day's start */
 	valuesIntraday: DepotValuePoint[]
+	/** an asset of the depot has intraday prices */
+	hasIntraday: boolean
 	treeChart: React.ReactNode
 	pieChart: React.ReactNode
 }
 
 export default function DepotValueChart({
+	depotId,
 	valuesYear,
 	valuesIntraday,
+	hasIntraday,
 	treeChart,
 	pieChart,
 }: DepotValueChartProps) {
-	const [range, setRange] = useState<Range>("1m")
-	const available = ranges.filter(
-		r => r.name !== "1d" || valuesIntraday.length > 0
+	const [days, setDays] = useState(30)
+	const {
+		enabled: intradayEnabled,
+		loaded: intradayLoaded,
+		setEnabled: setIntradayEnabled,
+	} = useIntradayPreference()
+	const showIntraday = hasIntraday && intradayEnabled
+	// switched off (or no intraday prices): 1T/5T fall back to 1M
+	const range = !showIntraday && days <= 5 ? 30 : days
+
+	// 5T and 1M with intraday prices: loaded on demand
+	const lazyIntraday = useIntradayValues(
+		depotId,
+		intradayLoaded && showIntraday && range > 1 && range <= maxIntradayDays
+			? range
+			: null,
+		// newest bar time (the last point is always now()): refetch per new bar
+		valuesIntraday.at(-2)?.tstamp
 	)
+	const intraday =
+		showIntraday &&
+		(range === 1 || (lazyIntraday !== null && range <= maxIntradayDays))
 
 	const area = useMemo(() => {
-		if (range === "1d") {
-			const processed = processDepotValues(valuesIntraday)
+		if (intraday) {
+			const processed = processDepotValues(
+				range === 1 ? valuesIntraday : (lazyIntraday ?? [])
+			)
 			if (!processed) return null
-			// measured against the previous close (the first point)
+			// measured against the first point (the previous close)
 			const { offset, startValue } = calculateOffset(processed.data, "total")
 			return { ...processed, offset, start: startValue }
 		}
 		const since = toISODateOnly(getDateCertainDaysAgo(30))
 		return processDepotValues(
-			range === "1m"
+			range <= 30
 				? valuesYear.filter(value => value.tstamp >= since)
 				: valuesYear
 		)
-	}, [range, valuesYear, valuesIntraday])
+	}, [intraday, range, valuesYear, valuesIntraday, lazyIntraday])
 
-	const timeAxis: TimeAxis = range === "1d" ? "time" : "date"
+	const timeAxis: TimeAxis = !intraday
+		? "date"
+		: range === 1
+			? "time"
+			: range <= 5
+				? "weekdayTime"
+				: "dateTime"
 
 	return (
 		<ChartContainer
 			className="overflow-hidden"
 			defaultTab="line"
 			toolbar={[
-				<ToggleGroup
+				<IntervallPickerControlled
 					key="range"
-					className="w-fit flex flex-row gap-1"
-					value={[range]}
-					onValueChange={value => {
-						const selected = available.find(r => r.name === value[0])
-						if (selected) setRange(selected.name)
+					options={depotIntervals}
+					value={range}
+					onValueChange={setDays}
+					intraday={{
+						available: hasIntraday,
+						enabled: intradayEnabled,
+						onChange: setIntradayEnabled,
 					}}
-				>
-					{available.map(r => (
-						<ToggleGroupItem key={r.name} value={r.name}>
-							{r.display}
-						</ToggleGroupItem>
-					))}
-				</ToggleGroup>,
+				/>,
 			]}
 			tabs={[
 				{
@@ -116,4 +153,47 @@ export default function DepotValueChart({
 			]}
 		/>
 	)
+}
+
+/**
+ * depots.get_intraday_values for the last `days` (5 = five trading days),
+ * fetched in the browser while `days` is set. Refetched when `latestPoint`
+ * (the newest bar time of the server-rendered curve) changes.
+ */
+function useIntradayValues(
+	depotId: number,
+	days: number | null,
+	latestPoint: string | undefined
+): DepotValuePoint[] | null {
+	const [result, setResult] = useState<{
+		days: number
+		values: DepotValuePoint[]
+	} | null>(null)
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: latestPoint triggers a refetch after a new bar
+	useEffect(() => {
+		if (days === null) return
+		let cancelled = false
+		const since =
+			days <= 5 ? startOfTradingDaysAgo(days) : getDateCertainDaysAgo(days)
+		supabase
+			.schema("depots")
+			.rpc("get_intraday_values", {
+				p_depot_id: depotId,
+				p_since: since.toISOString(),
+			})
+			.then(({ data, error }) => {
+				if (cancelled) return
+				if (error) {
+					console.error("get_intraday_values failed:", error)
+					return
+				}
+				setResult({ days, values: data ?? [] })
+			})
+		return () => {
+			cancelled = true
+		}
+	}, [depotId, days, latestPoint])
+
+	return result && result.days === days ? result.values : null
 }

@@ -82,6 +82,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 				/>
 				<ChartCard
 					className="w-full"
+					assetId={id}
 					prices={pricesWithEmptyDays}
 					pricesWeekly={pricesWeeklyWithEmptyDays}
 					pricesIntraday1d={pricesIntraday1d}
