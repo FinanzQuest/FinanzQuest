@@ -10,6 +10,7 @@ they invest **virtual money** in stocks/ETFs, plus tutorials.
 - `updater/` — Rust ingestion service that writes market data into `api.assets`
 - `docs/` — design notes (e.g. `docs/intraday-pricing.md`)
 - Infra (rarely relevant): `compose*.yml`, `Caddyfile*`, `nginx*`, `nixos/`, `flake.nix`
+- CI/CD: `.github/workflows/ci-cd.yml` (checks, GHCR images, SSH deploy); see `docs/ci-cd.md`
 
 Backend: self-hosted Supabase-like stack (Postgres + PostgREST + GoTrue fork),
 frontend talks to it with supabase-js. Data flow: `dbinit` schema →

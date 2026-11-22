@@ -1,0 +1,15 @@
+# Production overlay: run the images CI built and pushed to GHCR instead of
+# building on the server.
+#
+# The server's .env selects it (written by .github/scripts/deploy.sh):
+#   COMPOSE_FILE=compose.yml:compose.prod.yml
+#   IMAGE_TAG=<git commit sha of the deployed build>
+# so a plain `docker compose up -d` (the NixOS systemd unit) runs the pinned
+# version after a reboot too. Rollback = re-run an older CI/CD deploy job.
+services:
+  frontend:
+    image: ${IMAGE_PREFIX:-ghcr.io/finanzquest/finanzquest}-frontend:${IMAGE_TAG:-latest}
+    pull_policy: missing
+  updater:
+    image: ${IMAGE_PREFIX:-ghcr.io/finanzquest/finanzquest}-updater:${IMAGE_TAG:-latest}
+    pull_policy: missing

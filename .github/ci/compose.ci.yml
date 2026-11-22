@@ -1,0 +1,15 @@
+# Overlay for the CI database job (.github/scripts/db-test.sh).
+#
+# Runs the real services from compose.core.yml, but without fixed container
+# names or published ports, so the stack can run next to a local dev stack
+# (and several CI projects can share one Docker host).
+services:
+  db:
+    container_name: !reset null
+    ports: !reset []
+    restart: "no"
+  auth:
+    container_name: !reset null
+    restart: "no"
+  db-init:
+    container_name: !reset null
