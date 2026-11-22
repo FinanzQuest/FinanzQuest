@@ -1192,3 +1192,5 @@ id,symbol,name,description,asset_type,price_provider
 "1203","MEUD.PA","Stoxx Europe 600 ETF (Amundi, Paris)","Wie LYP6.DE, an der Pariser Börse gelistet","fund","yahoo"
 "1204","WEBN.DE","All Country World ETF (Amundi)","Über 2.000 Unternehmen aus Industrie- und Schwellenländern weltweit","fund","yahoo"
 "1205","AEEM.MI","Schwellenländer ETF (Amundi, Mailand)","Unternehmen aus Wachstumsmärkten wie China, Indien, Brasilien","fund","yahoo"
+"1206","SPCX","SpaceX (Space Exploration Technologies Corp.)","Raumfahrt - Raketen, Satelliten und Starlink-Internet","stock","alpaca"
+"1207","ANT","Anthropic PBC","Künstliche Intelligenz - Entwickler des KI-Assistenten Claude","stock","alpaca"
