@@ -52,8 +52,8 @@ export const getTimeBetweenDates = (
 	return Math.round(diffTime / msPerDay)
 }
 
-export function toAbsoluteTimeString(date: Date) {
-	return date.toLocaleDateString("de")
+export function toAbsoluteTimeString(date: Date, timeZone?: string) {
+	return date.toLocaleDateString("de", { timeZone })
 }
 
 export function relativeDateString(
@@ -140,4 +140,74 @@ const asset_type_colors = new Map(
 
 export function asset_type_color(asset_type: string): string | null {
 	return asset_type_colors.get(asset_type) ?? null
+}
+
+// Intraday times are shown in German market time on server and client alike,
+// so a server-rendered "Stand" matches the client-rendered chart.
+const marketTimeZone = "Europe/Berlin"
+
+const timeFormat = Intl.DateTimeFormat("de-DE", {
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZone: marketTimeZone,
+})
+
+const weekdayTimeFormat = Intl.DateTimeFormat("de-DE", {
+	weekday: "short",
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZone: marketTimeZone,
+})
+
+const marketDateFormat = Intl.DateTimeFormat("de-DE", {
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+	timeZone: marketTimeZone,
+})
+
+/** "HH:MM" in market time. */
+export const toTimeString = (date: Date) => timeFormat.format(date)
+
+/** "Mo., HH:MM" in market time — for multi-day intraday axes. */
+export const toWeekdayTimeString = (date: Date) =>
+	weekdayTimeFormat.format(date)
+
+/** "DD.MM.YYYY, HH:MM" in market time. */
+export const toDateTimeString = (date: Date) =>
+	`${marketDateFormat.format(date)}, ${timeFormat.format(date)}`
+
+/**
+ * Display string for the time a price is valid as of: "HH:MM" if it is from
+ * today, otherwise the date. A daily close is valid as of midnight UTC after
+ * its day (see api.daily_price_as_of), so that case shows the close's day.
+ */
+export function quoteTimeString(date: Date): string {
+	const isDailyClose =
+		date.getUTCHours() === 0 &&
+		date.getUTCMinutes() === 0 &&
+		date.getUTCSeconds() === 0 &&
+		date.getUTCMilliseconds() === 0
+	if (isDailyClose) {
+		return toAbsoluteTimeString(new Date(date.getTime() - msPerDay), "UTC")
+	}
+	if (marketDateFormat.format(date) === marketDateFormat.format(new Date())) {
+		return toTimeString(date)
+	}
+	return toDateTimeString(date)
+}
+
+/** How a chart's time axis labels its ticks. */
+export type TimeAxis = "date" | "time" | "weekdayTime"
+
+export function timeAxisTick(timestamp: string, axis: TimeAxis = "date") {
+	const date = new Date(timestamp)
+	if (axis === "time") return toTimeString(date)
+	if (axis === "weekdayTime") return toWeekdayTimeString(date)
+	return relativeDateStringCompact(date)
+}
+
+export function timeAxisLabel(timestamp: string, axis: TimeAxis = "date") {
+	const date = new Date(timestamp)
+	return axis === "date" ? toAbsoluteTimeString(date) : toDateTimeString(date)
 }

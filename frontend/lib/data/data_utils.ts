@@ -79,11 +79,14 @@ export function flattenOpenClose(rawData: Array<PlainPrice>) {
 
 export function calculateOffset<T extends Record<string, number | string>>(
 	data: Array<T | NullableRow<T>>,
-	dataKey: keyof T
+	dataKey: keyof T,
+	baseline?: number | null
 ) {
-	let minValue = Number.POSITIVE_INFINITY
-	let maxValue = Number.NEGATIVE_INFINITY
-	let startValue = null
+	// baseline: reference value (e.g. the previous close) to measure against
+	// instead of the first data point
+	let minValue = baseline ?? Number.POSITIVE_INFINITY
+	let maxValue = baseline ?? Number.NEGATIVE_INFINITY
+	let startValue = baseline ?? null
 
 	for (const row of data) {
 		if (!row[dataKey]) {

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/chart"
 import type { NullableRow } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
-import { relativeDateStringCompact, toAbsoluteTimeString } from "@/lib/util"
+import { type TimeAxis, timeAxisLabel, timeAxisTick } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import { Separator } from "../ui/separator"
 
@@ -29,6 +29,7 @@ interface props<T extends Record<string, number | string>>
 	startValue: number
 	range?: number
 	tickInterval?: number
+	timeAxis?: TimeAxis
 }
 
 export default function AreaChart<T extends Record<string, number | string>>({
@@ -40,6 +41,7 @@ export default function AreaChart<T extends Record<string, number | string>>({
 	yKey,
 	startValue,
 	tickInterval,
+	timeAxis = "date",
 }: props<T>) {
 	const chartConfig = {
 		open: {
@@ -90,15 +92,20 @@ export default function AreaChart<T extends Record<string, number | string>>({
 					className="number"
 					dataKey={xKey}
 					interval={tickInterval || "preserveEnd"}
-					tickFormatter={timestamp =>
-						relativeDateStringCompact(new Date(timestamp))
-					}
+					tickFormatter={timestamp => timeAxisTick(timestamp, timeAxis)}
 				/>
-				<YAxis hide dataKey={yKey} domain={["min", "max"]} />
+				<YAxis
+					hide
+					dataKey={yKey}
+					domain={[
+						(min: number) => Math.min(min, startValue),
+						(max: number) => Math.max(max, startValue),
+					]}
+				/>
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip />}
+					content={<CustomTooltip timeAxis={timeAxis} />}
 				/>
 				<ReferenceLine
 					y={startValue}
@@ -121,9 +128,16 @@ export default function AreaChart<T extends Record<string, number | string>>({
 	)
 }
 
-type CustomTooltipProps = React.ComponentProps<typeof Tooltip>
+type CustomTooltipProps = React.ComponentProps<typeof Tooltip> & {
+	timeAxis?: TimeAxis
+}
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({
+	active,
+	payload,
+	label,
+	timeAxis,
+}: CustomTooltipProps) => {
 	if (!active || !payload?.length) {
 		return null
 	}
@@ -132,12 +146,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 	const valueType = payload[0].payload?.type ?? ""
 
 	const displayString = Number.isNaN(value) ? "-" : currencyFormat.format(value)
-	const date = new Date(label)
-
 	return (
 		<div className="bg-background p-2 text-sm rounded shadow border">
 			<h1 className="">
-				<span className="font-semibold">{toAbsoluteTimeString(date)}</span>
+				<span className="font-semibold">
+					{timeAxisLabel(String(label), timeAxis)}
+				</span>
 			</h1>
 			<Separator orientation="horizontal" className="my-2 col-span-2" />
 			<p className="label inline-flex flex-row gap-2">

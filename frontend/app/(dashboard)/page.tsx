@@ -1,30 +1,24 @@
 "use server"
-import {
-	LineChart as LinechartIcon,
-	PieChart as PieChartIcon,
-	TableCellsMerge,
-} from "lucide-react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { AutoRefresh } from "@/components/auto_refresh"
 import { ErrorCard } from "@/components/cards/cards"
-import AreaChart from "@/components/charts/area"
 import PieChart from "@/components/charts/pie"
-import ChartContainer from "@/components/charts/primitive/container"
 import TreeChart from "@/components/charts/tree"
 import PositionTabView, { PositionsEmpty } from "@/components/displays/tab_view"
 import ChangeStat from "@/components/stat/change_stat"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import type {
-	DepotValue,
-	NonNullableRow,
-	PositionSummary,
-	SearchParams,
-} from "@/database/custom_types"
-import { processDepotValues } from "@/database/depots"
+import type { PositionSummary, SearchParams } from "@/database/custom_types"
+import type { DepotValuePoint } from "@/database/depots"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
-import { getDateCertainDaysAgo, toISODateOnly } from "@/lib/util"
+import {
+	getDateCertainDaysAgo,
+	quoteTimeString,
+	toISODateOnly,
+} from "@/lib/util"
 import { createClient } from "@/utils/supabase/server"
+import DepotValueChart from "./depot_value_chart"
 
 export default async function Page({
 	searchParams,
@@ -65,18 +59,21 @@ export default async function Page({
 	const treeData = fres.positions
 
 	const d = fres.depotAggValues?.at(0)
-	const areaData = processDepotValues(
-		(fres.depotValues as NonNullableRow<DepotValue>[]) ?? []
-	)
 	return (
 		<ScrollArea className="h-screen">
 			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
+				<AutoRefresh />
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
 						<span className="text-sm text-muted-foreground">Depotwert</span>
 						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
 							{currencyFormat.format(d?.total ?? 0)}
 						</span>
+						{fres.quoteTime && (
+							<span className="text-xs text-muted-foreground">
+								Stand: {quoteTimeString(new Date(fres.quoteTime))}
+							</span>
+						)}
 					</div>
 					<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
 						<ChangeStat
@@ -97,55 +94,24 @@ export default async function Page({
 						<ChangeStat label="Cash" value={d?.cash ?? 0} neutral />
 					</div>
 				</div>
-				<ChartContainer
-					className="overflow-hidden"
-					defaultTab="line"
-					tabs={[
-						{
-							name: "line",
-							icon: (
-								<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
-							),
-							content: (
-								<AreaChart
-									className="aspect-[4/3] md:aspect-[20/9] lg:aspect-[6/2] xl:aspect-[8/2]"
-									startValue={areaData?.start ?? 50000}
-									offset={areaData?.offset ?? 0}
-									data={areaData?.data ?? []}
-									dataKey="total"
-									xKey="timestamp"
-									yKey="total"
-								/>
-							),
-						},
-						{
-							name: "tree",
-							icon: (
-								<TableCellsMerge className="size-7 md:size-5 stroke-muted-foreground" />
-							),
-							content: (
-								<TreeChart
-									className="max-h-[500px] w-full"
-									data={treeData as PositionSummary[]}
-									dataKey="market_value"
-								/>
-							),
-						},
-						{
-							name: "pie",
-							icon: (
-								<PieChartIcon className="size-7 md:size-5 stroke-muted-foreground" />
-							),
-							content: (
-								<PieChart
-									className="max-h-[500px] w-full"
-									data={treeData as PositionSummary[]}
-									dataKey="market_value"
-								/>
-							),
-						},
-					]}
-				/>{" "}
+				<DepotValueChart
+					valuesYear={(fres.depotValues ?? []) as DepotValuePoint[]}
+					valuesIntraday={fres.intradayValues ?? []}
+					treeChart={
+						<TreeChart
+							className="max-h-[500px] w-full"
+							data={treeData as PositionSummary[]}
+							dataKey="market_value"
+						/>
+					}
+					pieChart={
+						<PieChart
+							className="max-h-[500px] w-full"
+							data={treeData as PositionSummary[]}
+							dataKey="market_value"
+						/>
+					}
+				/>
 				{!fres.positions || fres.positions?.length === 0 ? (
 					fres.ownedByUser && <PositionsEmpty />
 				) : (
@@ -184,14 +150,33 @@ const dataFetcher = async (depotId: number) => {
 
 	const ownedByUser = depot.users.some((id: string) => id === user.id)
 
-	const tstamp = toISODateOnly(getDateCertainDaysAgo(30))
+	const tstamp = toISODateOnly(getDateCertainDaysAgo(365))
 	const depots = client.schema("depots")
 
 	// depots.values / aggregated_values include a live row for today, so a
 	// trade or a new price shows up immediately (for any depot, incl. inspect).
-	const [positionResponse, valueResponse, valueAggResponse] = await Promise.all(
-		[
-			depots.rpc("get_position_profits", { p_depot_id: depot.id }),
+	const [positionResponse, valueResponse, valueAggResponse, intradayResponse] =
+		await Promise.all([
+			// positions, then the quote time of the newest price among them
+			depots
+				.rpc("get_position_profits", { p_depot_id: depot.id })
+				.then(async res => {
+					const assetIds = (res.data ?? [])
+						.filter(p => p.current_amount > 0)
+						.map(p => p.asset_id)
+					if (res.error || assetIds.length === 0) {
+						return { ...res, quoteTime: null }
+					}
+					const { data: latest } = await client
+						.schema("api")
+						.from("latest_prices")
+						.select("tstamp")
+						.in("asset_id", assetIds)
+						.order("tstamp", { ascending: false })
+						.limit(1)
+						.maybeSingle()
+					return { ...res, quoteTime: latest?.tstamp ?? null }
+				}),
 			depots
 				.from("values")
 				.select()
@@ -199,8 +184,15 @@ const dataFetcher = async (depotId: number) => {
 				.gte("tstamp", tstamp)
 				.order("tstamp"),
 			depots.from("aggregated_values").select().eq("depot_id", depot.id),
-		]
-	)
+			// default p_since: start of today (UTC) -> first point = previous close
+			depots.rpc("get_intraday_values", { p_depot_id: depot.id }),
+		])
+
+	// intraday values only feed the "Heute" range; without them the chart
+	// falls back to the daily ranges
+	if (intradayResponse.error) {
+		console.error("get_intraday_values failed:", intradayResponse.error)
+	}
 
 	return {
 		depot,
@@ -209,6 +201,8 @@ const dataFetcher = async (depotId: number) => {
 		positions: positionResponse.data,
 		depotValues: valueResponse.data,
 		depotAggValues: valueAggResponse.data,
+		intradayValues: intradayResponse.data,
+		quoteTime: positionResponse.quoteTime,
 		ownedByUser,
 		noDepot: false,
 	}

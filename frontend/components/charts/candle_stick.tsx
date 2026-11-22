@@ -16,7 +16,12 @@ import {
 	ChartTooltip,
 } from "@/components/ui/chart"
 import { formatFloatingPointString } from "@/lib/data/formatter"
-import { numberFormat, toAbsoluteTimeString } from "@/lib/util"
+import {
+	numberFormat,
+	type TimeAxis,
+	timeAxisLabel,
+	timeAxisTick,
+} from "@/lib/util"
 import { cn } from "@/lib/utils"
 import {
 	type TtoRelativeValues,
@@ -39,6 +44,7 @@ interface props<T extends BarDataT>
 	xKey: Extract<keyof T, string>
 	lineKey: Extract<keyof T, string>
 	tickInterval?: number
+	timeAxis?: TimeAxis
 }
 export default function CandleStickChart<T extends BarDataT>({
 	data,
@@ -49,6 +55,7 @@ export default function CandleStickChart<T extends BarDataT>({
 	winKey,
 	lineKey,
 	tickInterval,
+	timeAxis = "date",
 }: props<T>) {
 	const chartData = data //data
 	const chartConfig = {
@@ -70,6 +77,7 @@ export default function CandleStickChart<T extends BarDataT>({
 					className="number"
 					dataKey={xKey}
 					interval={tickInterval || "preserveEnd"}
+					tickFormatter={timestamp => timeAxisTick(timestamp, timeAxis)}
 				/>
 				<YAxis hide domain={["min", "max"]} />
 				<Bar maxBarSize={20} dataKey={barKey} fill="var(--win)">
@@ -107,16 +115,23 @@ export default function CandleStickChart<T extends BarDataT>({
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip />}
+					content={<CustomTooltip timeAxis={timeAxis} />}
 				/>
 			</ComposedChart>
 		</ChartContainer>
 	)
 }
 
-type CustomToolTipProps = React.ComponentProps<typeof Tooltip>
+type CustomToolTipProps = React.ComponentProps<typeof Tooltip> & {
+	timeAxis?: TimeAxis
+}
 
-const CustomTooltip = ({ active, payload, label }: CustomToolTipProps) => {
+const CustomTooltip = ({
+	active,
+	payload,
+	label,
+	timeAxis,
+}: CustomToolTipProps) => {
 	if (!active || !payload?.length) {
 		return null
 	}
@@ -134,10 +149,11 @@ const CustomTooltip = ({ active, payload, label }: CustomToolTipProps) => {
 		{ name: "Low", string: numberFormat.format(row.low) },
 	]
 	const profit = row.close - row.open
-	const date = new Date(label)
 	return (
 		<div className="bg-background p-2 rounded shadow border">
-			<h1 className="font-semibold text-sm">{toAbsoluteTimeString(date)}</h1>
+			<h1 className="font-semibold text-sm">
+				{timeAxisLabel(String(label), timeAxis)}
+			</h1>
 			<Separator orientation="horizontal" className="my-2" />
 			<div className="grid grid-cols-2 gap-2">
 				{displayValues.map(value => (

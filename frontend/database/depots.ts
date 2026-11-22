@@ -3,7 +3,10 @@ import type { NonNullableRow } from "./custom_types"
 
 type DepotValue = NonNullableRow<Database["depots"]["Views"]["values"]["Row"]>
 
-export function processDepotValues(edges: DepotValue[]) {
+/** A depot value at a point in time (depots.values or get_intraday_values). */
+export type DepotValuePoint = Pick<DepotValue, "tstamp" | "cash" | "assets">
+
+export function processDepotValues(edges: DepotValuePoint[]) {
 	const nodes: Array<{
 		total: number
 		assets: number

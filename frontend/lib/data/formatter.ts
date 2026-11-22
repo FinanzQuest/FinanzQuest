@@ -56,6 +56,20 @@ export function formatter(data: Array<StockPrice>, treshold = 1) {
 	return { dataWithEmptyDays: dataWithEmptyDays, data: filtered }
 }
 
+/**
+ * Intraday bars of the last `days` trading days (days that have bars, by UTC
+ * date). Bars are not padded with empty slots — gaps (nights, weekends) are
+ * simply skipped on the categorical chart axis.
+ */
+export function intradayFormatter(data: Array<StockPrice>, days: number) {
+	const bars = data.filter(price => price.close !== null)
+	const utcDay = (price: StockPrice) => toISODateOnly(new Date(price.tstamp))
+	const tradingDays = [...new Set(bars.map(utcDay))]
+	const firstDay = tradingDays.at(-days)
+	if (!firstDay) return bars as Array<Price>
+	return bars.filter(price => utcDay(price) >= firstDay) as Array<Price>
+}
+
 // function isNullishRow<T extends Record<string, unknown>>(
 //   row: T,
 // ): row is NonNullableRow<T> {

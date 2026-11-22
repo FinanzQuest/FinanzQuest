@@ -7,6 +7,7 @@ export type SearchParams = {
 }
 export type StockPrice = Database["api"]["Tables"]["asset_prices"]["Row"]
 export type Asset = Database["api"]["Tables"]["assets"]["Row"]
+export type LatestPrice = Database["api"]["Tables"]["latest_prices"]["Row"]
 
 export type NonNullableRow<T> = {
 	[K in keyof T]: NonNullable<T[K]>

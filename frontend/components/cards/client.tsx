@@ -16,14 +16,30 @@ type CardProps = ComponentPropsWithoutRef<"div">
 interface ChartCardProps extends CardProps {
 	prices: PlainPrice[]
 	pricesWeekly: PlainPrice[]
+	pricesIntraday1d?: PlainPrice[]
+	pricesIntraday5d?: PlainPrice[]
+	previousClose?: number | null
 }
 
-export function ChartCard({ prices, pricesWeekly, className }: ChartCardProps) {
+export function ChartCard({
+	prices,
+	pricesWeekly,
+	pricesIntraday1d,
+	pricesIntraday5d,
+	previousClose,
+	className,
+}: ChartCardProps) {
 	"use client"
 
 	return (
 		<div className={cn(className)}>
-			<StockChartContainer prices={prices} pricesWeekly={pricesWeekly} />
+			<StockChartContainer
+				prices={prices}
+				pricesWeekly={pricesWeekly}
+				pricesIntraday1d={pricesIntraday1d}
+				pricesIntraday5d={pricesIntraday5d}
+				previousClose={previousClose}
+			/>
 		</div>
 	)
 }

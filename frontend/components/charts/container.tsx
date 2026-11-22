@@ -11,6 +11,7 @@ import toRelativeValues, { calculateOffset } from "@/lib/data/data_utils"
 import {
 	getCurrentDate,
 	getDateCertainDaysAgo,
+	type TimeAxis,
 	toISODateOnly,
 } from "@/lib/util"
 import { IntervallPickerControlled } from "../cards/pick_intervall"
@@ -21,9 +22,29 @@ import ChartContainer from "./primitive/container"
 export interface props extends ComponentPropsWithoutRef<"div"> {
 	prices: Array<PlainPrice>
 	pricesWeekly: Array<PlainPrice>
+	/** 15-minute bars of the latest trading day ("1T") */
+	pricesIntraday1d?: Array<PlainPrice>
+	/** 15-minute bars of the last 5 trading days ("5T") */
+	pricesIntraday5d?: Array<PlainPrice>
+	/** previous day's close, the reference line of the "1T" chart */
+	previousClose?: number | null
 }
-export default function StockChartContainer({ prices, pricesWeekly }: props) {
+export default function StockChartContainer({
+	prices,
+	pricesWeekly,
+	pricesIntraday1d = [],
+	pricesIntraday5d = [],
+	previousClose,
+}: props) {
+	const hasIntraday = pricesIntraday1d.length > 0
 	const [selectedIntervall, setSelectedIntervall] = useState<number>(7)
+	// ranges up to 5 days are intraday bars, longer ones daily/weekly candles
+	const intraday = hasIntraday && selectedIntervall <= 5
+	const timeAxis: TimeAxis = !intraday
+		? "date"
+		: selectedIntervall === 1
+			? "time"
+			: "weekdayTime"
 	const timeFrame = useMemo(() => {
 		const start = getDateCertainDaysAgo(selectedIntervall)
 		const end = getCurrentDate()
@@ -31,6 +52,9 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 	}, [selectedIntervall])
 
 	const data = useMemo(() => {
+		if (intraday) {
+			return selectedIntervall === 1 ? pricesIntraday1d : pricesIntraday5d
+		}
 		const data = []
 		const src = selectedIntervall < 360 ? prices : pricesWeekly
 		const start = timeFrame.start ? toISODateOnly(timeFrame.start) : undefined
@@ -41,10 +65,30 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 			}
 		}
 		return data
-	}, [prices, pricesWeekly, timeFrame, selectedIntervall])
+	}, [
+		prices,
+		pricesWeekly,
+		pricesIntraday1d,
+		pricesIntraday5d,
+		intraday,
+		timeFrame,
+		selectedIntervall,
+	])
 
-	const area = useMemo(() => calculateOffset(data, "close"), [data])
+	const area = useMemo(
+		() =>
+			calculateOffset(
+				data,
+				"close",
+				intraday && selectedIntervall === 1 ? previousClose : null
+			),
+		[data, intraday, selectedIntervall, previousClose]
+	)
 	const tickInterval = useMemo(() => {
+		// intraday: let recharts pick ticks that fit
+		if (intraday) {
+			return undefined
+		}
 		if (selectedIntervall <= 15) {
 			return 0
 		}
@@ -60,7 +104,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 		}
 
 		return 17
-	}, [selectedIntervall])
+	}, [selectedIntervall, intraday])
 
 	const candleData = toRelativeValues(data)
 	return (
@@ -70,6 +114,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 					key={0}
 					value={selectedIntervall}
 					onValueChange={setSelectedIntervall}
+					intraday={hasIntraday}
 				/>,
 			]}
 			defaultTab="line"
@@ -90,6 +135,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 							winKey="closeLargerOpen"
 							lineKey="absClose"
 							tickInterval={tickInterval}
+							timeAxis={timeAxis}
 						/>
 					),
 				},
@@ -108,6 +154,7 @@ export default function StockChartContainer({ prices, pricesWeekly }: props) {
 							offset={area.offset}
 							tickInterval={tickInterval}
 							startValue={area.startValue}
+							timeAxis={timeAxis}
 						/>
 					),
 				},

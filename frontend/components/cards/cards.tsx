@@ -9,15 +9,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import type {
-	Asset,
-	Depot,
-	DepotPosition,
-	StockPrice,
-} from "@/database/custom_types"
+import type { Asset, Depot, DepotPosition } from "@/database/custom_types"
 import { currencyFormat, to_display_string } from "@/lib/cash_display_string"
 import { getIconURL } from "@/lib/icon_url"
-import { numberFormat, toAbsoluteTimeString } from "@/lib/util"
+import { numberFormat, quoteTimeString } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import URLIcon from "../icon"
 import ChangeStat from "../stat/change_stat"
@@ -26,41 +21,36 @@ import SellStockDialog from "../transaction_dialogs/sell_stock_dialog"
 
 type CardProps = ComponentPropsWithoutRef<"div">
 
-type Price = Omit<StockPrice, "asset_id">
-
 interface StockHeaderProps extends CardProps {
 	stock: Asset
-	currentPrice?: Price
-	referencePrice?: Price
-	dateString?: string
+	/** current price (latest_prices, falling back to the last daily close) */
+	price: number | null
+	/** close of the day before the current trading day */
+	previousClose: number | null
+	/** open of the current trading day */
+	dayOpen: number | null
+	/** time the price is valid as of (ISO timestamp or date) */
+	quoteTime: string | null
 	depot?: Depot | null
 	position?: DepotPosition
 	commission: number
 }
 
-function calculateChange(currentPrice?: Price, referencePrice?: Price) {
-	if (!currentPrice?.close || !currentPrice.open || !referencePrice?.close)
-		return { change24h: null, absoluteChange: null, relativeChange: null }
-
-	const change24h = currentPrice.close - (referencePrice?.close ?? 0)
-	const absoluteChange = currentPrice.close - currentPrice.open
-	const relativeChange = (absoluteChange / currentPrice.open) * 100
-	return { change24h, absoluteChange, relativeChange }
-}
-
 export function StockHeader({
 	className,
 	stock: asset,
-	currentPrice,
-	referencePrice,
-	dateString,
+	price: close,
+	previousClose,
+	dayOpen,
+	quoteTime,
 	depot,
 	position,
 	commission,
 }: StockHeaderProps) {
-	const stats = calculateChange(currentPrice, referencePrice)
-	const lastUpdated = dateString ?? currentPrice?.tstamp
-	const close = currentPrice?.close ?? null
+	const changeDay =
+		close != null && previousClose != null ? close - previousClose : null
+	const changeSinceOpen =
+		close != null && dayOpen != null ? close - dayOpen : null
 	const buyLimit = Math.max(0, (depot?.cash ?? 0) - commission)
 	const sellLimit = position?.worth ?? 0
 
@@ -117,21 +107,15 @@ export function StockHeader({
 				</span>
 			</div>
 			<div className="flex flex-row gap-x-8 gap-y-3 flex-wrap">
+				<ChangeStat label="Heute" value={changeDay ?? 0} prev={previousClose} />
 				<ChangeStat
-					label="24h"
-					value={stats.change24h ?? 0}
-					prev={referencePrice?.close ?? null}
-				/>
-				<ChangeStat
-					label="Heute"
-					value={stats.absoluteChange ?? 0}
-					prev={currentPrice?.open ?? null}
+					label="Seit Eröffnung"
+					value={changeSinceOpen ?? 0}
+					prev={dayOpen}
 				/>
 			</div>
 			<span className="text-xs text-muted-foreground">
-				{lastUpdated
-					? `Stand des ${toAbsoluteTimeString(new Date(lastUpdated))}`
-					: ""}
+				{quoteTime ? `Stand: ${quoteTimeString(new Date(quoteTime))}` : ""}
 			</span>
 		</header>
 	)

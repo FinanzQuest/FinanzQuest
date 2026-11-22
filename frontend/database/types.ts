@@ -47,6 +47,44 @@ export type Database = {
 					},
 				]
 			}
+			asset_prices_intraday: {
+				Row: {
+					asset_id: number
+					close: number | null
+					high: number | null
+					low: number | null
+					open: number | null
+					tstamp: string
+					volume: number | null
+				}
+				Insert: {
+					asset_id: number
+					close?: number | null
+					high?: number | null
+					low?: number | null
+					open?: number | null
+					tstamp: string
+					volume?: number | null
+				}
+				Update: {
+					asset_id?: number
+					close?: number | null
+					high?: number | null
+					low?: number | null
+					open?: number | null
+					tstamp?: string
+					volume?: number | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: "asset_prices_intraday_asset_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
+						referencedRelation: "assets"
+						referencedColumns: ["id"]
+					},
+				]
+			}
 			assets: {
 				Row: {
 					asset_type: Database["public"]["Enums"]["assettype"]
@@ -142,7 +180,9 @@ export type Database = {
 			}
 		}
 		Functions: {
+			daily_price_as_of: { Args: { p_day: string }; Returns: string }
 			rebuild_latest_prices: { Args: never; Returns: undefined }
+			rollup_intraday: { Args: { p_from: string }; Returns: number }
 			search_assets: {
 				Args: {
 					asset_type_filter?: string
@@ -1373,6 +1413,15 @@ export type Database = {
 					transaction_count: number
 					user_ids: string[]
 					user_names: string[]
+				}[]
+			}
+			get_intraday_values: {
+				Args: { p_depot_id: number; p_since?: string }
+				Returns: {
+					assets: number
+					cash: number
+					tstamp: string
+					value: number
 				}[]
 			}
 			get_position_profits: {

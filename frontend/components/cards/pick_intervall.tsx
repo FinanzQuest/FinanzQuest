@@ -74,39 +74,49 @@ export default function IntervallPicker({
 	)
 }
 
+interface ControlledProps extends props {
+	/** also offer the intraday ranges "1T" (1) and "5T" (5) */
+	intraday?: boolean
+}
+
 export function IntervallPickerControlled({
 	onValueChange,
 	value,
 	className,
-}: props) {
+	intraday,
+}: ControlledProps) {
 	interface IntervallType {
 		name: string
 		display: string
 		days: number
 	}
 	const intervallTemplates: Array<IntervallType> = [
-		{ name: "7d", display: "7d", days: 7 },
-		{ name: "14d", display: "14d", days: 14 },
-		{ name: "30d", display: "30d", days: 30 },
-		{ name: "quarter", display: "3mo", days: 92 },
-		{ name: "year", display: "1y", days: 365 },
-		{ name: "5years", display: "5y", days: 365 * 5 },
+		...(intraday
+			? [
+					{ name: "1d", display: "1T", days: 1 },
+					{ name: "5d", display: "5T", days: 5 },
+				]
+			: []),
+		{ name: "7d", display: "7T", days: 7 },
+		{ name: "14d", display: "14T", days: 14 },
+		{ name: "30d", display: "30T", days: 30 },
+		{ name: "quarter", display: "3M", days: 92 },
+		{ name: "year", display: "1J", days: 365 },
+		{ name: "5years", display: "5J", days: 365 * 5 },
 	]
 
 	return (
 		<ToggleGroup
-			className={cn("w-fit flex flex-row gap-1", className)}
+			className={cn("w-fit flex flex-row flex-wrap gap-1", className)}
 			value={[
 				intervallTemplates.find(item => item.days === value)?.name as string,
 			]}
 			onValueChange={value => {
-				console.log("a")
 				const s = intervallTemplates.find(
 					intervall => intervall.name === value[0]
 				)
-
-				const result = s === undefined ? intervallTemplates[0] : s
-				onValueChange(result.days)
+				// clicking the active item deselects it — keep the current range
+				if (s) onValueChange(s.days)
 			}}
 		>
 			{intervallTemplates.map(item => (
