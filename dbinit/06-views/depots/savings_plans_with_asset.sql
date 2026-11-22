@@ -1,9 +1,12 @@
 -- =============================================================================
 -- depots.savings_plans_with_asset
 -- Depends on: depots.savings_plans, api.assets
+-- security_invoker: the caller's RLS on savings_plans / savings_plans_budget
+-- applies (members and teachers only).
 -- =============================================================================
 
-CREATE OR REPLACE VIEW depots.savings_plans_with_asset AS
+CREATE OR REPLACE VIEW depots.savings_plans_with_asset
+WITH (security_invoker = true) AS
 SELECT
   sp.depot_id,
   sp.asset_id,

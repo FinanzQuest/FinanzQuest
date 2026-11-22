@@ -2,4 +2,5 @@
 -- GRANTs targeting depots.new_depot_for_user (function)
 -- =============================================================================
 
-GRANT EXECUTE ON FUNCTION depots.new_depot_for_user(UUID) TO anon, authenticated;
+REVOKE EXECUTE ON FUNCTION depots.new_depot_for_user(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION depots.new_depot_for_user(uuid) TO authenticated;

@@ -66,6 +66,16 @@ LANGUAGE sql AS $$
   WHERE v.depot_id = p_depot
 $$;
 
+-- depots.cash (trigger-maintained) equals the ledger for every test depot.
+CREATE FUNCTION pg_temp.cash_consistent() RETURNS boolean
+LANGUAGE sql AS $$
+  SELECT BOOL_AND(d.cash = d.cash_start - COALESCE(
+           (SELECT SUM(depots.transaction_expense(t.type, t.amount, t.price)
+                       + CASE WHEN depots.transaction_affects_commission(t.type) THEN t.commission ELSE 0 END)
+            FROM depots.transactions t WHERE t.depot_id = d.id), 0))
+  FROM depots.depots d WHERE d.id >= 990001
+$$;
+
 CREATE FUNCTION pg_temp.today_value(p_depot bigint) RETURNS numeric
 LANGUAGE sql AS $$
   SELECT value FROM depots.values WHERE depot_id = p_depot AND tstamp = CURRENT_DATE
@@ -132,6 +142,14 @@ SELECT pg_temp.check(NOT EXISTS (
        OR abs(h.commission - s.commission) > 1e-6),
   'holdings == SUM(transactions) for every depot/asset');
 
+SELECT pg_temp.check(pg_temp.cash_consistent(), 'depots.cash == cash_start - spent (bulk insert)');
+SELECT pg_temp.check(NOT EXISTS (
+    SELECT 1 FROM api.latest_prices lp
+    WHERE lp.close IS DISTINCT FROM (SELECT p.close::numeric FROM api.asset_prices p
+                                     WHERE p.asset_id = lp.asset_id AND p.close IS NOT NULL
+                                     ORDER BY p.tstamp DESC LIMIT 1)),
+  'latest_prices == newest close per asset');
+
 -- -----------------------------------------------------------------------------
 -- Freshness: a trade through the real RPC shows up immediately.
 -- -----------------------------------------------------------------------------
@@ -145,11 +163,11 @@ SELECT depots.buy_asset(1, 990001, 1000);
 RESET ROLE;
 RESET search_path;
 
--- (amount is stored as real = worth/price, so cost is only ~exact)
+-- (amount = worth/price is a rounded numeric division, so cost is ~exact)
 SELECT pg_temp.check(abs(
     (SELECT v.cash FROM depots.values v WHERE depot_id = 990001 AND tstamp = CURRENT_DATE)
   - ((SELECT s.cash FROM snap s WHERE tstamp = CURRENT_DATE) - 1000 - current_setting('config.commission')::numeric)
-  ) < 0.01,
+  ) < 1e-9,
   'buy_asset: today''s cash drops by worth + commission immediately');
 SELECT pg_temp.check(pg_temp.history_matches(990001), 'buy_asset: depot A still matches reference');
 SELECT pg_temp.check(
@@ -159,6 +177,30 @@ SELECT pg_temp.check(
 SELECT pg_temp.check(
   (SELECT total FROM depots.aggregated_values WHERE depot_id = 990001) = pg_temp.today_value(990001),
   'aggregated_values.total is the live value');
+SELECT pg_temp.check(
+  (SELECT prev_1d_total FROM depots.aggregated_values WHERE depot_id = 990001)
+  = (SELECT value FROM depots.daily_values WHERE depot_id = 990001 ORDER BY tstamp DESC LIMIT 1),
+  'aggregated_values.prev_1d_total is the last closed day');
+SELECT pg_temp.check(
+  (SELECT prev_1m_total FROM depots.aggregated_values WHERE depot_id = 990001)
+  IS NOT DISTINCT FROM (SELECT value FROM depots.daily_values WHERE depot_id = 990001
+       AND tstamp <= (CURRENT_DATE - interval '1 month')::date ORDER BY tstamp DESC LIMIT 1),
+  'aggregated_values.prev_1m_total is the last day at least a month ago');
+SELECT pg_temp.check(pg_temp.cash_consistent(), 'depots.cash == cash_start - spent (after buy_asset)');
+SELECT pg_temp.check(
+  (SELECT value = pg_temp.today_value(990001)
+          AND sparkline[1] = value
+          AND sparkline[2:] = (SELECT array_agg(value ORDER BY tstamp DESC) FROM
+                                 (SELECT value, tstamp FROM depots.daily_values WHERE depot_id = 990001
+                                  ORDER BY tstamp DESC LIMIT 6) x)
+          AND cardinality(sparkline) = 7
+   FROM depots.leaderboard WHERE id = 990001),
+  'leaderboard: live value and 7-point sparkline');
+SELECT pg_temp.check(
+  (SELECT rank FROM depots.leaderboard WHERE id = 990001)
+  = 1 + (SELECT COUNT(DISTINCT value) FROM depots.current_values
+         WHERE value > pg_temp.today_value(990001)),
+  'leaderboard: dense rank by live value');
 
 -- -----------------------------------------------------------------------------
 -- Freshness: a new price for today is reflected immediately.
@@ -193,6 +235,7 @@ SELECT pg_temp.check(
 SELECT pg_temp.check(
   (SELECT cash FROM depots.values WHERE depot_id = 990001 AND tstamp = CURRENT_DATE)
   = (SELECT cash FROM before_reward) + 100, 'grant_reward (teacher): cash +100');
+SELECT pg_temp.check(pg_temp.cash_consistent(), 'depots.cash == cash_start - spent (after reward)');
 
 -- -----------------------------------------------------------------------------
 -- Backdated single insert and delete recompute history.
@@ -206,6 +249,7 @@ SELECT pg_temp.check(pg_temp.history_matches(990001), 'backdated delete: history
 
 UPDATE depots.transactions SET amount = 25 WHERE depot_id = 990002 AND asset_id = 2;
 SELECT pg_temp.check(pg_temp.history_matches(990002), 'backdated update: history recomputed');
+SELECT pg_temp.check(pg_temp.cash_consistent(), 'depots.cash == cash_start - spent (after backdated changes)');
 
 -- -----------------------------------------------------------------------------
 -- Rebuild is idempotent; a depot without transactions shows its cash.

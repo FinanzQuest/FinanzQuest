@@ -1,49 +1,53 @@
 -- =============================================================================
--- depots.execute_savings_plans()
--- Depends on: depots.savings_plans, depots.depots, api.asset_prices,
---             depots.sp_to_interval (04-functions/depots/sp_to_interval.sql),
---             depots.TransactionType
+-- depots.execute_savings_plans() / PROCEDURE depots.run_savings_plans(job_id, config)
+-- Depends on: depots.savings_plans, api.latest_prices, depots.transactions,
+--             depots.sp_to_interval (04-functions/depots/sp_to_interval.sql)
+-- Job registration: 12-jobs/execute_savings_plans.sql (daily)
 -- -----------------------------------------------------------------------------
--- NOTE: casts to unqualified TransactionType (relies on search_path) — see
--- flagged issues.
+-- Executes every due plan at the asset's latest price: a plan is due when it
+-- has never run, or its period has passed since the last run. Each execution
+-- is a 'savings_plan' transaction (funded by the budget, not depot cash).
+-- Returns the number of executed plans.
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION depots.execute_savings_plans()
-RETURNS void AS $$
+RETURNS integer
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  v_count integer;
 BEGIN
-  WITH executable_plans AS (
-    SELECT
-      sp.id,
-      sp.depot_id,
-      sp.asset_id,
-      sp.worth / p.close AS amount,
-      p.close AS price
+  WITH due AS (
+    SELECT sp.id, sp.depot_id, sp.asset_id,
+           sp.worth::numeric / lp.close AS amount,
+           lp.close AS price
     FROM depots.savings_plans sp
-    JOIN depots.depots d ON d.id = sp.depot_id
-    JOIN LATERAL (
-      SELECT close FROM api.asset_prices
-      WHERE asset_id = sp.asset_id
-      ORDER BY tstamp DESC
-      LIMIT 1
-    ) p ON TRUE
-    WHERE sp.last_executed + depots.sp_to_interval(sp.period) <= CURRENT_DATE -- only the plans due to update today or before
+    JOIN api.latest_prices lp ON lp.asset_id = sp.asset_id
+    WHERE lp.close > 0
+      AND (sp.last_executed IS NULL
+           OR sp.last_executed + depots.sp_to_interval(sp.period) <= CURRENT_DATE)
+    FOR UPDATE OF sp SKIP LOCKED
   ),
   inserted AS (
-    INSERT INTO depots.transactions (depot_id, asset_id, amount, price, commission, user_id, type)
-    SELECT
-      ep.depot_id,
-      ep.asset_id,
-      ep.amount,
-      ep.price,
-      0.0,
-      NULL,
-      'savings_plan'::TransactionType
-    FROM executable_plans ep
-    RETURNING depot_id, asset_id
+    INSERT INTO depots.transactions (depot_id, user_id, asset_id, amount, price, commission, type)
+    SELECT due.depot_id, NULL, due.asset_id, due.amount, due.price, 0, 'savings_plan'
+    FROM due
   )
   UPDATE depots.savings_plans sp
   SET last_executed = CURRENT_DATE
-  FROM executable_plans ep
-  WHERE sp.id = ep.id;
+  FROM due
+  WHERE sp.id = due.id;
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
 END;
-$$ LANGUAGE plpgsql;
+$$;
+
+CREATE OR REPLACE PROCEDURE depots.run_savings_plans(job_id int, config jsonb)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM depots.execute_savings_plans();
+END;
+$$;

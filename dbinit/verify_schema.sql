@@ -59,7 +59,7 @@ BEGIN
   -- =========================================================================
   -- TABLES  (03-tables/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','depots.depots','depots.positions','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.latest_prices','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -70,25 +70,18 @@ BEGIN
   -- =========================================================================
   -- ROW LEVEL SECURITY flags  (09-policies/ enable statements)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','depots.depots','depots.positions','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans_budget','users.special_roles'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.latest_prices','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
       WHERE (s.nspname || '.' || c.relname) = _ AND c.relrowsecurity
     ) THEN fails := fails || ('rls enabled on ' || _); END IF;
   END LOOP;
-  -- depots.savings_plans: policies exist but RLS was NEVER enabled in source
-  -- (flagged during reorg). Assert current state; flip to relrowsecurity when fixed.
-  n := n + 1;
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
-    WHERE s.nspname = 'depots' AND c.relname = 'savings_plans' AND NOT c.relrowsecurity
-  ) THEN fails := fails || 'rls disabled on depots.savings_plans (expected FALSE until flagged bug fixed)'; END IF;
 
   -- =========================================================================
   -- VIEWS  (06-views/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['depots.values','depots.aggregated_values','users.profile','users.admin_overview','depots.depot_overview','depots.savings_plans_budget_overview','depots.savings_plans_with_asset','depots.leaderboard'] LOOP
+  FOREACH _ IN ARRAY ARRAY['depots.current_values','depots.values','depots.aggregated_values','users.profile','users.admin_overview','depots.depot_overview','depots.savings_plans_budget_overview','depots.savings_plans_with_asset','depots.leaderboard'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -114,7 +107,7 @@ BEGIN
   -- =========================================================================
   -- FUNCTIONS + PROCEDURES  (04-functions/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.update_depot_positions','depots.log_transaction','depots.buy_asset','depots.sell_asset','depots.buy_asset_at','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
+  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.buy_asset','depots.sell_asset','depots.check_savings_budget','api.on_asset_prices_change','api.rebuild_latest_prices','users.is_superuser_session','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_proc p JOIN pg_namespace s ON s.oid = p.pronamespace
@@ -146,10 +139,17 @@ BEGIN
     ) THEN fails := fails || ('trigger depots.' || _ || ' on depots.transactions'); END IF;
   END LOOP;
 
+  n := n + 1;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger t
+    WHERE t.tgname = 'asset_prices_latest' AND NOT t.tgisinternal
+      AND t.tgrelid = 'api.asset_prices'::regclass
+  ) THEN fails := fails || 'trigger api.asset_prices_latest on api.asset_prices'; END IF;
+
   -- =========================================================================
   -- SEQUENCES  (identity sequences backing the *_id_seq GRANTs)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.assets_id_seq','depots.depots_id_seq','depots.positions_id_seq','depots.transactions_id_seq','depots.savings_plans_id_seq'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.assets_id_seq','depots.depots_id_seq','depots.transactions_id_seq','depots.savings_plans_id_seq'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -160,7 +160,7 @@ BEGIN
   -- =========================================================================
   -- INDEXES  (all explicitly-created indexes across 03-tables/ and 05-matviews/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.idx_asset_symbol','api.assets_symbol_trgm_idx','api.assets_name_trgm_idx','api.assets_description_trgm_idx','api.idx_asset_prices_asset_tstamp','depots.idx_position_asset_depot','depots.idx_position_asset','depots.idx_position_depot','depots.idx_transaction_assets_depot','depots.idx_transaction_asset','depots.idx_transaction_depot','depots.idx_transactions_depot_asset_date','depots.idx_savings_assets_depot','depots.idx_savings_asset','depots.idx_savings_depot','depots.idx_holdings_asset'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.idx_asset_symbol','api.assets_symbol_trgm_idx','api.assets_name_trgm_idx','api.assets_description_trgm_idx','api.idx_asset_prices_asset_tstamp','depots.idx_transaction_assets_depot','depots.idx_transaction_asset','depots.idx_transaction_depot','depots.idx_transactions_depot_asset_date','depots.idx_savings_assets_depot','depots.idx_savings_asset','depots.idx_savings_depot','depots.idx_holdings_asset'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -174,30 +174,13 @@ BEGIN
   FOREACH _ IN ARRAY ARRAY[
     'api.assets|Anyone can read assets',
     'api.asset_prices|Anyone can read asset prices',
+    'api.latest_prices|Anyone can read latest prices',
     'depots.depots|Anyone can read depots',
-    'depots.depots|Users can manage their depots',
-    'depots.depots|read_acces_all',
     'depots.depots|auth_admin_insert',
-    'depots.depots|authenticated_insert',
-    'depots.depots|Teachers can view all Depots',
-    'depots.depots|Teachers can edit all Depots',
-    'depots.depots|Teachers can insert Depots',
     'depots.depots|Teachers can delete Depots',
-    'depots.positions|Users can read their depot positions',
-    'depots.positions|Users can manage their depot positions',
-    'depots.positions|Users can update their depot positions',
-    'depots.positions|Users can delete their depot positions',
-    'depots.positions|read_access_for_owners',
-    'depots.positions|Teachers can view all Positions',
     'depots.transactions|Users can read their depot transactions',
-    'depots.transactions|Users can create transactions in their depots',
-    'depots.transactions|Users can update their depot transactions',
-    'depots.transactions|Users can delete their depot transactions',
     'depots.transactions|Teachers can view all transactions',
     'depots.savings_plans|Users can read their depot savings plans',
-    'depots.savings_plans|Users can create savings plans in their depots',
-    'depots.savings_plans|Users can update their depot savings plans',
-    'depots.savings_plans|Users can delete their depot savings plans',
     'depots.savings_plans|Teachers can view all savings plans entrys',
     'depots.savings_plans_budget|Users can read their budget',
     'depots.savings_plans_budget|Teachers can read all budgets',
@@ -269,9 +252,21 @@ BEGIN
   n := n + 1;
   IF NOT has_table_privilege('service_worker',  'depots.transactions',   'SELECT,INSERT,UPDATE,DELETE') THEN fails := fails || 'grant CRUD depots.transactions to service_worker'; END IF;
   n := n + 1;
-  IF NOT has_table_privilege('authenticated',   'depots.depots',         'SELECT,INSERT,UPDATE,DELETE') THEN fails := fails || 'grant CRUD depots.depots to authenticated'; END IF;
+  IF NOT has_table_privilege('authenticated',   'depots.depots',         'SELECT,DELETE')               THEN fails := fails || 'grant SELECT,DELETE depots.depots to authenticated'; END IF;
   n := n + 1;
-  IF NOT has_table_privilege('authenticated',   'depots.savings_plans',  'SELECT,INSERT,UPDATE,DELETE') THEN fails := fails || 'grant CRUD depots.savings_plans to authenticated'; END IF;
+  IF has_table_privilege('authenticated',       'depots.depots',         'INSERT') OR has_table_privilege('authenticated', 'depots.depots', 'UPDATE') THEN fails := fails || 'expected no INSERT/UPDATE on depots.depots for authenticated'; END IF;
+  n := n + 1;
+  IF has_table_privilege('authenticated',       'depots.transactions',   'INSERT') OR has_table_privilege('authenticated', 'depots.transactions', 'UPDATE') OR has_table_privilege('authenticated', 'depots.transactions', 'DELETE') THEN fails := fails || 'expected no writes on depots.transactions for authenticated'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'api.latest_prices',     'SELECT')                     THEN fails := fails || 'grant SELECT api.latest_prices to authenticated'; END IF;
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace s ON s.oid = p.pronamespace WHERE s.nspname = 'depots' AND p.proname = 'run_savings_plans' AND p.prokind = 'p') THEN fails := fails || 'procedure depots.run_savings_plans'; END IF;
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM timescaledb_information.jobs WHERE proc_name = 'run_savings_plans') THEN fails := fails || 'timescale job run_savings_plans'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated',   'depots.savings_plans',  'SELECT')                     THEN fails := fails || 'grant SELECT depots.savings_plans to authenticated'; END IF;
+  n := n + 1;
+  IF has_table_privilege('authenticated',       'depots.savings_plans',  'INSERT')                     THEN fails := fails || 'expected no INSERT on depots.savings_plans for authenticated'; END IF;
   n := n + 1;
   IF NOT has_table_privilege('authenticated',   'users.special_roles',   'SELECT')                     THEN fails := fails || 'grant SELECT users.special_roles to authenticated'; END IF;
   n := n + 1;
@@ -308,13 +303,17 @@ BEGIN
   IF NOT has_sequence_privilege('service_worker', 'depots.transactions_id_seq', 'USAGE') THEN fails := fails || 'grant USAGE depots.transactions_id_seq to service_worker'; END IF;
 
   n := n + 1;
-  IF NOT has_function_privilege('authenticated', 'depots.buy_asset(bigint,bigint,real)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.buy_asset to authenticated'; END IF;
+  IF NOT has_function_privilege('authenticated', 'depots.buy_asset(bigint,bigint,numeric)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.buy_asset to authenticated'; END IF;
   n := n + 1;
   IF NOT has_function_privilege('anon', 'api.search_assets(text,text,integer)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE api.search_assets to anon'; END IF;
   n := n + 1;
   IF NOT has_function_privilege('authenticated', 'users.has_any_role(users.special_role[])', 'EXECUTE') THEN fails := fails || 'grant EXECUTE users.has_any_role to authenticated'; END IF;
   n := n + 1;
-  IF NOT has_function_privilege('anon', 'depots.new_depot_for_user(uuid)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.new_depot_for_user to anon'; END IF;
+  IF NOT has_function_privilege('authenticated', 'depots.new_depot_for_user(uuid)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE depots.new_depot_for_user to authenticated'; END IF;
+  n := n + 1;
+  IF has_function_privilege('anon', 'depots.new_depot_for_user(uuid)', 'EXECUTE') THEN fails := fails || 'expected no EXECUTE on depots.new_depot_for_user for anon'; END IF;
+  n := n + 1;
+  IF has_function_privilege('anon', 'depots.buy_asset(bigint,bigint,numeric)', 'EXECUTE') THEN fails := fails || 'expected no EXECUTE on depots.buy_asset for anon'; END IF;
 
   n := n + 1;
   IF NOT has_database_privilege('authenticator', 'postgres', 'CONNECT') THEN fails := fails || 'grant CONNECT database postgres to authenticator'; END IF;

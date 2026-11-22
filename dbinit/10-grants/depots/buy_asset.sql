@@ -2,4 +2,5 @@
 -- GRANTs targeting depots.buy_asset (function)
 -- =============================================================================
 
-GRANT EXECUTE ON FUNCTION depots.buy_asset(BIGINT, BIGINT, REAL) TO authenticated;
+REVOKE EXECUTE ON FUNCTION depots.buy_asset(bigint, bigint, numeric) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION depots.buy_asset(bigint, bigint, numeric) TO authenticated;

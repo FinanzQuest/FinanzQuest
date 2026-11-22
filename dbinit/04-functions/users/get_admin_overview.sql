@@ -2,7 +2,7 @@
 -- users.get_admin_overview()
 -- Depends on: users.has_any_role (04-functions/users/has_any_role.sql),
 --             auth.users, users.special_roles,
---             depots.depots, depots.positions, depots.transactions
+--             depots.depots, depots.holdings, depots.transactions
 -- Used by users.admin_overview view (06-views/users/admin_overview.sql)
 -- =============================================================================
 
@@ -21,7 +21,7 @@ RETURNS TABLE(
     transaction_count bigint
 ) AS $$
 BEGIN
-    IF NOT (users.has_any_role('admin', 'teacher') OR current_user = 'postgres') THEN
+    IF NOT (users.has_any_role('admin', 'teacher') OR users.is_superuser_session()) THEN
         RAISE EXCEPTION 'Unauthorized: Admin or Teacher role required'
             USING ERRCODE = '42501';
     END IF;
@@ -37,7 +37,7 @@ BEGIN
         roles.user_roles,
         roles.role_granted_at,
         COUNT(DISTINCT d.id) AS depot_count,
-        COUNT(DISTINCT p.id) AS position_count,
+        COUNT(DISTINCT (p.depot_id, p.asset_id)) AS position_count,
         COUNT(DISTINCT t.id) AS transaction_count
     FROM auth.users AS au
     LEFT JOIN LATERAL (
@@ -48,7 +48,8 @@ BEGIN
         WHERE us.user_id = au.id
     ) roles ON true
     LEFT JOIN depots.depots AS d ON au.id = ANY(d.users)
-    LEFT JOIN depots.positions AS p ON d.id = p.depot_id
+    LEFT JOIN depots.holdings AS p
+        ON d.id = p.depot_id AND p.asset_id IS NOT NULL AND p.amount > 0
     LEFT JOIN depots.transactions AS t ON d.id = t.depot_id
     GROUP BY au.id, au.email, au.created_at, au.raw_user_meta_data, roles.user_roles, roles.role_granted_at;
 END;

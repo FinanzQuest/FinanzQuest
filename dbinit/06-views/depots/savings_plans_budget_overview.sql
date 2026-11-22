@@ -2,9 +2,12 @@
 -- depots.savings_plans_budget_overview
 -- Depends on: depots.savings_plans_budget, depots.savings_plans,
 --             depots.sp_to_per_month (04-functions/depots/sp_to_per_month.sql)
+-- security_invoker: the caller's RLS on savings_plans / savings_plans_budget
+-- applies (members and teachers only).
 -- =============================================================================
 
-CREATE OR REPLACE VIEW depots.savings_plans_budget_overview AS
+CREATE OR REPLACE VIEW depots.savings_plans_budget_overview
+WITH (security_invoker = true) AS
 SELECT
     dsb.budget,
     dsb.depot_id,

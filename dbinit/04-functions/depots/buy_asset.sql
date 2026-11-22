@@ -1,81 +1,52 @@
 -- =============================================================================
 -- depots.buy_asset(p_asset_id, p_depot_id, p_worth)
--- Depends on: api.asset_prices, depots.depots, depots.positions,
---             depots.log_transaction (04-functions/depots/log_transaction.sql),
---             config.commission setting (11-config/config.sql)
+-- Depends on: api.latest_prices, depots.depots, depots.transactions,
+--             depots.is_depot_member, config.commission (11-config/config.sql)
 -- -----------------------------------------------------------------------------
--- NOTE: calls log_transaction unqualified (relies on search_path) — see
--- flagged issues.
+-- Buys p_worth (virtual money) of an asset at its latest price. The only way
+-- for a client to add a 'user' transaction: the ledger is not writable by
+-- clients, so price, amount and commission are always set here.
+-- Locks the depot row first, so the cash check and the trigger's cash update
+-- are race-free (two concurrent buys cannot both spend the same cash).
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION depots.buy_asset (
-p_asset_id BIGINT,
-p_depot_id BIGINT,
-p_worth REAL
-) RETURNS VOID
+CREATE OR REPLACE FUNCTION depots.buy_asset(
+  p_asset_id bigint,
+  p_depot_id bigint,
+  p_worth    numeric
+) RETURNS void
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
-    price REAL;
-    price_tstamp DATE;
-    asset_amount REAL;
-    total_cost REAL;
-    depot_cash REAL;
-    commission REAL;
+  v_commission numeric := current_setting('config.commission')::numeric;
+  v_cash       numeric;
+  v_price      numeric;
 BEGIN
-    -- Get commission from configuration
-    commission := current_setting('config.commission')::REAL;
+  IF p_worth IS NULL OR p_worth <= 0 THEN
+    RAISE EXCEPTION 'Amount must be positive' USING ERRCODE = '22023';
+  END IF;
+  IF NOT depots.is_depot_member(p_depot_id) THEN
+    RAISE EXCEPTION 'Not a member of depot %', p_depot_id USING ERRCODE = '42501';
+  END IF;
 
+  SELECT d.cash INTO v_cash FROM depots.depots d WHERE d.id = p_depot_id FOR NO KEY UPDATE;
+  IF v_cash IS NULL THEN
+    RAISE EXCEPTION 'Depot with id % not found', p_depot_id;
+  END IF;
 
-    -- Find the asset's current price
-    SELECT COALESCE(prices.close, prices.open), prices.tstamp
-    FROM api.asset_prices AS prices
-    WHERE prices.asset_id = p_asset_id
-    ORDER BY prices.tstamp DESC
-    LIMIT 1
-    INTO price, price_tstamp;
+  SELECT lp.close INTO v_price FROM api.latest_prices lp WHERE lp.asset_id = p_asset_id;
+  IF v_price IS NULL OR v_price <= 0 THEN
+    RAISE EXCEPTION 'No price found for asset_id %', p_asset_id;
+  END IF;
 
+  IF v_cash < p_worth + v_commission THEN
+    RAISE EXCEPTION 'Insufficient cash in depot. Required: %, Available: %',
+      p_worth + v_commission, round(v_cash, 2);
+  END IF;
 
-    -- Check if price was found
-    IF price IS NULL THEN
-        RAISE EXCEPTION 'No price found for asset_id %', p_asset_id;
-    END IF;
-
-    asset_amount := p_worth / price;
-    total_cost := p_worth + commission;
-
-
-    -- Verify that the depot has enough cash
-    SELECT d.cash
-    FROM depots.depots d
-    WHERE d.id = p_depot_id
-    INTO depot_cash;
-
-    -- Check if depot exists
-    IF depot_cash IS NULL THEN
-        RAISE EXCEPTION 'Depot with id % not found', p_depot_id;
-    END IF;
-
-    IF depot_cash < total_cost THEN
-        RAISE EXCEPTION 'Insufficient cash in depot. Required: %, Available: %', total_cost, depot_cash;
-    END IF;
-
-    -- Subtract the cash
-    UPDATE depots.depots
-    SET cash = cash - total_cost
-    WHERE id = p_depot_id;
-
-    -- Buy/update position
-    INSERT INTO depots.positions (depot_id, asset_id, price, amount, worth, last)
-    VALUES (p_depot_id, p_asset_id, price, asset_amount, p_worth, price_tstamp)
-    ON CONFLICT (depot_id, asset_id) DO UPDATE
-    SET
-        amount = positions.amount + EXCLUDED.amount,
-        worth = positions.worth + EXCLUDED.worth,
-        price = EXCLUDED.price,
-        last = EXCLUDED.last;
-
-
-    PERFORM log_transaction (p_asset_id, p_depot_id, asset_amount, price, commission);
+  INSERT INTO depots.transactions (depot_id, user_id, asset_id, amount, price, commission, type)
+  VALUES (p_depot_id, auth.uid(), p_asset_id, p_worth / v_price, v_price, v_commission, 'user');
 END;
-$$ ;
+$$;

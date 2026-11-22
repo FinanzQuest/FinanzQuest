@@ -9,12 +9,12 @@
 
 CREATE OR REPLACE FUNCTION depots.transaction_expense(
   t      depots.TransactionType,
-  amount real,
-  price  real
+  amount numeric,
+  price  numeric
 ) RETURNS numeric LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE t
-    WHEN 'user'         THEN amount::numeric * price::numeric  -- buy: cash out, sell: cash in
-    WHEN 'savings_plan' THEN 0::numeric                        -- externally funded (none -> asset)
-    WHEN 'movement'     THEN -amount::numeric                  -- deposit +100 -> cash +100
+    WHEN 'user'         THEN amount * price  -- buy: cash out, sell: cash in
+    WHEN 'savings_plan' THEN 0::numeric      -- externally funded (budget -> asset)
+    WHEN 'movement'     THEN -amount         -- deposit +100 -> cash +100
   END;
 $$;

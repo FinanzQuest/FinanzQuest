@@ -1,82 +1,53 @@
 -- =============================================================================
 -- depots.sell_asset(p_asset_id, p_depot_id, p_worth)
--- Depends on: api.asset_prices, depots.positions, depots.depots,
---             depots.log_transaction (04-functions/depots/log_transaction.sql),
---             config.commission setting (11-config/config.sql)
+-- Depends on: api.latest_prices, depots.depots, depots.holdings,
+--             depots.transactions, depots.is_depot_member,
+--             config.commission (11-config/config.sql)
 -- -----------------------------------------------------------------------------
--- NOTE: calls log_transaction unqualified (relies on search_path) — see
--- flagged issues.
+-- Sells p_worth of a position at the latest price, capped at the position's
+-- market value. Selling the whole position sells exactly the held amount, so
+-- no fractional dust is left behind.
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION depots.sell_asset (
-p_asset_id BIGINT,
-p_depot_id BIGINT,
-p_worth REAL
-) RETURNS VOID
+CREATE OR REPLACE FUNCTION depots.sell_asset(
+  p_asset_id bigint,
+  p_depot_id bigint,
+  p_worth    numeric
+) RETURNS void
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
-    price REAL;
-    price_tstamp DATE;
-    asset_amount REAL;
-    total_profit REAL;
-    possessed_worth REAL;
-    commission REAL;
-    worth_to_sell REAL;
+  v_commission numeric := current_setting('config.commission')::numeric;
+  v_held       numeric;
+  v_price      numeric;
+  v_amount     numeric;
 BEGIN
-    -- Get commission from configuration
-    commission := current_setting('config.commission')::REAL;
+  IF p_worth IS NULL OR p_worth <= 0 THEN
+    RAISE EXCEPTION 'Amount must be positive' USING ERRCODE = '22023';
+  END IF;
+  IF NOT depots.is_depot_member(p_depot_id) THEN
+    RAISE EXCEPTION 'Not a member of depot %', p_depot_id USING ERRCODE = '42501';
+  END IF;
 
-    -- Find the asset's current price
-    SELECT COALESCE(prices.close, prices.open), prices.tstamp
-    FROM api.asset_prices AS prices
-    WHERE prices.asset_id = p_asset_id
-    ORDER BY prices.tstamp DESC
-    LIMIT 1
-    INTO price, price_tstamp;
+  PERFORM 1 FROM depots.depots d WHERE d.id = p_depot_id FOR NO KEY UPDATE;
 
-    -- Check if price was found
-    IF price IS NULL THEN
-        RAISE EXCEPTION 'No price found for asset %', p_asset_id;
-    END IF;
+  SELECT h.amount INTO v_held
+  FROM depots.holdings h
+  WHERE h.depot_id = p_depot_id AND h.asset_id = p_asset_id;
+  IF v_held IS NULL OR v_held <= 0 THEN
+    RAISE EXCEPTION 'No position for depot % on asset % found', p_depot_id, p_asset_id;
+  END IF;
 
-    -- Verify that the depot has enough cash
-    SELECT dp.worth
-    FROM depots.positions AS dp
-    WHERE dp.depot_id = p_depot_id AND dp.asset_id = p_asset_id
-    INTO possessed_worth;
+  SELECT lp.close INTO v_price FROM api.latest_prices lp WHERE lp.asset_id = p_asset_id;
+  IF v_price IS NULL OR v_price <= 0 THEN
+    RAISE EXCEPTION 'No price found for asset %', p_asset_id;
+  END IF;
 
-    -- Check if depot exists
-    IF possessed_worth IS NULL THEN
-        RAISE EXCEPTION 'No position for depot % on asset % found', p_depot_id, p_asset_id;
-    END IF;
+  v_amount := CASE WHEN p_worth >= v_held * v_price THEN v_held ELSE p_worth / v_price END;
 
-    worth_to_sell := LEAST(possessed_worth, p_worth);
-
-    asset_amount := worth_to_sell / price;
-    total_profit := worth_to_sell - commission;
-
-    -- add the cash
-    UPDATE depots.depots
-    SET cash = cash + total_profit
-    WHERE id = p_depot_id;
-
-    IF possessed_worth = worth_to_sell THEN
-        DELETE FROM depots.positions
-        WHERE
-            asset_id = p_asset_id AND
-            depot_id = p_depot_id;
-    ELSE
-        UPDATE depots.positions
-        SET
-            amount = amount - asset_amount,
-            worth = worth - worth_to_sell
-        WHERE
-            asset_id = p_asset_id AND
-            depot_id = p_depot_id;
-    END IF;
-
-
-    PERFORM log_transaction (p_asset_id, p_depot_id, - asset_amount, price, commission);
+  INSERT INTO depots.transactions (depot_id, user_id, asset_id, amount, price, commission, type)
+  VALUES (p_depot_id, auth.uid(), p_asset_id, -v_amount, v_price, v_commission, 'user');
 END;
-$$ ;
+$$;

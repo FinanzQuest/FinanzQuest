@@ -1,49 +1,44 @@
 -- =============================================================================
 -- depots.aggregated_values
--- Depends on: depots.values (06-views/depots/values.sql)
+-- Depends on: depots.current_values (06-views/depots/current_values.sql),
+--             depots.daily_values (03-tables/depots/daily_values.sql)
 -- -----------------------------------------------------------------------------
--- One row per depot with diff columns
+-- One row per depot: today's live value and the change against the last
+-- stored day before today, and the last stored day at least one month / one
+-- year ago (calendar-based; NULL when the history is shorter). Each previous
+-- value is a single backward primary-key probe into daily_values.
 -- =============================================================================
 
 CREATE OR REPLACE VIEW depots.aggregated_values AS
-WITH latest_per_depot AS (
-  SELECT
-    assets,
-    depot_id,
-    cash,
-    profit_from_start,
-    value AS total,
-    tstamp,
-    NTH_VALUE(value, 2) OVER (
-      PARTITION BY depot_id ORDER BY tstamp DESC
-      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    ) AS prev_1d_total,
-    NTH_VALUE(value, 23) OVER (
-      PARTITION BY depot_id ORDER BY tstamp DESC
-      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    ) AS prev_1m_total,
-    NTH_VALUE(value, 253) OVER (
-      PARTITION BY depot_id ORDER BY tstamp DESC
-      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    ) AS prev_1y_total,
-    ROW_NUMBER() OVER (PARTITION BY depot_id ORDER BY tstamp DESC) AS rn
-  FROM depots.values
-)
 SELECT
-  assets,
-  depot_id,
-  cash,
-  total,
-  profit_from_start,
-  tstamp,
-  prev_1d_total,
-  prev_1m_total,
-  prev_1y_total,
-  total - prev_1d_total                              AS diff_1d,
-  total - prev_1m_total                              AS diff_1m,
-  total - prev_1y_total                              AS diff_1y,
-  (total - prev_1d_total) / NULLIF(prev_1d_total, 0) * 100 AS rel_diff_1d,
-  (total - prev_1m_total) / NULLIF(prev_1m_total, 0) * 100 AS rel_diff_1m,
-  (total - prev_1y_total) / NULLIF(prev_1y_total, 0) * 100 AS rel_diff_1y
-FROM latest_per_depot
-WHERE rn = 1;
+  c.assets,
+  c.depot_id,
+  c.cash,
+  c.value                                            AS total,
+  c.profit_from_start,
+  c.tstamp,
+  p1d.value                                          AS prev_1d_total,
+  p1m.value                                          AS prev_1m_total,
+  p1y.value                                          AS prev_1y_total,
+  c.value - p1d.value                                AS diff_1d,
+  c.value - p1m.value                                AS diff_1m,
+  c.value - p1y.value                                AS diff_1y,
+  (c.value - p1d.value) / NULLIF(p1d.value, 0) * 100 AS rel_diff_1d,
+  (c.value - p1m.value) / NULLIF(p1m.value, 0) * 100 AS rel_diff_1m,
+  (c.value - p1y.value) / NULLIF(p1y.value, 0) * 100 AS rel_diff_1y
+FROM depots.current_values c
+LEFT JOIN LATERAL (
+  SELECT dv.value FROM depots.daily_values dv
+  WHERE dv.depot_id = c.depot_id AND dv.tstamp < c.tstamp
+  ORDER BY dv.tstamp DESC LIMIT 1
+) p1d ON TRUE
+LEFT JOIN LATERAL (
+  SELECT dv.value FROM depots.daily_values dv
+  WHERE dv.depot_id = c.depot_id AND dv.tstamp <= (c.tstamp - INTERVAL '1 month')::date
+  ORDER BY dv.tstamp DESC LIMIT 1
+) p1m ON TRUE
+LEFT JOIN LATERAL (
+  SELECT dv.value FROM depots.daily_values dv
+  WHERE dv.depot_id = c.depot_id AND dv.tstamp <= (c.tstamp - INTERVAL '1 year')::date
+  ORDER BY dv.tstamp DESC LIMIT 1
+) p1y ON TRUE;

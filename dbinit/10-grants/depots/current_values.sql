@@ -1,5 +1,5 @@
 -- =============================================================================
--- GRANTs targeting depots.update_depot_positions (function)
+-- GRANTs targeting depots.current_values (view)
 -- =============================================================================
 
-GRANT EXECUTE ON FUNCTION depots.update_depot_positions() TO authenticated;
+GRANT SELECT ON depots.current_values TO anon, authenticated;

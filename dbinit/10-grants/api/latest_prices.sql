@@ -1,5 +1,5 @@
 -- =============================================================================
--- GRANTs targeting depots.log_transaction (function)
+-- GRANTs targeting api.latest_prices
 -- =============================================================================
 
-GRANT EXECUTE ON FUNCTION depots.log_transaction(BIGINT, BIGINT, REAL, REAL, REAL) TO authenticated;
+GRANT SELECT ON api.latest_prices TO anon, authenticated, service_worker;

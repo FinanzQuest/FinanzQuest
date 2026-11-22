@@ -9,7 +9,7 @@ RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF NOT (users.has_any_role('admin', 'teacher') OR current_user = 'postgres') THEN
+    IF NOT (users.has_any_role('admin', 'teacher') OR users.is_superuser_session()) THEN
         RAISE EXCEPTION 'Unauthorized: Admin or Teacher role required'
             USING ERRCODE = '42501';
     END IF;
