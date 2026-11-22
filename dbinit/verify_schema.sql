@@ -353,6 +353,19 @@ BEGIN
   IF NOT pg_has_role('service_worker'::name, 'view_refresher'::name, 'MEMBER') THEN fails := fails || 'membership: view_refresher granted to service_worker'; END IF;
 
   -- =========================================================================
+  -- SECURITY DEFINER functions pin their search_path
+  -- =========================================================================
+  FOR _ IN
+    SELECT p.oid::regprocedure::text FROM pg_proc p
+    WHERE p.prosecdef
+      AND p.pronamespace IN ('api'::regnamespace, 'depots'::regnamespace, 'users'::regnamespace)
+      AND NOT EXISTS (SELECT 1 FROM unnest(p.proconfig) c WHERE c LIKE 'search_path=%')
+  LOOP
+    fails := fails || ('SECURITY DEFINER without search_path: ' || _);
+  END LOOP;
+  n := n + 1;
+
+  -- =========================================================================
   -- SEED  (seed/assets.sql)
   -- =========================================================================
   n := n + 1;

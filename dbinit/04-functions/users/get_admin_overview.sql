@@ -53,4 +53,4 @@ BEGIN
     LEFT JOIN depots.transactions AS t ON d.id = t.depot_id
     GROUP BY au.id, au.email, au.created_at, au.raw_user_meta_data, roles.user_roles, roles.role_granted_at;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;

@@ -16,4 +16,4 @@ BEGIN
     DELETE FROM users.special_roles WHERE user_id = p_user_id AND user_role = 'teacher' ;
     UPDATE auth.users SET is_super_admin = false WHERE id = p_user_id;
 END;
-$$ SECURITY DEFINER;
+$$ SECURITY DEFINER SET search_path = '';

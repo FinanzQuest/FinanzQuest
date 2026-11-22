@@ -19,4 +19,4 @@ BEGIN
     INSERT INTO users.special_roles (user_id, user_role) VALUES (p_user_id, 'teacher');
     UPDATE auth.users SET is_super_admin = true WHERE id = p_user_id;
 END;
-$$ SECURITY DEFINER;
+$$ SECURITY DEFINER SET search_path = '';

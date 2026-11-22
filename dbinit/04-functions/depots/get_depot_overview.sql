@@ -51,4 +51,4 @@ CREATE OR REPLACE FUNCTION depots.get_depot_overview() RETURNS TABLE(
         ON dsb.depot_id = d.id
         GROUP BY d.id, u.user_names, u.user_ids, dsb.budget;
     END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;

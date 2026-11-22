@@ -18,4 +18,4 @@ BEGIN
         AND user_role = ANY(required_roles)
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;

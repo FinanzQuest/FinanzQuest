@@ -15,4 +15,4 @@ BEGIN
         WHERE user_id = auth.uid() AND user_role = required_role
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;

@@ -42,4 +42,4 @@ BEGIN
 
     RETURN QUERY SELECT v_user_count, v_teacher_count, v_admin_count, v_student_count;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;

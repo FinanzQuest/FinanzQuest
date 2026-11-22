@@ -15,4 +15,4 @@ BEGIN
     PERFORM depots.change_budget(NEW.id, budget); -- Set default budget, adjust as needed
     RETURN NEW;
 END;
-$$ SECURITY DEFINER;
+$$ SECURITY DEFINER SET search_path = '';
