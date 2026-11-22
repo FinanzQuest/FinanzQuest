@@ -12,7 +12,7 @@ import {
 	StockPositionCard,
 } from "@/components/cards/cards"
 import { ChartCard } from "@/components/cards/client"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { PageShell } from "@/components/page_shell"
 import type { DepotPosition, LatestPrice } from "@/database/custom_types"
 import { fetchStockData } from "@/database/fetch_stock_data"
 import { getServerClient, getUser } from "@/lib/auth"
@@ -72,35 +72,33 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const quote = getQuote(pricesFiltered, latestPrice)
 
 	return (
-		<ScrollArea className="h-screen ">
-			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
-				<AutoRefresh />
-				<StockHeader
-					price={quote.price}
-					previousClose={quote.previousClose}
-					dayOpen={quote.dayOpen}
-					quoteTime={quote.quoteTime}
-					stock={info[0]}
-					depot={depot}
-					position={positions.at(0)}
-					commission={commission}
-				/>
-				<ChartCard
-					className="w-full"
-					assetId={id}
-					prices={pricesWithEmptyDays}
-					pricesWeekly={pricesWeeklyWithEmptyDays}
-					pricesIntraday1d={pricesIntraday1d}
-					pricesIntraday5d={pricesIntraday5d}
-					previousClose={quote.previousClose}
-				/>
-				{depot && <StockPositionCard position={positions.at(0)} />}
-				{/* streams in after the prices: facts, holdings, countries */}
-				<Suspense fallback={<AssetDetailsSkeleton />}>
-					<AssetDetails id={id} />
-				</Suspense>
-			</main>
-		</ScrollArea>
+		<PageShell>
+			<AutoRefresh />
+			<StockHeader
+				price={quote.price}
+				previousClose={quote.previousClose}
+				dayOpen={quote.dayOpen}
+				quoteTime={quote.quoteTime}
+				stock={info[0]}
+				depot={depot}
+				position={positions.at(0)}
+				commission={commission}
+			/>
+			<ChartCard
+				className="w-full"
+				assetId={id}
+				prices={pricesWithEmptyDays}
+				pricesWeekly={pricesWeeklyWithEmptyDays}
+				pricesIntraday1d={pricesIntraday1d}
+				pricesIntraday5d={pricesIntraday5d}
+				previousClose={quote.previousClose}
+			/>
+			{depot && <StockPositionCard position={positions.at(0)} />}
+			{/* streams in after the prices: facts, holdings, countries */}
+			<Suspense fallback={<AssetDetailsSkeleton />}>
+				<AssetDetails id={id} />
+			</Suspense>
+		</PageShell>
 	)
 }
 

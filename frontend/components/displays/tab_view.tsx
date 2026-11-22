@@ -21,7 +21,6 @@ import {
 	SelectValue,
 } from "../ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group"
 import PositionList from "./position_list"
 
 interface returnT {
@@ -160,11 +159,11 @@ export default function PositionTabView({
 
 	return (
 		<Tabs defaultValue="all" className="rounded">
-			<div className="flex flex-row gap-4 w-full">
-				<div className="border rounded-full p-2 bg-muted/50">
+			<div className="flex flex-row flex-wrap items-center gap-3 w-full">
+				<div className="border rounded-full p-1.5 bg-muted/50 max-w-full overflow-x-auto">
 					<TabsList className="p-0 bg-transparent">
 						<TabsTrigger className="h-full" value="all">
-							All {Object.values(sortedStocks).flat().length}
+							Alle {Object.values(sortedStocks).flat().length}
 						</TabsTrigger>
 						{types.map(asset_type => {
 							const count = counts.get(asset_type as AssetTypeWithOther) ?? 0
@@ -184,7 +183,7 @@ export default function PositionTabView({
 				</div>
 				<div className="grow" />
 
-				<div className="border rounded-full p-2 bg-muted/50">
+				<div className="border rounded-full p-1.5 bg-muted/50">
 					<ToolBar value={modes} onValueChange={setModes} />
 				</div>
 			</div>
@@ -238,49 +237,45 @@ function SortSelector(props: {
 }) {
 	// controlled: always report the current props plus the one changed value
 	const descending = props.descending ?? false
-	const items: React.ReactNode[] = []
-	for (const order of props.orders) {
-		items.push(
-			<SelectItem value={order.type} key={order.type}>
-				<div className="flex flex-row gap-3 items-center">
-					<span className="size-[1.1lh] *:size-full stroke-muted-foreground">
-						{order.icon}
-					</span>
-					<span>{order.display}</span>
-				</div>
-			</SelectItem>
-		)
-	}
 	return (
-		<div className="flex flex-row gap-2">
+		<div className="flex flex-row gap-1 items-center">
 			<Select
+				items={Object.fromEntries(props.orders.map(o => [o.type, o.display]))}
 				onValueChange={value => {
 					if (value === null) return
 					props.onValueChange?.(value, descending)
 				}}
 				value={props.value}
 			>
-				<SelectTrigger className="w-fit bg-background h-full">
-					<SelectValue placeholder="Sortiermodus" />
+				<SelectTrigger
+					className="w-fit bg-background h-8 rounded-full"
+					aria-label="Sortieren nach"
+				>
+					<SelectValue placeholder="Sortieren" />
 				</SelectTrigger>
-				<SelectContent sideOffset={10}>{items}</SelectContent>
+				<SelectContent sideOffset={10}>
+					{props.orders.map(order => (
+						<SelectItem value={order.type} key={order.type}>
+							<div className="flex flex-row gap-3 items-center">
+								<span className="size-[1.1lh] *:size-full stroke-muted-foreground">
+									{order.icon}
+								</span>
+								<span>{order.display}</span>
+							</div>
+						</SelectItem>
+					))}
+				</SelectContent>
 			</Select>
-			<ToggleGroup
-				value={[props.descending ? "descending" : "ascending"]}
-				defaultValue={["descending"]}
-				onValueChange={value => {
-					// clicking the active item deselects it: keep the direction
-					if (!value[0]) return
-					props.onValueChange?.(props.value ?? "", value[0] === "descending")
-				}}
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				className="rounded-full"
+				onClick={() => props.onValueChange?.(props.value ?? "", !descending)}
+				aria-label={descending ? "Absteigend sortiert" : "Aufsteigend sortiert"}
+				title={descending ? "Absteigend" : "Aufsteigend"}
 			>
-				<ToggleGroupItem value="descending">
-					<SortDesc />
-				</ToggleGroupItem>
-				<ToggleGroupItem value="ascending">
-					<SortAsc />
-				</ToggleGroupItem>
-			</ToggleGroup>
+				{descending ? <SortDesc /> : <SortAsc />}
+			</Button>
 		</div>
 	)
 }

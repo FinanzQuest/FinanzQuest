@@ -80,7 +80,7 @@ export function Slide02() {
 								<stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 						<XAxis
 							dataKey="year"
 							tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
@@ -101,11 +101,11 @@ export function Slide02() {
 						/>
 						<Tooltip
 							contentStyle={{
-								background: "hsl(var(--card))",
-								border: "1px solid hsl(var(--border))",
+								background: "var(--card)",
+								border: "1px solid var(--border)",
 								borderRadius: 8,
 								fontSize: 12,
-								color: "hsl(var(--foreground))",
+								color: "var(--foreground)",
 							}}
 							labelFormatter={v => `Jahr ${v}`}
 							formatter={v => [`${v} €`, "Kaufkraft"]}

@@ -32,10 +32,10 @@ export function FactGrid({
 		>
 			{known.map(fact => (
 				<div key={fact.label} className="flex flex-col gap-1 min-w-0">
-					<dt className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-						<span className="truncate">{fact.label}</span>
+					<dt className="flex flex-row items-start gap-1 text-sm leading-tight text-muted-foreground">
+						<span className="break-words min-w-0">{fact.label}</span>
 						{fact.hint && (
-							<Tooltip name={fact.hint} className="shrink-0">
+							<Tooltip name={fact.hint} className="shrink-0 mt-px">
 								<Info
 									className="size-3.5"
 									aria-label={`Erklärung: ${fact.label}`}

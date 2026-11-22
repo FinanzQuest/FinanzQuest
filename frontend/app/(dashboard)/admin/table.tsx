@@ -514,12 +514,18 @@ export function AdminUsersTable({ data, className }: AdminUsersTableProps) {
 						newUser(data).then(handleError)
 					}}
 					trigger={
-						<Button size="icon">
-							<Plus />
+						<Button>
+							<Plus data-icon="inline-start" />
+							Nutzer anlegen
 						</Button>
 					}
 				/>
-				<ButtonGroup className="justify-end">
+				<ButtonGroup
+					className={cn(
+						"justify-end",
+						table.getPageCount() <= 1 && "invisible"
+					)}
+				>
 					<Tooltip name="Vorherige Seite">
 						<Button
 							onClick={() => table.previousPage()}

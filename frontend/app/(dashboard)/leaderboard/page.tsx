@@ -2,6 +2,7 @@ import { Minus, TriangleIcon } from "lucide-react"
 import { cacheLife, cacheTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
+import { PageShell } from "@/components/page_shell"
 import ChangeStat from "@/components/stat/change_stat"
 import type { LeaderboardRow, SearchParams } from "@/database/custom_types"
 import { getUser } from "@/lib/auth"
@@ -58,7 +59,7 @@ export default async function Page(props: {
 	})()
 
 	return (
-		<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8">
+		<PageShell>
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2">
 					<span className="text-sm text-muted-foreground">
@@ -82,22 +83,38 @@ export default async function Page(props: {
 					</div>
 				</div>
 			</div>
-			<div className="grid grid-cols-[auto_auto_1fr_1fr_minmax(200px,max-content)] w-full border rounded-2xl divide-y divide-border/50 gap-x-6">
+			<div className="flex flex-col w-full border rounded-2xl divide-y divide-border/50 overflow-hidden">
 				{leaderboard.data.map(row => (
-					<LeaderboardEntry key={row.id} row={row} />
+					<LeaderboardEntry
+						key={row.id}
+						row={row}
+						own={row.id === depot.data?.id}
+					/>
 				))}
 			</div>
-		</main>
+		</PageShell>
 	)
 }
 
-function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
+function LeaderboardEntry({
+	row,
+	own,
+}: {
+	row: LeaderboardRow
+	/** the viewer's active depot: highlighted */
+	own: boolean
+}) {
 	const rankChange = row.prev_rank && row.rank ? row.prev_rank - row.rank : null
 	const isRising = rankChange != null && rankChange > 0
 
 	const rankIndicator = (() => {
 		if (row.prev_rank == null)
-			return <div className="size-2 rounded-full self-center bg-blue-500" />
+			return (
+				<div
+					className="size-2 rounded-full self-center bg-overlay-1"
+					title="Neu"
+				/>
+			)
 		if (rankChange === 0)
 			return <Minus className="size-3 text-muted-foreground self-center" />
 
@@ -110,42 +127,50 @@ function LeaderboardEntry({ row }: { row: LeaderboardRow }) {
 			/>
 		)
 	})()
-	const userNames = row.users?.map((user, index) => {
-		const isLast = row.users && index === row.users.length - 1
-		return (
-			<span key={user.user_id}>
-				{user.name}
-				{!isLast && ", "}
-			</span>
-		)
-	})
+	const userNames = (row.users ?? [])
+		.map(user => user.name)
+		.filter(Boolean)
+		.join(", ")
 
 	return (
 		<div
 			className={cn(
-				"grid grid-cols-subgrid col-span-5 items-center px-4 hover:bg-muted/40"
+				"grid items-center gap-x-4 px-4 py-3 hover:bg-muted/40",
+				"grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[3.5rem_minmax(0,1fr)_auto_5rem] md:grid-cols-[4rem_minmax(0,1fr)_9rem_12rem]",
+				own && "bg-muted/60"
 			)}
+			aria-current={own ? "true" : undefined}
 		>
-			<div className="grid grid-cols-subgrid py-4 col-span-4 self-stretch">
-				<div className="flex flex-row items-center gap-2">
-					{rankIndicator}
-					<span className="text-sm text-muted-foreground number">
-						#{row.rank}
-					</span>
-				</div>
-				<div className="truncate">{row.name}</div>
-				<div>{userNames}</div>
-				<div className="number text-right tabular-nums">
-					{row.value && currencyFormatFixedLength.format(row.value)}
-				</div>
+			<div className="flex flex-row items-center gap-2">
+				{rankIndicator}
+				<span className="text-sm text-muted-foreground number">
+					#{row.rank}
+				</span>
 			</div>
-			{row.sparkline && (
-				<Sparkline
-					className="self-center"
-					data={row.sparkline}
-					startValue={row.cash_start as number}
-				/>
-			)}
+			<div className="flex flex-col min-w-0">
+				<span className="truncate font-medium">
+					{row.name}
+					{own && (
+						<span className="text-muted-foreground font-normal"> · du</span>
+					)}
+				</span>
+				{userNames && (
+					<span className="truncate text-sm text-muted-foreground">
+						{userNames}
+					</span>
+				)}
+			</div>
+			<div className="number text-right tabular-nums text-sm md:text-base">
+				{row.value != null && currencyFormatFixedLength.format(row.value)}
+			</div>
+			<div className="hidden sm:block">
+				{row.sparkline && (
+					<Sparkline
+						data={row.sparkline}
+						startValue={row.cash_start as number}
+					/>
+				)}
+			</div>
 		</div>
 	)
 }

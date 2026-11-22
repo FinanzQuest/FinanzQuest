@@ -1,4 +1,5 @@
 import { ErrorCard } from "@/components/cards/cards"
+import { PageShell } from "@/components/page_shell"
 import { createClient } from "@/utils/supabase/server"
 import { DepotTable } from "./table"
 
@@ -13,17 +14,19 @@ export default async function Page({
 	if (error) return <ErrorCard error={error} />
 
 	return (
-		<main className="w-full h-full flex flex-col items-start gap-6">
-			{profile?.name && (
-				<div>
+		<PageShell className="gap-6 max-w-none">
+			<div>
+				{profile?.name && (
 					<div className="text-muted-foreground">Depots von</div>
-					<div className="text-2xl font-bold">{profile.name}</div>
-				</div>
-			)}
+				)}
+				<h1 className="text-2xl font-bold tracking-tight">
+					{profile?.name ?? "Alle Depots"}
+				</h1>
+			</div>
 			<div className="border rounded-xl p-2 bg-muted/25 w-full">
 				<DepotTable className="rounded-lg bg-background" data={depots ?? []} />
 			</div>
-		</main>
+		</PageShell>
 	)
 }
 

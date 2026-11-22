@@ -56,12 +56,12 @@ export default function DashboardLayout({
 }>) {
 	return (
 		<>
-			<SidebarProvider>
+			<SidebarProvider className="h-svh overflow-hidden flex-col md:flex-row">
 				<Suspense fallback={<AppSidebar data={null} />}>
 					<Sidebar />
 				</Suspense>
 				{/* each route's loading.tsx shows its page-shaped skeleton */}
-				<div className="min-h-screen max-h-screen w-full overflow-hidden">
+				<div className="flex-1 min-h-0 min-w-0 w-full overflow-hidden">
 					{children}
 				</div>
 			</SidebarProvider>

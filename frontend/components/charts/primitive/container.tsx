@@ -48,9 +48,10 @@ export default function ChartContainer({
 		<Suspense fallback={<ChartSkeleton />}>
 			<Tabs defaultValue={defaultName} className={cn(className)}>
 				{tabsContent}
-				<div className="w-full bg-muted/50 px-2 border py-2 rounded-full flex flex-row items-center">
+				{/* one pill on wide screens; wraps into a rounded box on phones */}
+				<div className="w-full bg-muted/50 px-2 border py-2 rounded-3xl md:rounded-full flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
 					<TabsList className={"py-2"}>{tabsTrigger}</TabsList>
-					<div className="grow justify-end flex flex-row items-center ">
+					<div className="grow min-w-0 justify-end flex flex-row flex-wrap items-center gap-1">
 						{toolbar}
 						{/* <IntervalControls className="grow justify-end p-2" intervals={Intervals} /> */}
 					</div>

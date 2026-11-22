@@ -9,10 +9,10 @@ import {
 import LoginForm from "./form"
 export default function Page() {
 	return (
-		<main className="grow flex justify-center items-center">
-			<Card className="min-w-[350px] w-fit max-w-[33%] shadow-2xl">
-				<CardHeader>
-					<CardTitle className="text-center">Willkommen</CardTitle>
+		<main className="w-full flex justify-center">
+			<Card className="w-full max-w-md shadow-2xl">
+				<CardHeader className="text-center">
+					<CardTitle>Willkommen</CardTitle>
 					<CardDescription>
 						Logge dich ein, indem du deine E-Mail und Passwort eingibst.
 					</CardDescription>

@@ -64,6 +64,11 @@ import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 import NewEntryDialog from "./new_dialog"
 
+const shareFormat = new Intl.NumberFormat("de-DE", {
+	style: "percent",
+	maximumFractionDigits: 1,
+})
+
 interface EditableTableProps {
 	/** depot shown on the page; new entries go there */
 	depotId: number
@@ -333,7 +338,7 @@ export function SavingsPlanTable({
 					<div className="flex flex-row gap-2">
 						<div className="number">{currencyFormat.format(worth)}</div>
 						<div className="number text-muted-foreground">
-							{percentage?.toFixed(1)}%
+							{percentage != null && shareFormat.format(percentage / 100)}
 						</div>
 					</div>
 				)
@@ -523,8 +528,8 @@ export function SavingsPlanTable({
 			</div>
 			<div className="flex items-center justify-end space-x-2 py-4">
 				<div className="text-muted-foreground flex-1 text-sm">
-					{table.getFilteredSelectedRowModel().rows.length} of{" "}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
+					{table.getFilteredSelectedRowModel().rows.length > 0 &&
+						`${table.getFilteredSelectedRowModel().rows.length} von ${table.getFilteredRowModel().rows.length} ausgewählt`}
 				</div>
 			</div>
 			<ButtonGroup className="flex flex-row justify-stretch *:grow w-full">
@@ -532,8 +537,9 @@ export function SavingsPlanTable({
 					<NewEntryDialog
 						depotId={depotId}
 						trigger={
-							<Button size="icon">
-								<Plus />
+							<Button>
+								<Plus data-icon="inline-start" />
+								Sparplan anlegen
 							</Button>
 						}
 					/>
@@ -555,7 +561,12 @@ export function SavingsPlanTable({
 						</Button>
 					)}
 				</ButtonGroup>
-				<ButtonGroup className="justify-end">
+				<ButtonGroup
+					className={cn(
+						"justify-end",
+						table.getPageCount() <= 1 && "invisible"
+					)}
+				>
 					<Tooltip name="Vorherige Seite">
 						<Button
 							onClick={() => table.previousPage()}

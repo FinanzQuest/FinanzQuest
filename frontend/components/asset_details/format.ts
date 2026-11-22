@@ -142,7 +142,9 @@ const SHORT_WORDS = new Set([
 export function holdingName(name: string) {
 	if (name !== name.toUpperCase()) return name
 	const words = name.split(/(\s+)/)
-	if (words.length === 1) return name
+	// one short word is an abbreviation (SAP, LVMH); a long one a name (APPLE)
+	if (words.length === 1 && name.replace(/[^\p{L}]/gu, "").length <= 4)
+		return name
 	return words
 		.map(word => {
 			const letters = word.replace(/[^\p{L}]/gu, "")

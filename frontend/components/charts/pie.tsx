@@ -7,6 +7,12 @@ import { currencyFormat } from "@/lib/cash_display_string"
 import { cn } from "@/lib/utils"
 import { Separator } from "../ui/separator"
 
+const shareFormat = new Intl.NumberFormat("de-DE", {
+	style: "percent",
+	minimumFractionDigits: 1,
+	maximumFractionDigits: 1,
+})
+
 interface props<T extends Record<string, number | string | null>>
 	extends React.ComponentPropsWithoutRef<"div"> {
 	data: Array<T>
@@ -81,7 +87,9 @@ export default function PieChart<
 								style={{ backgroundColor: colorFor(position) }}
 							/>
 							<span className="text-muted-foreground">{position.symbol}</span>
-							<span className="number tabular-nums">{share.toFixed(1)} %</span>
+							<span className="number tabular-nums">
+								{shareFormat.format(share / 100)}
+							</span>
 						</div>
 					)
 				})}

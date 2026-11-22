@@ -1,4 +1,5 @@
 import { ErrorCard } from "@/components/cards/cards"
+import { PageShell } from "@/components/page_shell"
 import type { Client } from "@/database/custom_types"
 import { hasSpecialRoles } from "@/lib/db"
 import { numberFormat } from "@/lib/util"
@@ -22,7 +23,7 @@ export default async function Page() {
 	}
 
 	return (
-		<main className="w-full max-h-screen overflow-y-scroll px-4 md:px-8 py-6 flex flex-col gap-8">
+		<PageShell className="max-w-none">
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2">
 					<span className="text-sm text-muted-foreground">Nutzerzahl</span>
@@ -52,7 +53,7 @@ export default async function Page() {
 			<div className="flex flex-col gap-4 w-full grow">
 				<AdminUsersTable className="bg-background rounded-lg" data={users} />
 			</div>
-		</main>
+		</PageShell>
 	)
 }
 

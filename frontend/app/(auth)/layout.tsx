@@ -4,7 +4,6 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import type React from "react"
 import { Toaster } from "@/components/ui/sonner"
-import { cn } from "@/lib/utils"
 export const metadata: Metadata = {
 	title: "FinanzQuest",
 	description: "FinanzQuest",
@@ -18,11 +17,12 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<div className={cn()}>
-			<div className="w-[calc(100%)]  pt-8 pb-8 px-2 flex flex-row items-center justify-center">
-				<Image src={logo_full} alt="" height={48} />
+		// scrolls on its own (the body does not): small screens and long forms
+		<div className="h-svh overflow-y-auto flex flex-col">
+			<div className="pt-8 pb-6 px-4 flex flex-row items-center justify-center shrink-0">
+				<Image src={logo_full} alt="FinanzQuest" height={48} />
 			</div>
-			<div className="absolute right-1/2 bottom-1/2 translate-x-1/2 translate-y-1/2">
+			<div className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
 				{children}
 			</div>
 			<Toaster />

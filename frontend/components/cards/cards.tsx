@@ -59,7 +59,8 @@ export function StockHeader({
 			<div className="flex flex-row flex-wrap items-center justify-between gap-x-6 gap-y-4">
 				<div className="flex flex-row gap-4 items-center">
 					<URLIcon
-						className="size-[4lh] rounded-lg"
+						className="size-[4lh] rounded-lg text-base"
+						fallback={asset.symbol}
 						size={100}
 						iconURL={getIconURL(asset.symbol, asset.asset_type, 128)}
 					/>

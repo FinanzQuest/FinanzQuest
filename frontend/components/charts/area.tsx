@@ -126,7 +126,8 @@ export default function AreaChart<T extends Record<string, number | string>>({
 				<ReferenceLine
 					y={startValue}
 					strokeWidth={0.5}
-					stroke="hsl(var(--foreground)/50)"
+					stroke="var(--foreground)"
+					strokeOpacity={0.5}
 					strokeDasharray="6 3"
 				/>
 				<Area

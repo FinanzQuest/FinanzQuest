@@ -1,11 +1,16 @@
 "use client"
 
 import { buyStock } from "@/database/stock_transactions"
+import { currencyFormatFixedLength } from "@/lib/cash_display_string"
 import PrimitiveDialog, {
 	type TDepot,
 	type TStock,
 	type TTransactionHandler,
 } from "./primitive_dialog"
+
+const amountFormat = new Intl.NumberFormat("de-DE", {
+	maximumFractionDigits: 4,
+})
 
 const handleStockPurchase: TTransactionHandler = async (
 	stock,
@@ -23,9 +28,7 @@ const handleStockPurchase: TTransactionHandler = async (
 	return {
 		error: null,
 		success: {
-			message: `Successfully bought ${stock.name} x ${amount.toFixed(2)} for ${(
-				worth + commission
-			).toFixed(2)} USD`,
+			message: `${amountFormat.format(amount)} × ${stock.name} für ${currencyFormatFixedLength.format(worth + commission)} gekauft`,
 		},
 	}
 }

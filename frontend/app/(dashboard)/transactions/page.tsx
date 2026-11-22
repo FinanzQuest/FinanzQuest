@@ -2,23 +2,21 @@ import { MoveRight } from "lucide-react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
-import {
-	PositionRow,
-	positionColumns,
-} from "@/components/displays/position_list"
+import { PositionRow } from "@/components/displays/position_list"
 import URLIcon from "@/components/icon"
+import { PageShell } from "@/components/page_shell"
 import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import type {
 	PositionSummary,
 	SearchParams,
 	Transaction,
 } from "@/database/custom_types"
 import { getServerClient, getUser } from "@/lib/auth"
+import { currencyFormatFixedLength } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { getStockPagePath } from "@/lib/get_stock_path"
 import { getIconURL } from "@/lib/icon_url"
@@ -29,6 +27,16 @@ import {
 	toISODateOnly,
 } from "@/lib/util"
 import { cn } from "@/lib/utils"
+
+const timeFormat = new Intl.DateTimeFormat("de-DE", {
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZone: "Europe/Berlin",
+})
+
+const amountFormat = new Intl.NumberFormat("de-DE", {
+	maximumFractionDigits: 4,
+})
 
 type TransactionWithAssetPosition = Transaction & PositionSummary
 
@@ -50,13 +58,17 @@ export default async function Page(props: {
 	const groupedTransactions = groupTransactionsPerDay(transactions)
 
 	return (
-		<ScrollArea className="h-screen">
-			<main className="w-full h-fit max-w-300 mx-auto max-h-screen md:px-12 px-4 py-6 flex flex-col gap-8 *:shrink-0">
-				{groupedTransactions.map(group => (
-					<TransactionGroup key={group.day} {...group} />
-				))}
-			</main>
-		</ScrollArea>
+		<PageShell>
+			<h1 className="text-2xl font-bold tracking-tight">Transaktionen</h1>
+			{groupedTransactions.length === 0 && (
+				<p className="text-sm text-muted-foreground">
+					Noch keine Transaktionen. Kaufe dein erstes Wertpapier über die Suche.
+				</p>
+			)}
+			{groupedTransactions.map(group => (
+				<TransactionGroup key={group.day} {...group} />
+			))}
+		</PageShell>
 	)
 }
 
@@ -113,7 +125,7 @@ function TransactionGroup({
 					{date ? toAbsoluteTimeString(date) : ""}
 				</span>
 				<span className="text-sm text-muted-foreground align-bottom">
-					{date ? relativeDateString(date, "never") : "No Date"}
+					{date ? relativeDateString(date, "never") : "Ohne Datum"}
 				</span>
 			</div>
 			<div className="flex flex-col border rounded-2xl overflow-hidden divide-y divide-border/50">
@@ -144,20 +156,21 @@ function Description({
 			<HoverCard>
 				<HoverCardTrigger>
 					<span className="number tabular-nums bg-background border border-border/70 px-2 rounded-lg cursor-pointer">
-						${Math.abs(worth).toFixed(2)}
+						{currencyFormatFixedLength.format(Math.abs(worth))}
 					</span>
 				</HoverCardTrigger>
 				<HoverCardContent className="w-fit rounded-lg overflow-hidden">
 					<div className="flex flex-row gap-2">
 						<span className="number tabular-nums">
-							$
-							{Math.abs(transaction.amount * (transaction.price ?? 0)).toFixed(
-								2
+							{currencyFormatFixedLength.format(
+								Math.abs(transaction.amount * (transaction.price ?? 0))
 							)}
 						</span>
 						<span>{buy ? "+" : "-"}</span>
 						<span className="number tabular-nums">
-							${Math.abs(transaction.commission).toFixed(2)}
+							{currencyFormatFixedLength.format(
+								Math.abs(transaction.commission)
+							)}
 						</span>
 						<span className="text-muted-foreground">(Gebühren)</span>
 					</div>
@@ -178,17 +191,12 @@ function Description({
 							/>
 							{transaction.symbol}
 							<span className="number tabular-nums text-muted-foreground">
-								x{Math.abs(transaction.amount).toFixed(2)}
+								×{amountFormat.format(Math.abs(transaction.amount))}
 							</span>
 						</Link>
 					}
 				/>
-				<HoverCardContent
-					className={cn(
-						"grid gap-x-6 p-0  overflow-hidden w-fit",
-						positionColumns
-					)}
-				>
+				<HoverCardContent className="p-0 overflow-hidden w-[min(40rem,90vw)]">
 					<PositionRow
 						className="border-none rounded-none"
 						position={transaction}
@@ -208,7 +216,7 @@ function TransactionItem({
 	const is_savings_plan = transaction.type === "savings_plan"
 
 	const bg = (() => {
-		if (is_savings_plan) return "bg-blue-500"
+		if (is_savings_plan) return "bg-overlay-1"
 
 		return buy ? "bg-loss" : "bg-win"
 	})()
@@ -216,22 +224,20 @@ function TransactionItem({
 	const date = new Date(transaction.tstamp)
 
 	return (
-		<div className={cn("px-4 py-4 flex flex-row gap-3 hover:bg-muted/40")}>
-			<span className={cn(bg, "inline-block w-1 shrink-0 h-lh rounded-xl")} />
-			<span className="font-semibold text-md">
-				<Description transaction={transaction} />
-			</span>
-
-			{is_savings_plan && (
-				<span className="ml-2 text-muted-foreground text-sm self-center">
-					Sparplan
+		<div className="px-4 py-3 flex flex-row items-center gap-3 hover:bg-muted/40">
+			<span
+				className={cn(bg, "inline-block w-1 shrink-0 self-stretch rounded-xl")}
+			/>
+			<div className="flex flex-col gap-1.5 min-w-0 grow">
+				<span className="text-xs text-muted-foreground">
+					{is_savings_plan ? "Sparplan" : buy ? "Kauf" : "Verkauf"}
+					{" · "}
+					{timeFormat.format(date)}
 				</span>
-			)}
-			<span className="grow" />
-
-			<span className="text-muted-foreground text-sm self-center">
-				{date.toLocaleTimeString("de-DE")}
-			</span>
+				<span className="font-semibold text-md min-w-0 overflow-x-auto">
+					<Description transaction={transaction} />
+				</span>
+			</div>
 		</div>
 	)
 }

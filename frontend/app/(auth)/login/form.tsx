@@ -77,9 +77,9 @@ export default function LoginForm() {
 				/>
 
 				<Button className="w-full mx-auto" type="submit">
-					Log in
+					Einloggen
 				</Button>
-				<span className="text-muted-foreground text-sm">
+				<span className="text-muted-foreground text-sm text-center">
 					Kein Account?{" "}
 					<Link className={"underline underline-offset-2"} href="/signup">
 						Registriere dich hier.

@@ -127,12 +127,12 @@ export function IntervallPickerControlled({
 	return (
 		<div
 			className={cn(
-				"w-fit flex flex-row flex-wrap items-center gap-1",
+				"w-fit max-w-full flex flex-row items-center gap-1",
 				className
 			)}
 		>
 			<ToggleGroup
-				className="w-fit flex flex-row flex-wrap gap-1"
+				className="w-fit max-w-full flex flex-row flex-nowrap overflow-x-auto gap-1"
 				value={[visible.find(item => item.days === value)?.name as string]}
 				onValueChange={value => {
 					const s = visible.find(intervall => intervall.name === value[0])
@@ -171,7 +171,7 @@ export function IntervallPickerControlled({
 						}}
 					>
 						<Clock data-icon="inline-start" />
-						15 Min
+						<span className="hidden sm:inline">15 Min</span>
 					</Toggle>
 				</>
 			)}

@@ -54,7 +54,7 @@ export default function SignUpForm() {
 						<FormItem>
 							<FormLabel>Name</FormLabel>
 							<FormControl>
-								<Input type="text" placeholder="John Doe" {...field} />
+								<Input type="text" placeholder="Max Mustermann" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -131,6 +131,12 @@ export default function SignUpForm() {
 				<Button className="w-full mx-auto" type="submit">
 					Registrieren
 				</Button>
+				<span className="text-muted-foreground text-sm text-center">
+					Schon registriert?{" "}
+					<Link className="underline underline-offset-2" href="/login">
+						Hier einloggen.
+					</Link>
+				</span>
 			</form>
 		</Form>
 	)

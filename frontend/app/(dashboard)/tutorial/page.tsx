@@ -52,7 +52,7 @@ export default function Page() {
 	}, [goNext, goPrev])
 
 	return (
-		<main className="h-screen md:px-12 px-4 pt-6 w-full overflow-hidden bg-background flex flex-col">
+		<main className="h-full md:px-12 px-4 pt-6 w-full overflow-hidden bg-background flex flex-col">
 			{/* Header */}
 
 			{/* Carousel */}

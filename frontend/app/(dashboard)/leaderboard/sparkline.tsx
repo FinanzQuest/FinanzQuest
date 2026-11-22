@@ -25,10 +25,10 @@ export function Sparkline({
 	const offset = max === min ? 0 : (max - startValue) / (max - min)
 	const padding = (max - min) * 0.1 || startValue * 0.01
 	return (
-		<div className="w-full p-2">
+		<div className="w-full">
 			<div
 				className={cn(
-					"relative h-12 w-full rounded-lg overflow-hidden border bg-background",
+					"relative h-10 w-full rounded-lg overflow-hidden",
 					className
 				)}
 			>
@@ -36,48 +36,32 @@ export function Sparkline({
 					<AreaChart data={chartData}>
 						<defs>
 							<linearGradient id={`fill-${id}`} x1="0" y1="0" x2="0" y2="1">
-								<stop
-									offset="0"
-									stopColor="oklch(var(--win))"
-									stopOpacity={0.7}
-								/>
+								<stop offset="0" stopColor="var(--win)" stopOpacity={0.7} />
 								<stop
 									offset={`${offset * 100}%`}
-									stopColor="oklch(var(--win))"
+									stopColor="var(--win)"
 									stopOpacity={0.1}
 								/>
 								<stop
 									offset={`${offset * 100}%`}
-									stopColor="oklch(var(--loss))"
+									stopColor="var(--loss)"
 									stopOpacity={0.1}
 								/>
-								<stop
-									offset="100%"
-									stopColor="oklch(var(--loss))"
-									stopOpacity={0.7}
-								/>
+								<stop offset="100%" stopColor="var(--loss)" stopOpacity={0.7} />
 							</linearGradient>
 							<linearGradient id={`stroke-${id}`} x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stopColor="var(--win)" stopOpacity={1} />
 								<stop
-									offset="0%"
-									stopColor="oklch(var(--win))"
+									offset={`${offset * 100}%`}
+									stopColor="var(--win)"
 									stopOpacity={1}
 								/>
 								<stop
 									offset={`${offset * 100}%`}
-									stopColor="oklch(var(--win))"
+									stopColor="var(--loss)"
 									stopOpacity={1}
 								/>
-								<stop
-									offset={`${offset * 100}%`}
-									stopColor="oklch(var(--loss))"
-									stopOpacity={1}
-								/>
-								<stop
-									offset="100%"
-									stopColor="oklch(var(--loss))"
-									stopOpacity={1}
-								/>
+								<stop offset="100%" stopColor="var(--loss)" stopOpacity={1} />
 							</linearGradient>
 						</defs>
 						<ReferenceLine y={startValue} className="stroke-border" />

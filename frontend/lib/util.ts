@@ -87,9 +87,20 @@ export function relativeDateString(
 		return date.toLocaleDateString("de")
 	}
 
-	return `${diff} days ago`
+	return `vor ${diff - 1} Tagen`
 }
 
+const monthYearFormat = Intl.DateTimeFormat("de-DE", {
+	month: "short",
+	year: "2-digit",
+	timeZone: "Europe/Berlin",
+})
+
+/**
+ * Short chart-axis label: "Heute", "Gestern", the weekday within a week,
+ * "20.11." within about a year, "Nov. 25" before that. With
+ * absolute = "never", older dates stay "20.11." as well.
+ */
 export function relativeDateStringCompact(
 	date: Date,
 	absolute: "necessary" | "never" = "necessary"
@@ -97,11 +108,11 @@ export function relativeDateStringCompact(
 	const diff = getTimeBetweenDates(new Date(), date) as number
 
 	if (diff <= 1) {
-		return "heu"
+		return "Heute"
 	}
 
 	if (diff === 2) {
-		return "ges"
+		return "Gestern"
 	}
 
 	if (diff < 7) {
@@ -109,11 +120,15 @@ export function relativeDateStringCompact(
 		return days[date.getDay()]
 	}
 
-	if (absolute === "necessary" && diff > 30) {
-		return date.toLocaleDateString("de")
+	if (absolute === "necessary" && diff > 330) {
+		return monthYearFormat.format(date)
 	}
 
-	return `${diff}d`
+	return Intl.DateTimeFormat("de-DE", {
+		day: "2-digit",
+		month: "2-digit",
+		timeZone: "Europe/Berlin",
+	}).format(date)
 }
 
 const asset_type_displays = new Map(
@@ -131,10 +146,10 @@ export function asset_type_display(asset_type: string): string | null {
 
 const asset_type_colors = new Map(
 	Object.entries({
-		commodity: "hsl(var(--color-commodity))",
-		crypto: "hsl(var(--color-crypto))",
-		fund: "hsl(var(--color-fund))",
-		stock: "hsl(var(--color-stock))",
+		commodity: "var(--color-commodity)",
+		crypto: "var(--color-crypto)",
+		fund: "var(--color-fund)",
+		stock: "var(--color-stock)",
 	})
 )
 

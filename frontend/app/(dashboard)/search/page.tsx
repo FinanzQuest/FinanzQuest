@@ -1,9 +1,9 @@
 import { cacheLife, cacheTag } from "next/cache"
 import Link from "next/link"
 import { Suspense } from "react"
+import { PageShell } from "@/components/page_shell"
 import { ResultRow } from "@/components/search/result_row"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { fetchFacets, findAssets } from "@/database/find_assets"
 import {
 	PAGE_SIZE,
@@ -48,15 +48,13 @@ export default async function Page(props: {
 	const { facets } = await getFacets()
 	const query = toQueryString(filter)
 	return (
-		<ScrollArea className="h-screen">
-			<main className="w-full h-fit max-w-300 mx-auto md:px-12 px-4 py-6 flex flex-col gap-6">
-				<h1 className="text-2xl font-bold tracking-tight">Wertpapiersuche</h1>
-				<SearchFilters filter={filter} facets={facets} />
-				<Suspense key={query} fallback={<ResultsSkeleton />}>
-					<Results filter={filter} query={query} />
-				</Suspense>
-			</main>
-		</ScrollArea>
+		<PageShell className="gap-6">
+			<h1 className="text-2xl font-bold tracking-tight">Wertpapiersuche</h1>
+			<SearchFilters filter={filter} facets={facets} />
+			<Suspense key={query} fallback={<ResultsSkeleton />}>
+				<Results filter={filter} query={query} />
+			</Suspense>
+		</PageShell>
 	)
 }
 

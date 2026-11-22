@@ -23,7 +23,6 @@ import {
 	HandCoins,
 	MoreVertical,
 	PiggyBank,
-	Plus,
 	Trash2,
 	Vault,
 	X,
@@ -431,13 +430,14 @@ export function DepotTable({ data, className }: DepotTableProps) {
 				</Table>
 			</div>
 			<div className="flex flex-row items-center justify-between gap-2">
-				<Button
-					size="icon"
-					onClick={() => toast.info("Neues Depot (noch nicht implementiert)")}
+				{/* creating depots for students is not implemented yet: no button */}
+				<span />
+				<ButtonGroup
+					className={cn(
+						"justify-end",
+						table.getPageCount() <= 1 && "invisible"
+					)}
 				>
-					<Plus />
-				</Button>
-				<ButtonGroup className="justify-end">
 					<Tooltip name="Vorherige Seite">
 						<Button
 							onClick={() => table.previousPage()}
