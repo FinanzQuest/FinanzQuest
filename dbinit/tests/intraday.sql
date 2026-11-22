@@ -102,8 +102,8 @@ SELECT pg_temp.check(
   OR ((now() - interval '2 hours') AT TIME ZONE 'UTC')::date <> ((now() - interval '1 hour') AT TIME ZONE 'UTC')::date,
   'rollup: daily candle = first open / max high / min low / last close');
 SELECT pg_temp.check(
-  (SELECT close = 105 FROM api.latest_prices WHERE asset_id = 1),
-  'rollup does not change the latest price');
+  (SELECT close = 105 AND tstamp = now() - interval '1 hour' FROM api.latest_prices WHERE asset_id = 1),
+  'rollup keeps the latest price and its bar time');
 SELECT pg_temp.check(api.rollup_intraday((SELECT since FROM w)::date) = 0, 'rollup is idempotent (no rewrite)');
 
 -- ---------------------------------------------------------------------------

@@ -19,7 +19,8 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  v_as_of timestamptz;
+  v_as_of        timestamptz;
+  v_partial_day  boolean := false;
 BEGIN
   IF NEW.close IS NULL THEN
     RETURN NULL;
@@ -29,6 +30,9 @@ BEGIN
   -- chunk, so TG_TABLE_NAME is '_hyper_..._chunk', not the hypertable.
   IF TG_ARGV[0] = 'daily' THEN
     v_as_of := api.daily_price_as_of(NEW.tstamp::date);
+    -- today's candle (api.rollup_intraday) repeats the newest bar: only take
+    -- it if the price differs, so the quote keeps the bar's time
+    v_partial_day := NEW.tstamp::date >= (now() AT TIME ZONE 'UTC')::date;
   ELSE
     v_as_of := NEW.tstamp;
   END IF;
@@ -38,7 +42,8 @@ BEGIN
   ON CONFLICT (asset_id) DO UPDATE
     SET tstamp = EXCLUDED.tstamp, close = EXCLUDED.close
     WHERE EXCLUDED.tstamp >= l.tstamp
-      AND (EXCLUDED.tstamp, EXCLUDED.close) IS DISTINCT FROM (l.tstamp, l.close);
+      AND (EXCLUDED.close IS DISTINCT FROM l.close
+           OR (NOT v_partial_day AND EXCLUDED.tstamp IS DISTINCT FROM l.tstamp));
   RETURN NULL;
 END;
 $$;
