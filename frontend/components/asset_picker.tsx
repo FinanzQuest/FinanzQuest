@@ -1,6 +1,8 @@
-import { Check } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { fmtSignedPercent } from "@/components/asset_details/format"
+import { Sparkline } from "@/components/search/sparkline"
 import {
 	Command,
 	CommandEmpty,
@@ -8,17 +10,24 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandSeparator,
 } from "@/components/ui/command"
-import type { Asset } from "@/database/custom_types"
-import { getStockFromSearchString } from "@/database/search_stock"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import type { Asset, AssetType } from "@/database/custom_types"
+import { findAssets, type SearchHit } from "@/database/find_assets"
 import { getIconURL } from "@/lib/icon_url"
+import { ASSET_TYPES } from "@/lib/search_params"
+import { asset_type_display } from "@/lib/util"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/utils/supabase/client"
 
 type StockPickerProps = {
 	value?: number
 	onSelect: (assetId: number, asset: Asset) => void
 	searchQuery: string
 	onSearchChange: (query: string) => void
+	/** shows "Alle Ergebnisse" (the search page) with the current query/types */
+	onShowAll?: (query: string, types: AssetType[]) => void
 }
 
 const assetTypeStyles = {
@@ -28,15 +37,24 @@ const assetTypeStyles = {
 	commodity: "bg-commodity/30 border-commodity/60 text-commodity",
 }
 
-// then in JSX:
+const toAsset = (hit: SearchHit): Asset => ({
+	id: hit.id,
+	symbol: hit.symbol,
+	name: hit.name,
+	description: hit.description,
+	asset_type: hit.asset_type,
+	last_updated: null,
+})
 
 export default function StockPicker({
 	value,
 	onSelect,
 	searchQuery,
 	onSearchChange,
+	onShowAll,
 }: StockPickerProps) {
-	const [stocks, setStocks] = useState<Array<Asset>>([])
+	const [hits, setHits] = useState<SearchHit[]>([])
+	const [types, setTypes] = useState<AssetType[]>([])
 
 	useEffect(() => {
 		if (!searchQuery) return
@@ -44,26 +62,26 @@ export default function StockPicker({
 		// earlier response must not overwrite the current results)
 		let stale = false
 		const timer = setTimeout(async () => {
-			const { assets, error, success } = await getStockFromSearchString(
-				searchQuery,
-				5
+			const { hits, error } = await findAssets(
+				createClient(),
+				{ q: searchQuery, types },
+				8
 			)
 			if (stale) return
 			if (error) {
-				console.error("Failed to fetch data from database", error)
+				console.error("Search failed", error)
+				return
 			}
-			if (success) {
-				setStocks(assets)
-			}
+			setHits(hits)
 		}, 200)
 		return () => {
 			stale = true
 			clearTimeout(timer)
 		}
-	}, [searchQuery])
+	}, [searchQuery, types])
 
 	// an empty query shows nothing (derived, no state update needed)
-	const visibleStocks = searchQuery ? stocks : []
+	const visible = searchQuery ? hits : []
 
 	return (
 		<Command shouldFilter={false} className="border-none">
@@ -72,6 +90,22 @@ export default function StockPicker({
 				placeholder="Suche nach Symbol, Name, Beschreibung"
 				onValueChange={onSearchChange}
 			/>
+			<div className="px-2 pt-2">
+				<ToggleGroup
+					multiple
+					size="sm"
+					variant="outline"
+					value={types}
+					onValueChange={(v: string[]) => setTypes(v as AssetType[])}
+					aria-label="Anlageklasse"
+				>
+					{ASSET_TYPES.map(t => (
+						<ToggleGroupItem key={t.value} value={t.value}>
+							{t.label}
+						</ToggleGroupItem>
+					))}
+				</ToggleGroup>
+			</div>
 			<CommandList>
 				<CommandEmpty>
 					{searchQuery
@@ -79,54 +113,85 @@ export default function StockPicker({
 						: "Starte deine Suche..."}
 				</CommandEmpty>
 				<CommandGroup>
-					{visibleStocks.map(stock => {
-						const iconUrl = getIconURL(stock.symbol, stock.asset_type, 32)
+					{visible.map(hit => {
+						const iconUrl = getIconURL(hit.symbol, hit.asset_type, 32)
 						return (
 							<CommandItem
 								className="!rounded-lg w-full flex gap-3 flex-row !py-2 !px-3"
-								key={stock.id}
-								value={stock.id.toString()}
-								onSelect={() => {
-									onSelect(stock.id, stock)
-								}}
+								key={hit.id}
+								value={hit.id.toString()}
+								onSelect={() => onSelect(hit.id, toAsset(hit))}
 							>
-								{iconUrl && iconUrl !== "" ? (
+								{iconUrl ? (
 									<Image
 										src={iconUrl}
-										alt={""}
+										alt=""
 										width={16}
 										height={16}
 										fetchPriority="high"
 										className="rounded size-[1.7lh] bg-primary/50"
 									/>
 								) : (
-									<div className="size-[1.6lh] bg-primary/50 rounded"></div>
+									<div className="size-[1.6lh] bg-primary/50 rounded" />
 								)}
-								<div className="flex flex-col w-full">
-									<span className="font-medium">{stock.name}</span>
+								<div className="flex flex-col min-w-0 grow">
+									<span className="font-medium truncate">{hit.name}</span>
 									<span className="text-sm text-muted-foreground">
-										{stock.symbol}
+										{hit.symbol}
 									</span>
 								</div>
-								<div className="flex-grow flex-shrink" />
+								<Sparkline
+									values={hit.sparkline}
+									className="hidden sm:block w-16 h-6 shrink-0"
+								/>
+								<span
+									className={cn(
+										"hidden sm:block w-14 text-right text-xs tabular-nums shrink-0",
+										hit.return_3m == null
+											? "text-muted-foreground"
+											: hit.return_3m >= 0
+												? "text-win"
+												: "text-loss"
+									)}
+									title="Rendite 3 Monate"
+								>
+									{fmtSignedPercent(hit.return_3m) ?? ""}
+								</span>
 								<Check
 									className={cn(
-										"h-4 w-4 mr-2",
-										value === stock.id ? "opacity-100" : "opacity-0"
+										"h-4 w-4 shrink-0",
+										value === hit.id ? "opacity-100" : "opacity-0"
 									)}
 								/>
 								<div
 									className={cn(
-										"text-sm py-1 px-2 rounded-full border",
-										assetTypeStyles[stock.asset_type]
+										"text-sm py-1 px-2 rounded-full border shrink-0",
+										assetTypeStyles[hit.asset_type]
 									)}
 								>
-									{stock.asset_type}
+									{asset_type_display(hit.asset_type) ?? hit.asset_type}
 								</div>
 							</CommandItem>
 						)
 					})}
 				</CommandGroup>
+				{onShowAll && (
+					<>
+						<CommandSeparator />
+						<CommandGroup>
+							<CommandItem
+								value="__all__"
+								className="!rounded-lg !py-2 !px-3 gap-2"
+								onSelect={() => onShowAll(searchQuery, types)}
+							>
+								<ArrowRight className="size-4" />
+								{searchQuery
+									? `Alle Ergebnisse für „${searchQuery}“ mit Filtern & Sortierung`
+									: "Erweiterte Suche mit Filtern & Sortierung"}
+							</CommandItem>
+						</CommandGroup>
+					</>
+				)}
 			</CommandList>
 		</Command>
 	)

@@ -44,6 +44,13 @@
 
     /* oklch */
     --loss: oklch(56.41% 0.1859 16.13);
+    /* chart overlays (moving averages, benchmarks) */
+    --overlay-1: oklch(62% 0.17 255);
+    --overlay-2: oklch(68% 0.16 60);
+    --overlay-3: oklch(60% 0.19 300);
+    --overlay-4: oklch(62% 0.15 200);
+    --overlay-5: oklch(64% 0.17 25);
+    --overlay-6: oklch(58% 0.12 130);
 
     --color-commodity: hsl(43 74% 45%);
     --color-crypto: hsl(262 52% 47%);
@@ -89,6 +96,12 @@
 
     /* oklch */
     --loss: oklch(62.22% 0.2108 346.04);
+    --overlay-1: oklch(74% 0.15 255);
+    --overlay-2: oklch(80% 0.15 75);
+    --overlay-3: oklch(74% 0.17 300);
+    --overlay-4: oklch(78% 0.13 200);
+    --overlay-5: oklch(74% 0.16 25);
+    --overlay-6: oklch(76% 0.13 130);
     --color-commodity: hsl(52.16 66.81% 55.1%);
     --color-crypto: oklch(63.461% 0.14547 270.701);
     --color-fund: oklch(78.397% 0.18622 151.251);
@@ -143,6 +156,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-win: var(--win);
+  --color-overlay-1: var(--overlay-1);
+  --color-overlay-2: var(--overlay-2);
+  --color-overlay-3: var(--overlay-3);
+  --color-overlay-4: var(--overlay-4);
+  --color-overlay-5: var(--overlay-5);
+  --color-overlay-6: var(--overlay-6);
   --color-loss: var(--loss);
   --color-commodity: var(--color-commodity);
   --color-crypto: var(--color-crypto);

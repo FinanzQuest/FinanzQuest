@@ -5,6 +5,7 @@ import {
 	Home,
 	LayoutDashboard,
 	Lightbulb,
+	ListFilter,
 	type LucideIcon,
 	Menu,
 	PiggyBank,
@@ -60,6 +61,7 @@ function useNavTree(isTeacher: boolean): Record<string, Array<ItemT>> {
 			{ title: "Transaktionen", url: "/transactions", icon: ArrowLeftRight },
 			{ title: "Sparplan", url: "/savings_plan", icon: PiggyBank },
 		],
+		Markt: [{ title: "Wertpapiersuche", url: "/search", icon: ListFilter }],
 		Wissen: [{ title: "Tutorial", url: "/tutorial", icon: Lightbulb }],
 		Wettbewerb: [{ title: "Leaderboard", url: "/leaderboard", icon: Trophy }],
 	}

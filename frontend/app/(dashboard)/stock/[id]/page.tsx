@@ -1,5 +1,10 @@
 import { cacheLife, cacheTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
+import {
+	AssetDetails,
+	AssetDetailsSkeleton,
+} from "@/components/asset_details/asset_details"
 import { AutoRefresh } from "@/components/auto_refresh"
 import {
 	ErrorCard,
@@ -90,6 +95,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 					previousClose={quote.previousClose}
 				/>
 				{depot && <StockPositionCard position={positions.at(0)} />}
+				{/* streams in after the prices: facts, holdings, countries */}
+				<Suspense fallback={<AssetDetailsSkeleton />}>
+					<AssetDetails id={id} />
+				</Suspense>
 			</main>
 		</ScrollArea>
 	)

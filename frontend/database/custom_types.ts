@@ -6,10 +6,11 @@ export type SearchParams = {
 	inspect_depot?: string | null
 }
 export type StockPrice = Database["api"]["Tables"]["asset_prices"]["Row"]
-// price_provider is ingestion detail (which API the updater uses), not shown
+// price_provider / details_provider / fund_id are ingestion detail (which
+// API the updater uses, which fund row holds the facts), not shown
 export type Asset = Omit<
 	Database["api"]["Tables"]["assets"]["Row"],
-	"price_provider"
+	"price_provider" | "details_provider" | "fund_id"
 >
 export type LatestPrice = Database["api"]["Tables"]["latest_prices"]["Row"]
 

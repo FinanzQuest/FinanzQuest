@@ -17,6 +17,8 @@ interface ChartContainerProps extends React.ComponentPropsWithoutRef<"div"> {
 	defaultTab?: string
 	tabs: TabConfig[]
 	toolbar?: React.ReactNode[]
+	/** below the toolbar, e.g. a legend */
+	footer?: React.ReactNode
 }
 
 export default function ChartContainer({
@@ -24,6 +26,7 @@ export default function ChartContainer({
 	tabs,
 	className,
 	toolbar,
+	footer,
 }: ChartContainerProps) {
 	const tabsContent: React.ReactNode[] = tabs.map(tab => (
 		<TabsContent className="" key={tab.key ?? tab.name} value={tab.name}>
@@ -52,6 +55,7 @@ export default function ChartContainer({
 						{/* <IntervalControls className="grow justify-end p-2" intervals={Intervals} /> */}
 					</div>
 				</div>
+				{footer}
 			</Tabs>
 		</Suspense>
 	)

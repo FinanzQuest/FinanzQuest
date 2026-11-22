@@ -13,6 +13,13 @@ import {
 
 import type { PlainPrice } from "@/database/custom_types"
 import toRelativeValues, { calculateOffset } from "@/lib/data/data_utils"
+import {
+	isBenchmark,
+	type OverlayKey,
+	overlayRange,
+	withOverlays,
+} from "@/lib/data/overlays"
+import { useChartOverlays } from "@/lib/use_chart_overlays"
 import { useIntradayPreference } from "@/lib/use_intraday_preference"
 import {
 	getCurrentDate,
@@ -27,6 +34,7 @@ import {
 } from "../cards/pick_intervall"
 import AreaChart from "./area"
 import CandleStickChart from "./candle_stick"
+import { OverlayLegend, OverlayPicker } from "./overlay_picker"
 import ChartContainer from "./primitive/container"
 
 export interface props extends ComponentPropsWithoutRef<"div"> {
@@ -56,6 +64,7 @@ export default function StockChartContainer({
 		setEnabled: setIntradayEnabled,
 	} = useIntradayPreference()
 	const [selectedIntervall, setSelectedIntervall] = useState<number>(7)
+	const [overlays, setOverlays] = useState<OverlayKey[]>([])
 	// 7T-30T with intraday prices: loaded on demand
 	const monthBars = useMonthBars(
 		assetId,
@@ -124,6 +133,34 @@ export default function StockChartContainer({
 			),
 		[data, intraday, selectedIntervall, previousClose]
 	)
+	// benchmarks compare daily closes: not in the intraday views
+	const activeOverlays = useMemo(
+		() => (intraday ? overlays.filter(key => !isBenchmark(key)) : overlays),
+		[intraday, overlays]
+	)
+	const { series: overlaySeries, loading: overlaysLoading } = useChartOverlays(
+		assetId,
+		activeOverlays,
+		!intraday && selectedIntervall >= 360 ? "weekly" : "daily"
+	)
+	const rows = useMemo(
+		() => withOverlays(data, activeOverlays, overlaySeries),
+		[data, activeOverlays, overlaySeries]
+	)
+	// y-range and gain/loss split over the price and the overlay lines
+	const { offset, domain } = useMemo(() => {
+		const range = activeOverlays.length
+			? overlayRange(rows, activeOverlays)
+			: null
+		if (!range) return { offset: area.offset, domain: undefined }
+		const min = Math.min(range[0], area.startValue)
+		const max = Math.max(range[1], area.startValue)
+		return {
+			offset: max > min ? (max - area.startValue) / (max - min) : 0,
+			domain: [min, max] as [number, number],
+		}
+	}, [rows, activeOverlays, area])
+
 	const tickInterval = useMemo(() => {
 		// intraday: let recharts pick ticks that fit
 		if (intraday) {
@@ -146,7 +183,12 @@ export default function StockChartContainer({
 		return 17
 	}, [selectedIntervall, intraday])
 
-	const candleData = toRelativeValues(data)
+	const candleData = toRelativeValues(data).map((row, i) => ({
+		...row,
+		...Object.fromEntries(
+			activeOverlays.map(key => [key, rows[i]?.[key] ?? null])
+		),
+	}))
 	return (
 		<ChartContainer
 			toolbar={[
@@ -160,7 +202,15 @@ export default function StockChartContainer({
 						onChange: setIntradayEnabled,
 					}}
 				/>,
+				<OverlayPicker
+					key={1}
+					value={overlays}
+					onValueChange={setOverlays}
+					benchmarksAvailable={!intraday}
+					loading={overlaysLoading}
+				/>,
 			]}
+			footer={<OverlayLegend value={activeOverlays} />}
 			defaultTab="line"
 			className="w-full"
 			tabs={[
@@ -180,6 +230,7 @@ export default function StockChartContainer({
 							lineKey="absClose"
 							tickInterval={tickInterval}
 							timeAxis={timeAxis}
+							overlays={activeOverlays}
 						/>
 					),
 				},
@@ -191,14 +242,17 @@ export default function StockChartContainer({
 					content: (
 						<AreaChart
 							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
-							data={data}
+							// overlay rows carry a nested `change` object for the tooltip
+							data={rows as unknown as PlainPrice[]}
 							dataKey="close"
 							xKey="tstamp"
 							yKey="close"
-							offset={area.offset}
+							offset={offset}
 							tickInterval={tickInterval}
 							startValue={area.startValue}
 							timeAxis={timeAxis}
+							overlays={activeOverlays}
+							domain={domain}
 						/>
 					),
 				},

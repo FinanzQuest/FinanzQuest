@@ -3,7 +3,8 @@ import type React from "react"
 import type { TooltipContentProps, TooltipValueType } from "recharts"
 import {
 	Area,
-	AreaChart as RechartsAreaChart,
+	ComposedChart,
+	Line,
 	ReferenceLine,
 	XAxis,
 	YAxis,
@@ -15,6 +16,13 @@ import {
 } from "@/components/ui/chart"
 import type { NullableRow } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
+import {
+	isBenchmark,
+	OVERLAY_COLOR,
+	OVERLAY_LABEL,
+	type OverlayKey,
+	type OverlayValues,
+} from "@/lib/data/overlays"
 import { type TimeAxis, timeAxisLabel, timeAxisTick } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import { Separator } from "../ui/separator"
@@ -30,6 +38,10 @@ interface props<T extends Record<string, number | string>>
 	range?: number
 	tickInterval?: number
 	timeAxis?: TimeAxis
+	/** lines drawn over the price (row fields of the same name) */
+	overlays?: OverlayKey[]
+	/** y-range covering price and overlays (default: the price) */
+	domain?: [number, number]
 }
 
 export default function AreaChart<T extends Record<string, number | string>>({
@@ -42,6 +54,8 @@ export default function AreaChart<T extends Record<string, number | string>>({
 	startValue,
 	tickInterval,
 	timeAxis = "date",
+	overlays = [],
+	domain,
 }: props<T>) {
 	const chartConfig = {
 		open: {
@@ -57,7 +71,7 @@ export default function AreaChart<T extends Record<string, number | string>>({
 			config={chartConfig}
 			className={cn("min-h[200px]", className)}
 		>
-			<RechartsAreaChart accessibilityLayer data={data}>
+			<ComposedChart accessibilityLayer data={data}>
 				<defs>
 					<linearGradient id={"fill"} x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0" stopColor={"var(--win)"} stopOpacity={0.35} />
@@ -96,16 +110,18 @@ export default function AreaChart<T extends Record<string, number | string>>({
 				/>
 				<YAxis
 					hide
-					dataKey={yKey}
-					domain={[
-						(min: number) => Math.min(min, startValue),
-						(max: number) => Math.max(max, startValue),
-					]}
+					dataKey={domain ? undefined : yKey}
+					domain={
+						domain ?? [
+							(min: number) => Math.min(min, startValue),
+							(max: number) => Math.max(max, startValue),
+						]
+					}
 				/>
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip timeAxis={timeAxis} />}
+					content={<CustomTooltip timeAxis={timeAxis} overlays={overlays} />}
 				/>
 				<ReferenceLine
 					y={startValue}
@@ -122,8 +138,23 @@ export default function AreaChart<T extends Record<string, number | string>>({
 					stroke="url(#stroke)"
 					strokeWidth={2}
 					fill="url(#fill)"
+					isAnimationActive={false}
 				/>
-			</RechartsAreaChart>
+				{overlays.map(key => (
+					<Line
+						key={key}
+						dataKey={key}
+						type="linear"
+						dot={false}
+						activeDot={false}
+						connectNulls
+						isAnimationActive={false}
+						stroke={OVERLAY_COLOR[key]}
+						strokeWidth={1.5}
+						strokeDasharray={isBenchmark(key) ? undefined : "5 3"}
+					/>
+				))}
+			</ComposedChart>
 		</ChartContainer>
 	)
 }
@@ -133,6 +164,50 @@ type CustomTooltipProps = Partial<
 	TooltipContentProps<TooltipValueType, string>
 > & {
 	timeAxis?: TimeAxis
+	overlays?: OverlayKey[]
+}
+
+const signedPercent = new Intl.NumberFormat("de-DE", {
+	style: "percent",
+	minimumFractionDigits: 1,
+	maximumFractionDigits: 1,
+	signDisplay: "exceptZero",
+})
+
+/** Overlay values of a chart row: moving averages in €, benchmarks in %. */
+export function OverlayTooltipRows({
+	row,
+	overlays,
+}: {
+	row: OverlayValues | undefined
+	overlays: OverlayKey[]
+}) {
+	if (!row || overlays.length === 0) return null
+	return (
+		<div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5 mt-2 text-xs">
+			{overlays.map(key => {
+				const v = isBenchmark(key) ? row.change?.[key] : row[key]
+				if (v == null) return null
+				return (
+					<div key={key} className="contents">
+						<span className="flex flex-row items-center gap-1.5">
+							<span
+								aria-hidden
+								className="size-2 rounded-full"
+								style={{ background: OVERLAY_COLOR[key] }}
+							/>
+							{OVERLAY_LABEL[key]}
+						</span>
+						<span className="number text-right">
+							{isBenchmark(key)
+								? signedPercent.format(v)
+								: currencyFormat.format(v)}
+						</span>
+					</div>
+				)
+			})}
+		</div>
+	)
 }
 
 const CustomTooltip = ({
@@ -140,6 +215,7 @@ const CustomTooltip = ({
 	payload,
 	label,
 	timeAxis,
+	overlays = [],
 }: CustomTooltipProps) => {
 	if (!active || !payload?.length) {
 		return null
@@ -161,6 +237,10 @@ const CustomTooltip = ({
 				<span className="number">{displayString}</span>
 				<span className="">{valueType}</span>
 			</p>
+			<OverlayTooltipRows
+				row={payload[0].payload as OverlayValues | undefined}
+				overlays={overlays}
+			/>
 		</div>
 	)
 }

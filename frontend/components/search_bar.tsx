@@ -57,6 +57,15 @@ export function SearchBarPopOut({ doRedirect, triggerRender }: PopOutProps) {
 					onSelect={handleAssetSelect}
 					searchQuery={searchQuery}
 					onSearchChange={setSearchQuery}
+					onShowAll={(query, types) => {
+						const params = new URLSearchParams()
+						if (query) params.set("q", query)
+						if (types.length) params.set("type", types.join(","))
+						const qs = params.toString()
+						router.push(qs ? `/search?${qs}` : "/search")
+						setOpen(false)
+						setSearchQuery("")
+					}}
 				/>
 			</CommandDialog>
 		</>

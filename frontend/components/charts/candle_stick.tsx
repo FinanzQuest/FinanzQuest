@@ -17,6 +17,12 @@ import {
 } from "@/components/ui/chart"
 import { formatFloatingPointString } from "@/lib/data/formatter"
 import {
+	isBenchmark,
+	OVERLAY_COLOR,
+	type OverlayKey,
+	type OverlayValues,
+} from "@/lib/data/overlays"
+import {
 	numberFormat,
 	type TimeAxis,
 	timeAxisLabel,
@@ -29,6 +35,7 @@ import {
 } from "../../lib/data/data_utils"
 import { WinLossIndicator } from "../stat/indicator"
 import { Separator } from "../ui/separator"
+import { OverlayTooltipRows } from "./area"
 
 type BarDataT = Record<
 	string,
@@ -45,6 +52,8 @@ interface props<T extends BarDataT>
 	lineKey: Extract<keyof T, string>
 	tickInterval?: number
 	timeAxis?: TimeAxis
+	/** lines drawn over the candles (row fields of the same name) */
+	overlays?: OverlayKey[]
 }
 export default function CandleStickChart<T extends BarDataT>({
 	data,
@@ -56,6 +65,7 @@ export default function CandleStickChart<T extends BarDataT>({
 	lineKey,
 	tickInterval,
 	timeAxis = "date",
+	overlays = [],
 }: props<T>) {
 	const chartData = data //data
 	const chartConfig = {
@@ -112,10 +122,24 @@ export default function CandleStickChart<T extends BarDataT>({
 					connectNulls
 					strokeOpacity={0.5}
 				/>
+				{overlays.map(key => (
+					<Line
+						key={key}
+						dataKey={key}
+						type="linear"
+						dot={false}
+						activeDot={false}
+						connectNulls
+						isAnimationActive={false}
+						stroke={OVERLAY_COLOR[key]}
+						strokeWidth={1.5}
+						strokeDasharray={isBenchmark(key) ? undefined : "5 3"}
+					/>
+				))}
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip timeAxis={timeAxis} />}
+					content={<CustomTooltip timeAxis={timeAxis} overlays={overlays} />}
 				/>
 			</ComposedChart>
 		</ChartContainer>
@@ -127,6 +151,7 @@ type CustomToolTipProps = Partial<
 	TooltipContentProps<TooltipValueType, string>
 > & {
 	timeAxis?: TimeAxis
+	overlays?: OverlayKey[]
 }
 
 const CustomTooltip = ({
@@ -134,6 +159,7 @@ const CustomTooltip = ({
 	payload,
 	label,
 	timeAxis,
+	overlays = [],
 }: CustomToolTipProps) => {
 	if (!active || !payload?.length) {
 		return null
@@ -179,6 +205,10 @@ const CustomTooltip = ({
 					{formatFloatingPointString(Math.abs(profit), 2)}
 				</span>
 			</span>
+			<OverlayTooltipRows
+				row={payload[0].payload as OverlayValues | undefined}
+				overlays={overlays}
+			/>
 		</div>
 	)
 }

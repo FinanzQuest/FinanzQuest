@@ -12,6 +12,29 @@ export const currencyFormatFixedLength = Intl.NumberFormat("de-DE", {
 	currencyDisplay: "symbol",
 })
 
+/** 1.37e11, "USD" -> "137 Mrd. $"; without (or with an unknown) currency
+ * only the number: "137 Mrd.". null for missing values. */
+export function compactMoneyString(
+	amount: number | null | undefined,
+	currency?: string | null
+): string | null {
+	if (amount == null || !Number.isFinite(amount)) return null
+	const compact = { notation: "compact", maximumFractionDigits: 1 } as const
+	const code = currency?.trim()
+	if (code) {
+		try {
+			return Intl.NumberFormat("de-DE", {
+				...compact,
+				style: "currency",
+				currency: code,
+			}).format(amount)
+		} catch {
+			// not an ISO currency code: number only
+		}
+	}
+	return Intl.NumberFormat("de-DE", compact).format(amount)
+}
+
 export function to_display_string(
 	amount: number | null,
 	absolute?: boolean,

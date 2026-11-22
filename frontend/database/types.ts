@@ -9,6 +9,84 @@ export type Json =
 export type Database = {
 	api: {
 		Tables: {
+			asset_details: {
+				Row: {
+					asset_id: number
+					beta: number | null
+					country: string | null
+					currency: string | null
+					dividend_yield: number | null
+					employees: number | null
+					industry: string | null
+					market_cap: number | null
+					payout_ratio: number | null
+					pe_ratio: number | null
+					price_to_book: number | null
+					profit_margin: number | null
+					revenue: number | null
+					revenue_currency: string | null
+					revenue_growth: number | null
+					sector: string | null
+					updated_at: string
+					website: string | null
+				}
+				Insert: {
+					asset_id: number
+					beta?: number | null
+					country?: string | null
+					currency?: string | null
+					dividend_yield?: number | null
+					employees?: number | null
+					industry?: string | null
+					market_cap?: number | null
+					payout_ratio?: number | null
+					pe_ratio?: number | null
+					price_to_book?: number | null
+					profit_margin?: number | null
+					revenue?: number | null
+					revenue_currency?: string | null
+					revenue_growth?: number | null
+					sector?: string | null
+					updated_at?: string
+					website?: string | null
+				}
+				Update: {
+					asset_id?: number
+					beta?: number | null
+					country?: string | null
+					currency?: string | null
+					dividend_yield?: number | null
+					employees?: number | null
+					industry?: string | null
+					market_cap?: number | null
+					payout_ratio?: number | null
+					pe_ratio?: number | null
+					price_to_book?: number | null
+					profit_margin?: number | null
+					revenue?: number | null
+					revenue_currency?: string | null
+					revenue_growth?: number | null
+					sector?: string | null
+					updated_at?: string
+					website?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: "asset_details_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: true
+						referencedRelation: "asset_stats"
+						referencedColumns: ["asset_id"]
+					},
+					{
+						foreignKeyName: "asset_details_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: true
+						referencedRelation: "assets"
+						referencedColumns: ["id"]
+					},
+				]
+			}
 			asset_prices: {
 				Row: {
 					asset_id: number
@@ -38,6 +116,13 @@ export type Database = {
 					volume?: number | null
 				}
 				Relationships: [
+					{
+						foreignKeyName: "assetprices_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
+						referencedRelation: "asset_stats"
+						referencedColumns: ["asset_id"]
+					},
 					{
 						foreignKeyName: "assetprices_asset_id_fkey"
 						columns: ["asset_id"]
@@ -80,6 +165,13 @@ export type Database = {
 						foreignKeyName: "asset_prices_intraday_asset_fkey"
 						columns: ["asset_id"]
 						isOneToOne: false
+						referencedRelation: "asset_stats"
+						referencedColumns: ["asset_id"]
+					},
+					{
+						foreignKeyName: "asset_prices_intraday_asset_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
@@ -89,6 +181,10 @@ export type Database = {
 				Row: {
 					asset_type: Database["public"]["Enums"]["assettype"]
 					description: string | null
+					details_provider:
+						| Database["public"]["Enums"]["detailsprovider"]
+						| null
+					fund_id: number | null
 					id: number
 					last_updated: string | null
 					name: string
@@ -98,6 +194,10 @@ export type Database = {
 				Insert: {
 					asset_type: Database["public"]["Enums"]["assettype"]
 					description?: string | null
+					details_provider?:
+						| Database["public"]["Enums"]["detailsprovider"]
+						| null
+					fund_id?: number | null
 					id?: number
 					last_updated?: string | null
 					name: string
@@ -107,11 +207,144 @@ export type Database = {
 				Update: {
 					asset_type?: Database["public"]["Enums"]["assettype"]
 					description?: string | null
+					details_provider?:
+						| Database["public"]["Enums"]["detailsprovider"]
+						| null
+					fund_id?: number | null
 					id?: number
 					last_updated?: string | null
 					name?: string
 					price_provider?: Database["public"]["Enums"]["priceprovider"] | null
 					symbol?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "assets_fund_id_fkey"
+						columns: ["fund_id"]
+						isOneToOne: false
+						referencedRelation: "funds"
+						referencedColumns: ["id"]
+					},
+				]
+			}
+			fund_countries: {
+				Row: {
+					country: string
+					fund_id: number
+					weight: number
+				}
+				Insert: {
+					country: string
+					fund_id: number
+					weight: number
+				}
+				Update: {
+					country?: string
+					fund_id?: number
+					weight?: number
+				}
+				Relationships: [
+					{
+						foreignKeyName: "fund_countries_fund_id_fkey"
+						columns: ["fund_id"]
+						isOneToOne: false
+						referencedRelation: "funds"
+						referencedColumns: ["id"]
+					},
+				]
+			}
+			fund_holdings: {
+				Row: {
+					country: string | null
+					fund_id: number
+					name: string
+					position: number
+					sector: string | null
+					ticker: string | null
+					weight: number
+				}
+				Insert: {
+					country?: string | null
+					fund_id: number
+					name: string
+					position: number
+					sector?: string | null
+					ticker?: string | null
+					weight: number
+				}
+				Update: {
+					country?: string | null
+					fund_id?: number
+					name?: string
+					position?: number
+					sector?: string | null
+					ticker?: string | null
+					weight?: number
+				}
+				Relationships: [
+					{
+						foreignKeyName: "fund_holdings_fund_id_fkey"
+						columns: ["fund_id"]
+						isOneToOne: false
+						referencedRelation: "funds"
+						referencedColumns: ["id"]
+					},
+				]
+			}
+			funds: {
+				Row: {
+					currency: string | null
+					details_as_of: string | null
+					details_source: string | null
+					details_updated_at: string | null
+					distribution: string | null
+					domicile: string | null
+					fund_size: number | null
+					holdings_count: number | null
+					id: number
+					inception: string | null
+					index_name: string | null
+					isin: string | null
+					issuer: string
+					name: string
+					replication: string | null
+					ter: number | null
+				}
+				Insert: {
+					currency?: string | null
+					details_as_of?: string | null
+					details_source?: string | null
+					details_updated_at?: string | null
+					distribution?: string | null
+					domicile?: string | null
+					fund_size?: number | null
+					holdings_count?: number | null
+					id?: number
+					inception?: string | null
+					index_name?: string | null
+					isin?: string | null
+					issuer: string
+					name: string
+					replication?: string | null
+					ter?: number | null
+				}
+				Update: {
+					currency?: string | null
+					details_as_of?: string | null
+					details_source?: string | null
+					details_updated_at?: string | null
+					distribution?: string | null
+					domicile?: string | null
+					fund_size?: number | null
+					holdings_count?: number | null
+					id?: number
+					inception?: string | null
+					index_name?: string | null
+					isin?: string | null
+					issuer?: string
+					name?: string
+					replication?: string | null
+					ter?: number | null
 				}
 				Relationships: []
 			}
@@ -132,6 +365,13 @@ export type Database = {
 					tstamp?: string
 				}
 				Relationships: [
+					{
+						foreignKeyName: "latest_prices_asset_fkey"
+						columns: ["asset_id"]
+						isOneToOne: true
+						referencedRelation: "asset_stats"
+						referencedColumns: ["asset_id"]
+					},
 					{
 						foreignKeyName: "latest_prices_asset_fkey"
 						columns: ["asset_id"]
@@ -176,14 +416,103 @@ export type Database = {
 						foreignKeyName: "assetprices_asset_id_fkey"
 						columns: ["asset_id"]
 						isOneToOne: false
+						referencedRelation: "asset_stats"
+						referencedColumns: ["asset_id"]
+					},
+					{
+						foreignKeyName: "assetprices_asset_id_fkey"
+						columns: ["asset_id"]
+						isOneToOne: false
 						referencedRelation: "assets"
 						referencedColumns: ["id"]
 					},
 				]
 			}
+			asset_stats: {
+				Row: {
+					asset_id: number | null
+					cagr_5y: number | null
+					last_close: number | null
+					last_tstamp: string | null
+					return_1y: number | null
+					return_3m: number | null
+					sparkline: number[] | null
+				}
+				Relationships: []
+			}
 		}
 		Functions: {
+			asset_facets: {
+				Args: never
+				Returns: {
+					assets: number
+					facet: string
+					value: string
+				}[]
+			}
+			asset_moving_averages: {
+				Args: { p_asset_id: number; p_since: string }
+				Returns: {
+					ma100: number
+					ma200: number
+					tstamp: string
+				}[]
+			}
+			asset_performance: {
+				Args: { p_asset_id: number }
+				Returns: {
+					as_of: string
+					cagr_3y: number
+					cagr_5y: number
+					high_52w: number
+					low_52w: number
+					max_drawdown_5y: number
+					return_1y: number
+					volatility_1y: number
+				}[]
+			}
 			daily_price_as_of: { Args: { p_day: string }; Returns: string }
+			find_assets: {
+				Args: {
+					p_countries?: string[]
+					p_descending?: boolean
+					p_distribution?: string
+					p_indexes?: string[]
+					p_issuers?: string[]
+					p_limit?: number
+					p_offset?: number
+					p_query?: string
+					p_sectors?: string[]
+					p_sort?: string
+					p_types?: Database["public"]["Enums"]["assettype"][]
+				}
+				Returns: {
+					asset_type: Database["public"]["Enums"]["assettype"]
+					cagr_5y: number
+					country: string
+					currency: string
+					description: string
+					distribution: string
+					dividend_yield: number
+					fund_currency: string
+					fund_size: number
+					id: number
+					index_name: string
+					industry: string
+					issuer: string
+					last_close: number
+					market_cap: number
+					name: string
+					relevance: number
+					return_1y: number
+					return_3m: number
+					sector: string
+					sparkline: number[]
+					symbol: string
+					ter: number
+					total_count: number
+				}[]
+			}
 			rebuild_latest_prices: { Args: never; Returns: undefined }
 			rollup_intraday: { Args: { p_from: string }; Returns: number }
 			search_assets: {
@@ -2183,6 +2512,7 @@ export type Database = {
 		}
 		Enums: {
 			assettype: "commodity" | "crypto" | "fund" | "stock"
+			detailsprovider: "ishares" | "vanguard" | "yahoo"
 			priceprovider: "alpaca" | "yahoo"
 			savingsperiod: "annually" | "monthly" | "weekly" | "daily"
 		}
@@ -2454,6 +2784,7 @@ export const Constants = {
 	public: {
 		Enums: {
 			assettype: ["commodity", "crypto", "fund", "stock"],
+			detailsprovider: ["ishares", "vanguard", "yahoo"],
 			priceprovider: ["alpaca", "yahoo"],
 			savingsperiod: ["annually", "monthly", "weekly", "daily"],
 		},
