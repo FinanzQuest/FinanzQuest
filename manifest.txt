@@ -12,7 +12,8 @@
 #
 # Ordering inside each phase is dependency-ordered, NOT alphabetical.
 # Key within-folder orderings that differ from plain sort:
-#   - 03-tables/api/: assets.sql BEFORE asset_prices.sql (asset_prices FK -> assets)
+#   - 03-tables/api/: funds.sql BEFORE assets.sql (assets.fund_id FK -> funds),
+#     assets.sql BEFORE asset_prices.sql (asset_prices FK -> assets)
 #   - 06-views/depots/: values.sql BEFORE aggregated_values.sql, and
 #     leaderboard.sql AFTER values.sql + users/profile.sql
 #   - 04-functions/: leaf helpers before their callers; users/ before depots/
@@ -35,13 +36,18 @@ dbinit/01-schema/schemas.sql
 # --- 02-types ----------------------------------------------------------------
 dbinit/02-types/asset_type.sql
 dbinit/02-types/price_provider.sql
+dbinit/02-types/details_provider.sql
 dbinit/02-types/profile_ref.sql
 dbinit/02-types/savings_period.sql
 dbinit/02-types/special_role.sql
 dbinit/02-types/transaction_type.sql
 
 # --- 03-tables ---------------------------------------------------------------
+dbinit/03-tables/api/funds.sql
 dbinit/03-tables/api/assets.sql
+dbinit/03-tables/api/fund_holdings.sql
+dbinit/03-tables/api/fund_countries.sql
+dbinit/03-tables/api/asset_details.sql
 dbinit/03-tables/api/asset_prices.sql
 dbinit/03-tables/api/asset_prices_intraday.sql
 dbinit/03-tables/api/latest_prices.sql
@@ -61,6 +67,10 @@ dbinit/04-functions/api/daily_price_as_of.sql
 dbinit/04-functions/api/on_asset_prices_change.sql
 dbinit/04-functions/api/rebuild_latest_prices.sql
 dbinit/04-functions/api/rollup_intraday.sql
+dbinit/04-functions/api/asset_performance.sql
+dbinit/04-functions/api/asset_moving_averages.sql
+dbinit/04-functions/api/asset_facets.sql
+dbinit/04-functions/api/refresh_asset_stats.sql
 dbinit/04-functions/users/has_role.sql
 dbinit/04-functions/users/has_any_role.sql
 dbinit/04-functions/users/is_superuser_session.sql
@@ -101,6 +111,10 @@ dbinit/04-functions/depots/get_depot_overview.sql
 
 # --- 05-materialized-views ---------------------------------------------------
 dbinit/05-materialized-views/api/asset_prices_weekly.sql
+dbinit/05-materialized-views/api/asset_stats.sql
+# SQL function reading api.asset_stats: its body is checked at CREATE, so it
+# comes after the materialized view
+dbinit/04-functions/api/find_assets.sql
 
 # --- 06-views ----------------------------------------------------------------
 dbinit/06-views/depots/current_values.sql
@@ -131,6 +145,10 @@ dbinit/09-policies/api/assets.sql
 dbinit/09-policies/api/asset_prices.sql
 dbinit/09-policies/api/asset_prices_intraday.sql
 dbinit/09-policies/api/latest_prices.sql
+dbinit/09-policies/api/funds.sql
+dbinit/09-policies/api/fund_holdings.sql
+dbinit/09-policies/api/fund_countries.sql
+dbinit/09-policies/api/asset_details.sql
 dbinit/09-policies/depots/depots.sql
 dbinit/09-policies/depots/transactions.sql
 dbinit/09-policies/depots/holdings.sql
@@ -148,6 +166,15 @@ dbinit/10-grants/api/latest_prices.sql
 dbinit/10-grants/api/on_asset_prices_change.sql
 dbinit/10-grants/api/asset_prices_weekly.sql
 dbinit/10-grants/api/search_assets.sql
+dbinit/10-grants/api/funds.sql
+dbinit/10-grants/api/fund_holdings.sql
+dbinit/10-grants/api/fund_countries.sql
+dbinit/10-grants/api/asset_details.sql
+dbinit/10-grants/api/asset_performance.sql
+dbinit/10-grants/api/asset_moving_averages.sql
+dbinit/10-grants/api/find_assets.sql
+dbinit/10-grants/api/asset_facets.sql
+dbinit/10-grants/api/asset_stats.sql
 dbinit/10-grants/depots/depots.sql
 dbinit/10-grants/depots/transactions.sql
 dbinit/10-grants/depots/holdings.sql
@@ -196,6 +223,9 @@ dbinit/11-config/config.sql
 dbinit/12-jobs/refresh_depot_values.sql
 dbinit/12-jobs/execute_savings_plans.sql
 dbinit/12-jobs/asset_prices_intraday_retention.sql
+dbinit/12-jobs/refresh_asset_stats.sql
 
 # --- seed (runs last; COPY needs api.assets + the CSV mounted) ---------------
 dbinit/seed/assets.sql
+# after assets: links listings to their funds by symbol
+dbinit/seed/funds.sql

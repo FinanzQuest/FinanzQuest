@@ -48,7 +48,7 @@ BEGIN
   -- =========================================================================
   -- TYPES  (02-types/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['public.assettype','public.priceprovider','public.savingsperiod','depots.transactiontype','users.special_role','users.profile_ref'] LOOP
+  FOREACH _ IN ARRAY ARRAY['public.assettype','public.priceprovider','public.detailsprovider','public.savingsperiod','depots.transactiontype','users.special_role','users.profile_ref'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_type t JOIN pg_namespace s ON s.oid = t.typnamespace
@@ -59,7 +59,7 @@ BEGIN
   -- =========================================================================
   -- TABLES  (03-tables/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.asset_prices_intraday','api.latest_prices','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.asset_prices_intraday','api.latest_prices','api.funds','api.fund_holdings','api.fund_countries','api.asset_details','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -70,7 +70,7 @@ BEGIN
   -- =========================================================================
   -- ROW LEVEL SECURITY flags  (09-policies/ enable statements)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.asset_prices_intraday','api.latest_prices','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
+  FOREACH _ IN ARRAY ARRAY['api.assets','api.asset_prices','api.asset_prices_intraday','api.latest_prices','api.funds','api.fund_holdings','api.fund_countries','api.asset_details','depots.depots','depots.transactions','depots.holdings','depots.daily_values','depots.savings_plans','depots.savings_plans_budget','users.special_roles'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
@@ -107,7 +107,7 @@ BEGIN
   -- =========================================================================
   -- FUNCTIONS + PROCEDURES  (04-functions/)
   -- =========================================================================
-  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.buy_asset','depots.sell_asset','depots.check_savings_budget','api.on_asset_prices_change','api.rebuild_latest_prices','api.daily_price_as_of','api.rollup_intraday','depots.get_intraday_values','users.is_superuser_session','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.random_depot_name','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
+  FOREACH _ IN ARRAY ARRAY['depots.transaction_expense','depots.transaction_affects_commission','depots.sp_to_per_month','depots.sp_to_interval','depots.get_position_profits','depots.get_transactions_with_position','depots.buy_asset','depots.sell_asset','depots.check_savings_budget','api.on_asset_prices_change','api.rebuild_latest_prices','api.daily_price_as_of','api.rollup_intraday','api.asset_performance','api.asset_moving_averages','api.find_assets','api.asset_facets','depots.get_intraday_values','users.is_superuser_session','depots.get_commission','depots.execute_savings_plans','depots.is_depot_member','depots.new_depot_for_user','depots.random_depot_name','depots.change_budget','depots.grant_default_budget_trigger','depots.get_depot_overview','depots.grant_reward','depots.update_savings_plan','depots.upsert_savings_plan','depots.delete_savings_plan','depots.apply_ledger_delta','depots.rebuild_holdings','depots.rebuild_depot_values_for','depots.rebuild_depot_values','depots.on_transactions_change','api.search_assets','users.grant_role','users.grant_teacher','users.revoke_teacher','users.revoke_role','users.has_role','users.has_any_role','users.get_all_profiles','users.get_admin_overview','users.stats'] LOOP
     n := n + 1;
     IF NOT EXISTS (
       SELECT 1 FROM pg_proc p JOIN pg_namespace s ON s.oid = p.pronamespace
@@ -188,6 +188,10 @@ BEGIN
     'api.asset_prices|Anyone can read asset prices',
     'api.latest_prices|Anyone can read latest prices',
     'api.asset_prices_intraday|Anyone can read intraday prices',
+    'api.funds|Anyone can read funds',
+    'api.fund_holdings|Anyone can read fund_holdings',
+    'api.fund_countries|Anyone can read fund_countries',
+    'api.asset_details|Anyone can read asset_details',
     'depots.depots|Anyone can read depots',
     'depots.depots|auth_admin_insert',
     'depots.depots|Teachers can delete Depots',
@@ -384,6 +388,39 @@ BEGIN
     WHERE table_schema = 'api' AND table_name = 'assets' AND column_name = 'price_provider'
       AND udt_name = 'priceprovider' AND is_nullable = 'YES'
   ) THEN fails := fails || 'column api.assets.price_provider (PriceProvider, nullable)'; END IF;
+
+  n := n + 1;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'api' AND table_name = 'assets' AND column_name = 'details_provider'
+      AND udt_name = 'detailsprovider' AND is_nullable = 'YES'
+  ) THEN fails := fails || 'column api.assets.details_provider (DetailsProvider, nullable)'; END IF;
+
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM api.assets WHERE fund_id IS NOT NULL) THEN fails := fails || 'seed data (no listing linked to api.funds)'; END IF;
+
+  n := n + 1;
+  IF NOT has_function_privilege('anon', 'api.asset_performance(bigint)', 'EXECUTE') THEN fails := fails || 'grant EXECUTE api.asset_performance to anon'; END IF;
+  n := n + 1;
+  IF has_table_privilege('service_worker', 'api.funds', 'INSERT') OR NOT has_column_privilege('service_worker', 'api.funds', 'fund_size', 'UPDATE')
+  THEN fails := fails || 'api.funds: service_worker may only update the fetched columns'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('service_worker', 'api.fund_countries', 'SELECT,INSERT,UPDATE,DELETE') THEN fails := fails || 'grant CRUD api.fund_countries to service_worker'; END IF;
+
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM pg_matviews WHERE schemaname = 'api' AND matviewname = 'asset_stats')
+    THEN fails := fails || 'materialized view api.asset_stats'; END IF;
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname = 'api' AND indexname = 'asset_stats_asset_id_idx')
+    THEN fails := fails || 'unique index api.asset_stats_asset_id_idx (needed for REFRESH CONCURRENTLY)'; END IF;
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM timescaledb_information.jobs WHERE proc_schema = 'api' AND proc_name = 'refresh_asset_stats')
+    THEN fails := fails || 'job api.refresh_asset_stats'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('anon', 'api.asset_stats', 'SELECT') THEN fails := fails || 'grant SELECT api.asset_stats to anon'; END IF;
+  n := n + 1;
+  IF NOT has_function_privilege('anon', 'api.find_assets(text, assettype[], text[], text[], text[], text[], text, text, boolean, integer, integer)', 'EXECUTE')
+    THEN fails := fails || 'grant EXECUTE api.find_assets to anon'; END IF;
 
   -- =========================================================================
   -- RESULT

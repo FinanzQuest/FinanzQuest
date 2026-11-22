@@ -1,12 +1,16 @@
 -- =============================================================================
 -- api.assets
 -- Depends on: public.AssetType (02-types/asset_type.sql),
+--             public.DetailsProvider (02-types/details_provider.sql),
+--             api.funds (03-tables/api/funds.sql),
 --             public.PriceProvider (02-types/price_provider.sql),
 --             pg_trgm extension (01-schema/extensions.sql)
 -- price_provider: the market data API the updater fetches this asset from,
 -- set by `updater --mode resolve-providers` (Alpaca if it serves the symbol,
 -- else Yahoo Finance). NULL: neither serves it (or not resolved yet); the
 -- updater skips such assets.
+-- details_provider: where the updater fetches the asset's details from
+-- (DetailsProvider; NULL: none). fund_id: the fund a listing belongs to.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS api.assets (
@@ -17,6 +21,8 @@ CREATE TABLE IF NOT EXISTS api.assets (
   asset_type  AssetType NOT NULL,
   last_updated date,
   price_provider PriceProvider,
+  details_provider DetailsProvider,
+  fund_id     bigint REFERENCES api.funds (id),
   CONSTRAINT AssetInfo_pkey          PRIMARY KEY (id),
   CONSTRAINT AssetInfo_unique_symbol UNIQUE (symbol)
 );
@@ -25,3 +31,5 @@ CREATE INDEX idx_asset_symbol        ON api.assets USING HASH (symbol);
 CREATE INDEX assets_symbol_trgm_idx  ON api.assets USING GIN (symbol gin_trgm_ops);
 CREATE INDEX assets_name_trgm_idx    ON api.assets USING GIN (name gin_trgm_ops);
 CREATE INDEX assets_description_trgm_idx ON api.assets USING GIN (description gin_trgm_ops);
+
+CREATE INDEX assets_fund_id_idx ON api.assets (fund_id) WHERE fund_id IS NOT NULL;
