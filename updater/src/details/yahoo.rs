@@ -39,7 +39,11 @@ impl Client {
         }
         // sets the session cookie (the response itself is a 404)
         let _ = self.http.get("https://fc.yahoo.com/").send().await;
-        let response = self.http.get(format!("{ROOT}/v1/test/getcrumb")).send().await?;
+        let response = self
+            .http
+            .get(format!("{ROOT}/v1/test/getcrumb"))
+            .send()
+            .await?;
         if response.status() == StatusCode::TOO_MANY_REQUESTS {
             return Err(Error::RateLimited);
         }
@@ -168,10 +172,14 @@ pub fn parse_fund(r: &Value) -> FundDetails {
         .unwrap_or_default();
     FundDetails {
         as_of: None,
-        fund_size: num(r, "/defaultKeyStatistics/totalAssets").or_else(|| num(r, "/summaryDetail/totalAssets")),
+        fund_size: num(r, "/defaultKeyStatistics/totalAssets")
+            .or_else(|| num(r, "/summaryDetail/totalAssets")),
         holdings_count: None,
-        ter: num(r, "/fundProfile/feesExpensesInvestment/annualReportExpenseRatio")
-            .or_else(|| num(r, "/defaultKeyStatistics/annualReportExpenseRatio")),
+        ter: num(
+            r,
+            "/fundProfile/feesExpensesInvestment/annualReportExpenseRatio",
+        )
+        .or_else(|| num(r, "/defaultKeyStatistics/annualReportExpenseRatio")),
         inception: num(r, "/defaultKeyStatistics/fundInceptionDate")
             .and_then(|t| time::OffsetDateTime::from_unix_timestamp(t as i64).ok())
             .map(|t| t.date()),

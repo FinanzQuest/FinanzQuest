@@ -49,7 +49,9 @@ pub fn date(s: &str) -> Option<time::Date> {
         .split(|c: char| c == '/' || c == ',' || c.is_whitespace())
         .filter(|p| !p.is_empty())
         .collect();
-    let [a, b, c] = parts.as_slice() else { return None };
+    let [a, b, c] = parts.as_slice() else {
+        return None;
+    };
     let (day, mon) = match (a.parse::<u8>(), b.parse::<u8>()) {
         (Ok(day), _) => (day, month(b)?),
         (_, Ok(day)) => (day, month(a)?),

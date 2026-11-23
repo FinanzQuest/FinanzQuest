@@ -7,7 +7,9 @@ pub fn tables(html: &str) -> Vec<Vec<Vec<String>>> {
     let mut rest = html;
     while let Some(start) = find_tag(rest, "table") {
         let after = &rest[start..];
-        let end = after.find("</table>").map_or(after.len(), |e| e + "</table>".len());
+        let end = after
+            .find("</table>")
+            .map_or(after.len(), |e| e + "</table>".len());
         let table = &after[..end];
         let mut rows = Vec::new();
         let mut r = table;
@@ -50,7 +52,9 @@ fn cells(row: &str) -> Vec<String> {
             (None, None) => break,
         };
         let cell = &rest[start..];
-        let Some(content_start) = cell.find('>') else { break };
+        let Some(content_start) = cell.find('>') else {
+            break;
+        };
         let end = cell.find(close).unwrap_or(cell.len());
         out.push(text(&cell[content_start + 1..end.max(content_start + 1)]));
         rest = &cell[end.min(cell.len())..];

@@ -1,0 +1,11 @@
+# Actions in .github/workflows are pinned to commit SHAs; this keeps the pins
+# (and their "# vX.Y.Z" comments) current through weekly PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

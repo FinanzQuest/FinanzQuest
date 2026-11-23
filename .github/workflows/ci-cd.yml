@@ -1,0 +1,242 @@
+# CI/CD for FinanzQuest. Docs: docs/ci-cd.md
+#
+#   pull_request    -> checks (frontend, updater, database) + image builds (no push)
+#   push to main    -> checks -> build & push images to GHCR -> deploy
+#   manual dispatch -> same as a push to main (redeploys the current main)
+#
+# Deploy target: a NixOS server using this repo's module (nix/module.nix).
+# A failed health check rolls back automatically. Manual rollback: re-run the
+# "deploy" job of an older main run (its images stay in GHCR).
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # never cancel a main run midway (it may be deploying)
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_PREFIX: ghcr.io/finanzquest/finanzquest
+  # main pushes (and manual runs on main) publish and deploy; PRs only build
+  PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+
+jobs:
+  frontend:
+    name: Frontend (Biome, TypeScript, next build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          # its cache would call the runner's Yarn 1; Yarn 4 comes from corepack
+          package-manager-cache: false
+
+      - name: Enable corepack (Yarn from package.json "packageManager")
+        run: corepack enable && yarn --version
+
+      - name: Locate Yarn cache
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-
+
+      - run: yarn install --immutable
+
+      - name: Biome (lint + format)
+        # version matches the $schema in biome.json
+        run: npx --yes @biomejs/biome@2.6.8 ci .
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: frontend/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}-${{ hashFiles('frontend/**/*.ts', 'frontend/**/*.tsx', '!frontend/node_modules/**') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}-
+
+      - name: next build (includes the TypeScript check)
+        run: |
+          # throwaway values: the build needs the env shape, not a backend
+          sh generate_keys.sh http://localhost:3001 http://localhost:3001 "$(openssl rand -hex 32)" \
+            | grep -vE '^(SUPABASE_SERVICE_ROLE_KEY|SUPABASE_JWT_SECRET)=' > .env.local
+          yarn build
+          rm -f .env.local
+
+  updater:
+    name: Updater (fmt, clippy, test)
+    runs-on: ubuntu-latest
+    env:
+      SQLX_OFFLINE: "true" # compile query! macros against updater/.sqlx
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install toolchain from rust-toolchain.toml
+        run: rustup toolchain install && rustc --version
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+
+      - run: cargo fmt --all --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+
+  database:
+    name: Database (manifest init, verify_schema, dbinit/tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: bash .github/scripts/db-test.sh
+
+  images:
+    name: Image ${{ matrix.image }}
+    needs: [frontend, updater, database]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: frontend
+            context: frontend
+            file: frontend/Dockerfile
+            target: runner
+          - image: updater
+            context: updater
+            file: updater/dockerfile
+            target: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        if: env.PUBLISH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build arguments
+        id: args
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          API_URL_SERVER: ${{ vars.API_URL_SERVER }}
+          API_URL_CLIENT: ${{ vars.API_URL_CLIENT }}
+        run: |
+          if [ "$PUBLISH" = true ] && [ "${{ matrix.image }}" = frontend ]; then
+            # Next.js inlines the public URLs and the anon key (signed with
+            # JWT_SECRET) at build time, so the production image needs the
+            # production values.
+            for v in JWT_SECRET API_URL_SERVER API_URL_CLIENT; do
+              [ -n "${!v}" ] || { echo "::error::$v is not set (see docs/ci-cd.md)"; exit 1; }
+            done
+          else
+            JWT_SECRET=$(openssl rand -hex 32)
+            API_URL_SERVER=http://localhost:3001
+            API_URL_CLIENT=http://localhost:3001
+          fi
+          echo "::add-mask::$JWT_SECRET"
+          {
+            echo "jwt_secret=$JWT_SECRET"
+            echo "build_args<<EOF"
+            echo "API_URL_SERVER=$API_URL_SERVER"
+            echo "API_URL_CLIENT=$API_URL_CLIENT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          build-args: ${{ matrix.image == 'frontend' && steps.args.outputs.build_args || '' }}
+          secrets: |
+            jwt_secret=${{ steps.args.outputs.jwt_secret }}
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          # PR builds must not overwrite main's cache with dummy-secret layers
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: ${{ env.PUBLISH == 'true' && format('type=gha,mode=max,scope={0}', matrix.image) || '' }}
+
+  deploy:
+    name: Deploy to production
+    needs: images
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'FinanzQuest/FinanzQuest'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configure SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER || 'finanzquest' }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          for v in DEPLOY_HOST DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            [ -n "${!v}" ] || { echo "::error::secret $v is not set (see docs/ci-cd.md)"; exit 1; }
+          done
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host prod
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            Port $DEPLOY_PORT
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            ServerAliveInterval 30
+          EOF
+
+      - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          # The key is restricted to the server's finanzquest-ctl (NixOS
+          # module): it only accepts "deploy <sha> <actor>" and reads stdin =
+          # one line GHCR token + a tar.gz of the runtime files (data only).
+          # Secrets stay in the server's environmentFile, never in the bundle.
+          # shellcheck disable=SC2029 # expands here on purpose
+          { printf '%s\n' "$GITHUB_TOKEN"
+            tar czf - compose.yml compose.core.yml compose.prod.yml Caddyfile manifest.txt dbinit
+          } | ssh prod "deploy $SHA $ACTOR"

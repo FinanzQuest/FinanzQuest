@@ -30,8 +30,12 @@ pub async fn fetch(http: &reqwest::Client, url: &str) -> Result<FundDetails, Err
 /// derivatives): they count towards 'ZZ', not towards the holdings.
 fn is_cash_like(asset_class: &str) -> bool {
     let c = asset_class.to_ascii_lowercase();
-    c.contains("cash") || c.contains("money market") || c == "fx" || c.contains("futures")
-        || c.contains("derivative") || c.contains("swap")
+    c.contains("cash")
+        || c.contains("money market")
+        || c == "fx"
+        || c.contains("futures")
+        || c.contains("derivative")
+        || c.contains("swap")
 }
 
 pub fn parse(text: &str) -> Result<FundDetails, Error> {
@@ -53,7 +57,9 @@ pub fn parse(text: &str) -> Result<FundDetails, Error> {
                 "Inception Date" => details.inception = record.get(1).and_then(parse::date),
                 // equity files start with Ticker, bond files with Name
                 _ if record.iter().any(|f| f.trim() == "Name")
-                    && record.iter().any(|f| matches!(f.trim(), "Weight (%)" | "Market Weight")) =>
+                    && record
+                        .iter()
+                        .any(|f| matches!(f.trim(), "Weight (%)" | "Market Weight")) =>
                 {
                     header = Some(record.iter().map(|f| f.trim().to_string()).collect())
                 }
@@ -82,7 +88,9 @@ pub fn parse(text: &str) -> Result<FundDetails, Error> {
     );
 
     fn get(r: &csv::StringRecord, c: Option<usize>) -> Option<&str> {
-        c.and_then(|c| r.get(c)).map(str::trim).filter(|v| !v.is_empty() && *v != "-")
+        c.and_then(|c| r.get(c))
+            .map(str::trim)
+            .filter(|v| !v.is_empty() && *v != "-")
     }
     // bond funds hold many lines of one issuer ("TREASURY NOTE"): one entry each
     let mut holdings: Vec<Holding> = Vec::new();
@@ -90,17 +98,26 @@ pub fn parse(text: &str) -> Result<FundDetails, Error> {
     let mut fund_size = 0.0;
     let mut count = 0;
     for r in &rows {
-        let Some(weight) = get(r, Some(weight_col)).and_then(parse::percent) else { continue };
+        let Some(weight) = get(r, Some(weight_col)).and_then(parse::percent) else {
+            continue;
+        };
         fund_size += get(r, value_col).and_then(parse::number).unwrap_or(0.0);
         let cash = get(r, class_col).is_some_and(is_cash_like);
-        let country = if cash { None } else { get(r, location_col).and_then(countries::code) };
+        let country = if cash {
+            None
+        } else {
+            get(r, location_col).and_then(countries::code)
+        };
         *by_country.entry(country.unwrap_or("ZZ")).or_default() += weight;
         if cash {
             continue;
         }
         count += 1;
         let name = get(r, Some(name_col)).unwrap_or("?");
-        match holdings.iter_mut().find(|h| h.name.eq_ignore_ascii_case(name)) {
+        match holdings
+            .iter_mut()
+            .find(|h| h.name.eq_ignore_ascii_case(name))
+        {
             Some(h) => h.weight += weight,
             None => holdings.push(Holding {
                 name: name.to_string(),
