@@ -101,9 +101,17 @@ SELECT pg_temp.check(
    FROM api.asset_prices WHERE asset_id = 1 AND tstamp = ((now() - interval '1 hour') AT TIME ZONE 'UTC')::date)
   OR ((now() - interval '2 hours') AT TIME ZONE 'UTC')::date <> ((now() - interval '1 hour') AT TIME ZONE 'UTC')::date,
   'rollup: daily candle = first open / max high / min low / last close');
+-- Between 00:00 and 01:00 UTC the last bar belongs to yesterday: the rollup
+-- then writes yesterday's finished candle, which by design outranks that
+-- day's bars and is stamped as of the day's end (api.daily_price_as_of).
 SELECT pg_temp.check(
-  (SELECT close = 105 AND tstamp = now() - interval '1 hour' FROM api.latest_prices WHERE asset_id = 1),
-  'rollup keeps the latest price and its bar time');
+  (SELECT close = 105 AND tstamp = CASE
+       WHEN ((now() - interval '1 hour') AT TIME ZONE 'UTC')::date < (now() AT TIME ZONE 'UTC')::date
+       THEN api.daily_price_as_of(((now() - interval '1 hour') AT TIME ZONE 'UTC')::date)
+       ELSE now() - interval '1 hour'
+     END
+   FROM api.latest_prices WHERE asset_id = 1),
+  'rollup keeps the latest price and its bar time (or the day-end time once that day is over)');
 SELECT pg_temp.check(api.rollup_intraday((SELECT since FROM w)::date) = 0, 'rollup is idempotent (no rewrite)');
 
 -- ---------------------------------------------------------------------------
