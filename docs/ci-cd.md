@@ -1,103 +1,176 @@
 # CI/CD
 
-One workflow: `.github/workflows/ci-cd.yml`.
+GitHub Actions workflow `.github/workflows/ci-cd.yml` + NixOS module
+`nix/module.nix` (exported by this repo's flake) on the production server.
 
 | Trigger | What runs |
 |---|---|
 | Pull request | frontend, updater, database checks → image builds (not pushed) |
-| Push to `main` | same checks → build & push images to GHCR → deploy over SSH |
+| Push to `main` | same checks → push images to GHCR → deploy |
 | Manual (*Run workflow* on `main`) | same as a push: redeploys current `main` |
 
-## Jobs
+## CI jobs
 
 - **frontend**: `yarn install --immutable` (Yarn 4 via corepack), Biome
   `ci` (lint + format, version pinned to `biome.json`'s schema), `next build`
   (includes the TypeScript check) with throwaway env values.
-- **updater**: `cargo fmt --check`, `clippy -D warnings`, `cargo test`, all
-  with `SQLX_OFFLINE=true` against `updater/.sqlx`. After changing a
-  `query!`, regenerate it (`cargo sqlx prepare`) or CI fails.
+- **updater**: `cargo fmt --check`, `clippy -D warnings`, `cargo test`, with
+  `SQLX_OFFLINE=true` against `updater/.sqlx`. After changing a `query!`,
+  regenerate it (`cargo sqlx prepare`) or CI fails.
 - **database**: `.github/scripts/db-test.sh` starts the real `db`, `auth`
-  (GoTrue) and `db-init` services from `compose.core.yml`, so the manifest is
-  applied exactly as in production, then runs `dbinit/verify_schema.sql` and
-  every `dbinit/tests/*.sql` (except `*_perf.sql`). Runs locally too, next to
-  a dev stack: `bash .github/scripts/db-test.sh`.
-- **images**: builds `frontend` (target `runner`) and `updater`. On `main`
-  they are pushed as `ghcr.io/finanzquest/finanzquest-{frontend,updater}`
-  with tags `<commit sha>` and `latest`.
-- **deploy** (`main` only, environment `production`, one at a time): copies
-  the runtime files (compose files, `Caddyfile`, `manifest.txt`, `dbinit/`)
-  to the server, then runs `.github/scripts/deploy.sh` there: pull images,
-  `docker compose up -d`, wait until `postgres`, `auth_container` and
-  `frontend` are healthy. A failed health check fails the job.
+  (GoTrue) and `db-init` services from `compose.core.yml`, then runs
+  `dbinit/verify_schema.sql` and every `dbinit/tests/*.sql` (except
+  `*_perf.sql`). Runs locally next to a dev stack too:
+  `bash .github/scripts/db-test.sh`.
+- **images**: `frontend` (target `runner`) and `updater`. On `main` pushed as
+  `ghcr.io/finanzquest/finanzquest-{frontend,updater}:<sha>` and `:latest`.
 
-## How production runs the images
+All actions are pinned to commit SHAs; Dependabot (`.github/dependabot.yml`)
+proposes updates weekly.
 
-`compose.prod.yml` points `frontend` and `updater` at the GHCR images.
-`deploy.sh` keeps two lines in the server's `.env` up to date (and touches
-nothing else in it):
+## Deploy: how it works
 
-```
-COMPOSE_FILE=compose.yml:compose.prod.yml
-IMAGE_TAG=<deployed commit sha>
-```
+The server's flake imports this repo's NixOS module. It creates a user
+`finanzquest` that:
 
-So the NixOS unit's plain `docker compose up -d` also runs the deployed
-version after a reboot. Local dev (`compose.dev.yml`) is unaffected.
+- has **no sudo** and is **not in the `docker` group**; it runs its own
+  rootless Docker (lingering, so it starts at boot). A compromised deploy can
+  only affect FinanzQuest's containers, not the host or other services.
+- accepts the CI deploy key **only as a forced command**
+  (`restrict,command="finanzquest-ctl"`): no shell, no port forwarding, no
+  other commands.
 
-## Not automated (on purpose)
+The deploy job makes one SSH call, `deploy <sha> <actor>`, with stdin =
+GHCR token line + a tar.gz of the runtime files (`compose*.yml`,
+`Caddyfile`, `manifest.txt`, `dbinit/`). `finanzquest-ctl` (code from the
+module, pinned by the server's flake, never from the upload):
+
+1. validates the command, sha and actor; rejects bundles with unexpected
+   files, symlinks or missing files
+2. swaps the files into `/var/lib/finanzquest/app` (keeps `app.previous`)
+3. writes `.env` = your secrets file + `COMPOSE_FILE`, `IMAGE_TAG`,
+   `IMAGE_PREFIX`, `HTTP_PORT`, `HTTPS_PORT`
+4. logs in to GHCR with the job's short-lived token, pulls, `up -d`, logs out
+5. waits for `postgres`, `auth_container`, `frontend` to be healthy;
+   otherwise **rolls back** to the previous release and fails the job
+
+`compose.prod.yml` makes production use the GHCR images and publish only
+Caddy's ports (Postgres and the frontend stay internal). Dev
+(`compose.dev.yml`) is unaffected. `finanzquest.service` starts the last
+deployed version at boot; `nixos-rebuild` never restarts the stack.
+
+Not automated (on purpose):
 
 - **Database migrations.** `db-init` only initialises an empty database.
-  Apply new files from `dbinit/migrations/` on the server by hand, *before*
-  merging code that needs them.
-- **Server secrets.** They live only in the server's `.env`.
+  Apply new `dbinit/migrations/` files by hand, *before* merging code that
+  needs them:
+  `sudo -u finanzquest finanzquest-ctl compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 < dbinit/migrations/<file>.sql`
+- **Module updates.** Changes to `nix/module.nix` or `nix/finanzquest-ctl.sh`
+  reach the server with `nix flake update finanzquest && nixos-rebuild switch`.
 
 ## Rollback
 
-Open the *CI/CD* run of the last good `main` commit → *Re-run jobs* → pick
-**deploy**. Its images are still in GHCR, so nothing is rebuilt.
-Emergency on the server: set `IMAGE_TAG=<good sha>` in `.env`, then
-`docker compose up -d`.
+Automatic when health checks fail. Manually: open the *CI/CD* run of the
+last good `main` commit → *Re-run jobs* → **deploy** (images stay in GHCR).
+
+## Operating the stack
+
+```
+sudo -u finanzquest finanzquest-ctl compose ps
+sudo -u finanzquest finanzquest-ctl compose logs -f frontend
+sudo -u finanzquest finanzquest-ctl compose exec db psql -U postgres
+```
 
 ## One-time setup
 
-### GitHub secrets (Settings → Secrets and variables → Actions)
+### 1. Server flake
+
+```nix
+{
+  inputs.finanzquest = {
+    url = "github:FinanzQuest/FinanzQuest";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { nixpkgs, finanzquest, ... }: {
+    nixosConfigurations.<host> = nixpkgs.lib.nixosSystem {
+      modules = [
+        ./configuration.nix
+        finanzquest.nixosModules.default
+        {
+          services.finanzquest = {
+            enable = true;
+            environmentFile = "/var/lib/finanzquest-secrets/env";
+            deployKeys = [ "ssh-ed25519 AAAA... finanzquest-ci-deploy" ];
+            # httpPort = 80; httpsPort = 443; openFirewall = true;  (defaults)
+          };
+        }
+      ];
+    };
+  };
+}
+```
+
+Options: `nix/module.nix`. Ports below 1024 lower
+`net.ipv4.ip_unprivileged_port_start` (as a default your config can
+override). If another service on the host already uses 80/443, pick other
+ports and put that host's reverse proxy in front.
+
+### 2. Secrets file (on the server, never in Git or the Nix store)
+
+```
+sudo install -d -m 750 -o root -g finanzquest /var/lib/finanzquest-secrets
+sudo install -m 640 -o root -g finanzquest /dev/null /var/lib/finanzquest-secrets/env
+sudoedit /var/lib/finanzquest-secrets/env
+```
+
+Contents, `.env` syntax: `POSTGRES_PASSWORD`, `JWT_SECRET`,
+`AUTH_ADMIN_PASSWORD`, `AUTHENTICATOR_PASSWORD`, `SERVICE_WORKER_PASSWORD`,
+`SITE_URL`, `API_URL_SERVER`, `API_URL_CLIENT`, `ALPACA_KEY_ID`,
+`ALPACA_SECRET_KEY`, `CADDY_HOST`, `FRONTEND_URL`. agenix/sops-nix work too
+(owner `finanzquest`, mode 0400).
+
+### 3. GitHub
+
+Secrets (Settings → Secrets and variables → Actions):
 
 | Secret | Value |
 |---|---|
 | `DEPLOY_HOST` | server hostname or IP |
-| `DEPLOY_USER` | `admin` |
-| `DEPLOY_SSH_KEY` | private half of the deploy key (public half is in `nixos/nixos/users.nix`) |
-| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan -t ed25519 <host>` output, checked against the server's `/etc/ssh/ssh_host_ed25519_key.pub` |
-| `JWT_SECRET` | the **production** JWT secret (same as the server's `.env`); the frontend build signs the public anon key with it |
+| `DEPLOY_SSH_KEY` | private half of the deploy key (public half goes into `deployKeys`) |
+| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan -t ed25519 <host>`, checked against the server's `/etc/ssh/ssh_host_ed25519_key.pub` |
+| `JWT_SECRET` | the **production** JWT secret; the frontend build signs the public anon key with it |
 
-### GitHub variables
+Variables: `API_URL_SERVER`, `API_URL_CLIENT` (inlined into the frontend
+build, same as in the secrets file); optional `PRODUCTION_URL`,
+`DEPLOY_USER` (default `finanzquest`), `DEPLOY_PORT` (default `22`).
 
-| Variable | Value |
-|---|---|
-| `API_URL_SERVER` | as in the server's `.env` (inlined into the frontend build) |
-| `API_URL_CLIENT` | as in the server's `.env` (inlined into the frontend build) |
-| `PRODUCTION_URL` | optional, shown on the deployment |
-| `DEPLOY_PATH` | optional, default `/home/admin/FinanzQuest` |
-| `DEPLOY_PORT` | optional, default `22` |
+Environment `production` (Settings → Environments): *Deployment branches →
+Selected branches → `main`*, so only `main` can use the deploy secrets.
 
-### Server
+### 4. Moving an existing stack (data migration)
 
-1. `nixos-rebuild switch` with this repo's `nixos/` config, which authorises
-   the deploy key for `admin`.
-2. `/home/admin/FinanzQuest/.env` exists with the production secrets
-   (`POSTGRES_PASSWORD`, `JWT_SECRET`, `AUTH_ADMIN_PASSWORD`,
-   `AUTHENTICATOR_PASSWORD`, `SERVICE_WORKER_PASSWORD`, `SITE_URL`,
-   `API_URL_SERVER`, `API_URL_CLIENT`, `ALPACA_KEY_ID`, `ALPACA_SECRET_KEY`,
-   `CADDY_HOST`, ...).
-3. Docker daemon: the server runs both rootful and rootless Docker
-   (`nixos/nixos/docker.nix`). `deploy.sh` uses the rootless socket of the
-   SSH user when it exists, like an interactive `admin` shell does. The
-   systemd unit `finanzquest` runs as root and would use the rootful daemon.
-   Run the stack under **one** of them, otherwise both try to bind ports
-   80/443.
+Run once, after the first `nixos-rebuild switch` and **before** the first CI
+deploy. Old stack = the one currently serving (here: `admin`'s Docker).
 
-### GHCR
+```
+# as admin: stop the old stack, export the Postgres volume
+cd ~/FinanzQuest && docker compose down
+docker run --rm -v finanzquest_postgres:/v alpine tar -C /v -cf - . > /tmp/pg.tar
+docker run --rm -v finanzquest_caddy_data:/v alpine tar -C /v -cf - . > /tmp/caddy.tar
 
-Images are published by the workflow's own `GITHUB_TOKEN`. The deploy
-logs in on the server with that token for the pull, then logs out again, so
-the packages can stay private. If you make them public, nothing changes.
+# as finanzquest: import into its rootless Docker
+sudo chown finanzquest /tmp/pg.tar /tmp/caddy.tar
+sudo -iu finanzquest sh -c '
+  export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+  docker volume create finanzquest_postgres
+  docker volume create finanzquest_caddy_data
+  docker run --rm -i -v finanzquest_postgres:/v alpine tar -C /v -xf - < /tmp/pg.tar
+  docker run --rm -i -v finanzquest_caddy_data:/v alpine tar -C /v -xf - < /tmp/caddy.tar'
+sudo rm /tmp/pg.tar /tmp/caddy.tar
+```
+
+Then disable the old way of starting it (e.g. the `finanzquest` unit in the
+old `nixos/configuration.nix`, which the module replaces) and trigger the
+first deploy (*Run workflow* on `main`). Volume names come from the compose
+project name `FinanzQuest` → `finanzquest_*`; check with `docker volume ls`.

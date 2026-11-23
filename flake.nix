@@ -17,7 +17,12 @@
       rust-overlay,
       flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (
+    {
+      # Production deployment on a NixOS server (see docs/ci-cd.md)
+      nixosModules.default = import ./nix/module.nix;
+      nixosModules.finanzquest = import ./nix/module.nix;
+    }
+    // flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = import nixpkgs {

@@ -1,15 +1,23 @@
-# Production overlay: run the images CI built and pushed to GHCR instead of
-# building on the server.
+# Production overlay, used on the server by the NixOS module (nix/module.nix):
+# finanzquest-ctl writes COMPOSE_FILE=compose.yml:compose.prod.yml plus
+# IMAGE_PREFIX / IMAGE_TAG / HTTP_PORT / HTTPS_PORT into the deployed .env.
 #
-# The server's .env selects it (written by .github/scripts/deploy.sh):
-#   COMPOSE_FILE=compose.yml:compose.prod.yml
-#   IMAGE_TAG=<git commit sha of the deployed build>
-# so a plain `docker compose up -d` (the NixOS systemd unit) runs the pinned
-# version after a reboot too. Rollback = re-run an older CI/CD deploy job.
+# - frontend and updater run the images CI pushed to GHCR (no builds on the
+#   server)
+# - only Caddy publishes ports; Postgres and the frontend stay internal,
+#   since the server is shared with other services
 services:
   frontend:
     image: ${IMAGE_PREFIX:-ghcr.io/finanzquest/finanzquest}-frontend:${IMAGE_TAG:-latest}
     pull_policy: missing
+    ports: !reset []
   updater:
     image: ${IMAGE_PREFIX:-ghcr.io/finanzquest/finanzquest}-updater:${IMAGE_TAG:-latest}
     pull_policy: missing
+  db:
+    ports: !reset []
+  gateway:
+    ports: !override
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+      - ${HTTPS_PORT:-443}:443/udp
