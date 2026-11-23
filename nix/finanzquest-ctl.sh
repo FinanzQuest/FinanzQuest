@@ -1,6 +1,6 @@
 # finanzquest-ctl: runs the FinanzQuest stack as the service user, on that
 # user's rootless Docker. Packaged by nix/module.nix, which prepends:
-#   STATE_DIR ENV_FILE IMAGE_PREFIX HTTP_PORT HTTPS_PORT HEALTH_TIMEOUT
+#   STATE_DIR RUNTIME_DIR ENV_FILE IMAGE_PREFIX HTTP_PORT HTTPS_PORT HEALTH_TIMEOUT
 #
 # Modes:
 #   (no args, via SSH)  forced command of the CI deploy key. Only accepts
@@ -9,17 +9,17 @@
 #                       tar.gz bundle of the runtime files (data only: nothing
 #                       from it is executed here).
 #   boot                systemd: start the last deployed version
-#   compose ARGS...     admin pass-through, e.g.
-#                       sudo -u finanzquest finanzquest-ctl compose ps
+#   compose ARGS...     admin pass-through to the stack, e.g.
+#                       sudo -iu finanzquest finanzquest-ctl compose ps
+#   docker ARGS...      admin pass-through to the user's Docker daemon
 
 APP="$STATE_DIR/app"
 TAG_FILE="$STATE_DIR/image-tag"
 BUNDLE_FILES=(compose.yml compose.core.yml compose.prod.yml Caddyfile manifest.txt)
 HEALTHY_CONTAINERS=(postgres auth_container frontend)
 
-uid=$(id -u)
-export DOCKER_HOST="unix:///run/user/${uid}/docker.sock"
-export XDG_RUNTIME_DIR="/run/user/${uid}"
+# the user's own rootless daemon (finanzquest-docker.service)
+export DOCKER_HOST="unix://${RUNTIME_DIR}/docker.sock"
 export DOCKER_CONFIG="$STATE_DIR/.docker"
 cd "$STATE_DIR"
 
@@ -158,9 +158,10 @@ cmd_deploy() {
 case "${1:-}" in
   boot) cmd_boot ;;
   compose) shift; [ -d "$APP" ] || die "nothing deployed yet"; compose "$@" ;;
+  docker) shift; docker "$@" ;;
   "")
-    [ -n "${SSH_ORIGINAL_COMMAND:-}" ] || die "usage: finanzquest-ctl boot | compose ARGS... (deploys arrive via SSH)"
+    [ -n "${SSH_ORIGINAL_COMMAND:-}" ] || die "usage: finanzquest-ctl boot | compose ARGS... | docker ARGS... (deploys arrive via SSH)"
     cmd_deploy
     ;;
-  *) die "usage: finanzquest-ctl boot | compose ARGS..." ;;
+  *) die "usage: finanzquest-ctl boot | compose ARGS... | docker ARGS..." ;;
 esac

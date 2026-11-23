@@ -30,13 +30,19 @@ proposes updates weekly.
 
 ## Deploy: how it works
 
-The server's flake imports this repo's NixOS module. It creates a user
-`finanzquest` that:
+The server's flake imports this repo's NixOS module. It only adds
+FinanzQuest's own pieces: the system user `finanzquest` and two services,
+`finanzquest-docker` and `finanzquest`. It does not enable Docker for the
+host, change sysctls, add global packages or open firewall ports (checked
+by `nix build .#checks.x86_64-linux.module`, a VM test).
 
-- has **no sudo** and is **not in the `docker` group**; it runs its own
-  rootless Docker (lingering, so it starts at boot). A compromised deploy can
-  only affect FinanzQuest's containers, not the host or other services.
-- accepts the CI deploy key **only as a forced command**
+- `finanzquest` has **no sudo** and is **not in the `docker` group**.
+  `finanzquest-docker.service` is a rootless Docker daemon for this user
+  only (socket `/run/finanzquest/docker.sock`). Only that service gets
+  `CAP_NET_BIND_SERVICE`, so Caddy can use 80/443 without changing the
+  host-wide unprivileged port limit. A compromised deploy can only affect
+  FinanzQuest's containers, not the host or other services.
+- The CI deploy key works **only as a forced command**
   (`restrict,command="finanzquest-ctl"`): no shell, no port forwarding, no
   other commands.
 
@@ -64,7 +70,7 @@ Not automated (on purpose):
 - **Database migrations.** `db-init` only initialises an empty database.
   Apply new `dbinit/migrations/` files by hand, *before* merging code that
   needs them:
-  `sudo -u finanzquest finanzquest-ctl compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 < dbinit/migrations/<file>.sql`
+  `sudo -iu finanzquest finanzquest-ctl compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 < dbinit/migrations/<file>.sql`
 - **Module updates.** Changes to `nix/module.nix` or `nix/finanzquest-ctl.sh`
   reach the server with `nix flake update finanzquest && nixos-rebuild switch`.
 
@@ -75,10 +81,13 @@ last good `main` commit → *Re-run jobs* → **deploy** (images stay in GHCR).
 
 ## Operating the stack
 
+`finanzquest-ctl` is only in the service user's profile, hence `sudo -iu`:
+
 ```
-sudo -u finanzquest finanzquest-ctl compose ps
-sudo -u finanzquest finanzquest-ctl compose logs -f frontend
-sudo -u finanzquest finanzquest-ctl compose exec db psql -U postgres
+sudo -iu finanzquest finanzquest-ctl compose ps
+sudo -iu finanzquest finanzquest-ctl compose logs -f frontend
+sudo -iu finanzquest finanzquest-ctl compose exec db psql -U postgres
+systemctl status finanzquest-docker finanzquest
 ```
 
 ## One-time setup
@@ -102,7 +111,8 @@ sudo -u finanzquest finanzquest-ctl compose exec db psql -U postgres
             enable = true;
             environmentFile = "/var/lib/finanzquest-secrets/env";
             deployKeys = [ "ssh-ed25519 AAAA... finanzquest-ci-deploy" ];
-            # httpPort = 80; httpsPort = 443; openFirewall = true;  (defaults)
+            # httpPort = 80; httpsPort = 443;  (defaults)
+            # openFirewall = true;  # or open the ports in your own config
           };
         }
       ];
@@ -111,10 +121,11 @@ sudo -u finanzquest finanzquest-ctl compose exec db psql -U postgres
 }
 ```
 
-Options: `nix/module.nix`. Ports below 1024 lower
-`net.ipv4.ip_unprivileged_port_start` (as a default your config can
-override). If another service on the host already uses 80/443, pick other
-ports and put that host's reverse proxy in front.
+Options: `nix/module.nix`. The firewall is left to you (`openFirewall`
+defaults to false, as in nixpkgs modules). If another service on the host
+already uses 80/443, pick other ports and put that host's reverse proxy in
+front. Remove any old `systemd.services.finanzquest` definition (e.g. from
+this repo's `nixos/configuration.nix`): same unit name.
 
 ### 2. Secrets file (on the server, never in Git or the Nix store)
 
@@ -154,23 +165,24 @@ Run once, after the first `nixos-rebuild switch` and **before** the first CI
 deploy. Old stack = the one currently serving (here: `admin`'s Docker).
 
 ```
-# as admin: stop the old stack, export the Postgres volume
+# as admin: stop the old stack, export its volumes (Postgres, Caddy certs)
 cd ~/FinanzQuest && docker compose down
-docker run --rm -v finanzquest_postgres:/v alpine tar -C /v -cf - . > /tmp/pg.tar
-docker run --rm -v finanzquest_caddy_data:/v alpine tar -C /v -cf - . > /tmp/caddy.tar
+umask 077
+docker run --rm -v finanzquest_postgres:/v alpine tar -C /v -cpf - . > ~/pg.tar
+docker run --rm -v finanzquest_caddy_data:/v alpine tar -C /v -cpf - . > ~/caddy.tar
 
-# as finanzquest: import into its rootless Docker
-sudo chown finanzquest /tmp/pg.tar /tmp/caddy.tar
-sudo -iu finanzquest sh -c '
-  export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
-  docker volume create finanzquest_postgres
-  docker volume create finanzquest_caddy_data
-  docker run --rm -i -v finanzquest_postgres:/v alpine tar -C /v -xf - < /tmp/pg.tar
-  docker run --rm -i -v finanzquest_caddy_data:/v alpine tar -C /v -xf - < /tmp/caddy.tar'
-sudo rm /tmp/pg.tar /tmp/caddy.tar
+# import into finanzquest's daemon (stdin is redirected as admin, so the
+# service user never needs to read admin's files)
+fq() { sudo -iu finanzquest finanzquest-ctl docker "$@"; }
+fq volume create finanzquest_postgres
+fq volume create finanzquest_caddy_data
+fq run --rm -i -v finanzquest_postgres:/v alpine tar -C /v -xpf - < ~/pg.tar
+fq run --rm -i -v finanzquest_caddy_data:/v alpine tar -C /v -xpf - < ~/caddy.tar
+rm ~/pg.tar ~/caddy.tar
 ```
 
 Then disable the old way of starting it (e.g. the `finanzquest` unit in the
 old `nixos/configuration.nix`, which the module replaces) and trigger the
 first deploy (*Run workflow* on `main`). Volume names come from the compose
-project name `FinanzQuest` → `finanzquest_*`; check with `docker volume ls`.
+project name `FinanzQuest` → `finanzquest_*`; check with `docker volume ls`
+(old) and `fq volume ls` (new).

@@ -21,6 +21,12 @@
       # Production deployment on a NixOS server (see docs/ci-cd.md)
       nixosModules.default = import ./nix/module.nix;
       nixosModules.finanzquest = import ./nix/module.nix;
+
+      # VM test of the module: nix build .#checks.x86_64-linux.module
+      checks.x86_64-linux.module = import ./nix/vm-test.nix {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        module = ./nix/module.nix;
+      };
     }
     // flake-utils.lib.eachDefaultSystem (
       system:
