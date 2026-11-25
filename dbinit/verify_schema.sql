@@ -429,6 +429,58 @@ BEGIN
   IF NOT has_table_privilege('anon', 'api.fund_holdings_linked', 'SELECT') THEN fails := fails || 'grant SELECT api.fund_holdings_linked to anon'; END IF;
 
   -- =========================================================================
+  -- TUTORIAL PROGRESS  (2026-12-05_tutorial_progress.sql)
+  -- =========================================================================
+  FOREACH _ IN ARRAY ARRAY['users.tutorial_paths','users.tutorial_path_requires','users.tutorial_lessons',
+                           'users.lesson_progress','users.lesson_attempts','users.learner_stats'] LOOP
+    n := n + 1;
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
+      WHERE (s.nspname || '.' || c.relname) = _ AND c.relkind = 'r' AND c.relrowsecurity
+    ) THEN fails := fails || ('table with RLS ' || _); END IF;
+    n := n + 1;
+    IF NOT has_table_privilege('authenticated', _, 'SELECT')
+       OR has_table_privilege('authenticated', _, 'INSERT')
+       OR has_table_privilege('authenticated', _, 'UPDATE')
+       OR has_table_privilege('authenticated', _, 'DELETE')
+    THEN fails := fails || ('authenticated SELECT-only on ' || _); END IF;
+    n := n + 1;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname || '.' || tablename = _ AND cmd = 'SELECT')
+       OR EXISTS (SELECT 1 FROM pg_policies WHERE schemaname || '.' || tablename = _ AND cmd <> 'SELECT')
+    THEN fails := fails || ('only SELECT policies on ' || _); END IF;
+  END LOOP;
+  n := n + 1;
+  IF NOT EXISTS (SELECT 1 FROM pg_class WHERE oid = 'users.learner_overview'::regclass AND relkind = 'v'
+                 AND 'security_invoker=true' = ANY (reloptions))
+    THEN fails := fails || 'view users.learner_overview (security_invoker)'; END IF;
+  n := n + 1;
+  IF NOT has_table_privilege('authenticated', 'users.learner_overview', 'SELECT')
+    THEN fails := fails || 'grant SELECT users.learner_overview to authenticated'; END IF;
+  FOREACH _ IN ARRAY ARRAY['users.can_view_learner(uuid)','users.start_lesson(text)','users.complete_lesson(text,bigint,numeric,bigint)',
+                           'users.tutorial_class_overview()','users.tutorial_class_lessons(uuid)'] LOOP
+    n := n + 1;
+    IF NOT has_function_privilege('authenticated', _, 'EXECUTE') OR has_function_privilege('anon', _, 'EXECUTE')
+      THEN fails := fails || ('EXECUTE for authenticated only: ' || _); END IF;
+    n := n + 1;
+    IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = _::regprocedure)
+      THEN fails := fails || ('SECURITY DEFINER: ' || _); END IF;
+  END LOOP;
+  FOREACH _ IN ARRAY ARRAY['users.is_lesson_unlocked(uuid,text)','users.record_lesson_start(uuid,text,timestamptz)',
+                           'users.record_lesson_completion(uuid,text,bigint,numeric,bigint,timestamptz)'] LOOP
+    n := n + 1;
+    IF has_function_privilege('authenticated', _, 'EXECUTE') OR has_function_privilege('anon', _, 'EXECUTE')
+      THEN fails := fails || ('expected no client EXECUTE on internal ' || _); END IF;
+  END LOOP;
+  FOREACH _ IN ARRAY ARRAY['users.idx_lesson_progress_reward_transaction','users.idx_lesson_progress_reward_depot'] LOOP
+    n := n + 1;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname || '.' || indexname = _) THEN fails := fails || ('index ' || _); END IF;
+  END LOOP;
+  n := n + 1;
+  IF (SELECT count(*) FROM users.tutorial_lessons) < 33 OR NOT EXISTS (
+       SELECT 1 FROM users.tutorial_path_requires WHERE path_id = 'portfolio' AND requires_path_id = 'anleihen')
+    THEN fails := fails || 'seed data (seed/tutorial_catalog.sql)'; END IF;
+
+  -- =========================================================================
   -- RESULT
   -- =========================================================================
   IF cardinality(fails) > 0 THEN
