@@ -287,3 +287,127 @@
     }
   }
 }
+
+/*
+ * Micro-animations: 120-220ms, ease-out, <=4px movement, opacity and
+ * 0.97-1 scale only. Everything is switched off for reduced motion.
+ */
+@layer utilities {
+  @keyframes fq-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  @keyframes fq-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  /* page content on route change (used by app/(dashboard)/template.tsx) */
+  .fq-page-in {
+    animation: fq-fade-up 200ms ease-out both;
+  }
+  .fq-fade-in {
+    animation: fq-fade-in 220ms ease-out both;
+  }
+  /* press feedback */
+  .fq-press {
+    transition: transform 120ms ease-out;
+  }
+  .fq-press:active {
+    transform: scale(0.97);
+  }
+  /* hover lift for cards / stat values */
+  .fq-lift {
+    transition:
+      transform 160ms ease-out,
+      box-shadow 160ms ease-out;
+  }
+  .fq-lift:hover {
+    transform: translateY(-2px);
+  }
+  /* tab bar: the pill fades/scales in behind the active item */
+  .fq-tab {
+    position: relative;
+    isolation: isolate;
+  }
+  .fq-tab::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--sidebar-accent);
+    opacity: 0;
+    transform: scale(0.92);
+    transition:
+      opacity 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  .fq-tab[aria-current="page"]::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .fq-tab > svg {
+    transition: transform 120ms ease-out;
+  }
+  .fq-tab:active > svg {
+    transform: scale(0.9);
+  }
+  /* world map: countries fade in, light stagger by document order */
+  .fq-map-in path {
+    animation: fq-fade-in 360ms ease-out both;
+  }
+  .fq-map-in path:nth-child(3n) {
+    animation-delay: 40ms;
+  }
+  .fq-map-in path:nth-child(3n + 1) {
+    animation-delay: 80ms;
+  }
+  .fq-map-in path:nth-child(3n + 2) {
+    animation-delay: 120ms;
+  }
+}
+
+@layer base {
+  /* buttons: crisp press */
+  [data-slot="button"] {
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+  [data-slot="button"]:active:not([aria-haspopup]) {
+    scale: 0.98;
+  }
+  /* search results: first rows ease in with <=30ms steps */
+  [cmdk-item] {
+    animation: fq-fade-up 160ms ease-out both;
+  }
+  [cmdk-item]:nth-child(2) {
+    animation-delay: 30ms;
+  }
+  [cmdk-item]:nth-child(3) {
+    animation-delay: 60ms;
+  }
+  [cmdk-item]:nth-child(4) {
+    animation-delay: 90ms;
+  }
+  [cmdk-item]:nth-child(n + 5) {
+    animation-delay: 120ms;
+  }
+  [data-slot="command-input-wrapper"] > * {
+    transition:
+      box-shadow 150ms ease-out,
+      border-color 150ms ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+      scale: none !important;
+    }
+  }
+}

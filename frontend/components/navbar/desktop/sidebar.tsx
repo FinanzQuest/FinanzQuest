@@ -99,6 +99,7 @@ function NavItems({
 					{items.map(item => (
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton
+								className="fq-press"
 								variant={collapsed ? "outline" : "default"}
 								render={<Link href={item.url} />}
 								tooltip={item.title}
@@ -300,7 +301,7 @@ function MobileTabBar({
 			.some(item => isActive(pathname, item.url))
 
 	const tabClass =
-		"flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium leading-none transition-colors"
+		"flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium leading-none transition-colors duration-150 ease-out fq-tab"
 
 	return (
 		<nav
@@ -378,7 +379,7 @@ function MobileTabBar({
 														aria-current={
 															isActive(pathname, item.url) ? "page" : undefined
 														}
-														className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium transition-colors hover:bg-accent aria-[current=page]:bg-accent"
+														className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium transition-colors duration-150 ease-out hover:bg-accent aria-[current=page]:bg-accent fq-press"
 													>
 														<item.icon className="size-5 shrink-0" />
 														<span>{item.title}</span>

@@ -71,13 +71,13 @@ export function WorldMap({
 				className="w-full h-auto"
 			>
 				{/* base layer: every country in the muted colour */}
-				<g className="fill-muted stroke-background [stroke-width:0.5]">
+				<g className="fq-map-in fill-muted stroke-background [stroke-width:0.5]">
 					{PATHS.map(({ id, d }) => (
 						<path key={id} d={d} />
 					))}
 				</g>
 				{/* held countries on top, shaded by their share */}
-				<g className="fill-primary stroke-background [stroke-width:0.5]">
+				<g className="fq-map-in fill-primary stroke-background [stroke-width:0.5]">
 					{PATHS.map(({ id, d }) => {
 						const held = byNumeric.get(id)
 						if (!held) return null
@@ -86,7 +86,7 @@ export function WorldMap({
 								key={id}
 								d={d}
 								fillOpacity={opacity(held.weight)}
-								className="transition-opacity hover:opacity-80"
+								className="transition-opacity duration-150 ease-out hover:opacity-70"
 							>
 								<title>
 									{`${countryName(held.code)}: ${fmtPercent(held.weight)}`}
