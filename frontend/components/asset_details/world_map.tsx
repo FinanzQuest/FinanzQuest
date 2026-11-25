@@ -96,7 +96,7 @@ export function WorldMap({
 					})}
 				</g>
 			</svg>
-			<figcaption className="flex flex-row items-center gap-3 text-xs text-muted-foreground">
+			<figcaption className="flex flex-row flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
 				<span>{fmtPercent(0)}</span>
 				<span
 					aria-hidden

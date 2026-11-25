@@ -532,7 +532,7 @@ export function SavingsPlanTable({
 						`${table.getFilteredSelectedRowModel().rows.length} von ${table.getFilteredRowModel().rows.length} ausgewählt`}
 				</div>
 			</div>
-			<ButtonGroup className="flex flex-row justify-stretch *:grow w-full">
+			<ButtonGroup className="flex flex-row flex-wrap justify-stretch *:grow w-full">
 				<ButtonGroup>
 					<NewEntryDialog
 						depotId={depotId}

@@ -255,3 +255,35 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+/*
+ * Touch devices: grow the hit area of small controls to at least 40px
+ * without changing how they look (an invisible ::before overhang). In the
+ * base layer, so a utility like `absolute` still wins over `relative`.
+ */
+@layer base {
+  @media (pointer: coarse) {
+    :where(
+        [data-slot="button"],
+        [data-slot="toggle"],
+        [data-slot="toggle-group-item"],
+        [data-slot="tabs-trigger"],
+        [data-slot="select-trigger"],
+        [data-slot="sidebar-trigger"]
+      ) {
+      position: relative;
+    }
+    :where(
+        [data-slot="button"],
+        [data-slot="toggle"],
+        [data-slot="toggle-group-item"],
+        [data-slot="tabs-trigger"],
+        [data-slot="select-trigger"],
+        [data-slot="sidebar-trigger"]
+      )::before {
+      content: "";
+      position: absolute;
+      inset-block: min(0px, calc((100% - 2.5rem) / 2));
+      inset-inline: min(0px, calc((100% - 2.5rem) / 2));
+    }
+  }
+}

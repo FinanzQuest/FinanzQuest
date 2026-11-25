@@ -14,12 +14,19 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Suspense, useState } from "react"
 import DepotPicker from "@/components/navbar/desktop/depot_picker"
 import { SearchBarPopOut } from "@/components/search_bar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet"
 import {
 	Sidebar,
 	SidebarContent,
@@ -230,88 +237,166 @@ function DesktopSidebar({
 	)
 }
 
-// ── iPad portrait: topbar + hamburger sheet ──────────────────────────────────
-function MobileTopbar({
+// ── Phones / iPad portrait: slim top bar + bottom tab bar + "Mehr" sheet ─────
+/** Main sections in the bottom tab bar (short labels for ~72px wide tabs). */
+const tabItems: Array<ItemT> = [
+	{ title: "Depot", url: "/", icon: Home },
+	{ title: "Suche", url: "/search", icon: ListFilter },
+	{ title: "Umsätze", url: "/transactions", icon: ArrowLeftRight },
+	{ title: "Sparplan", url: "/savings_plan", icon: PiggyBank },
+]
+
+function isActive(pathname: string, url: string) {
+	return url === "/" ? pathname === "/" : pathname.startsWith(url)
+}
+
+function MobileTopbar() {
+	return (
+		<header className="md:hidden shrink-0 w-full border-b bg-sidebar pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+			<div className="flex h-14 items-center gap-3 px-4">
+				<Link href="/" className="shrink-0" aria-label="Mein Depot">
+					<Image
+						src={logo}
+						className="size-9 rounded-[33%]"
+						alt="FinanzQuest"
+						height={36}
+					/>
+				</Link>
+				<SearchBarPopOut
+					doRedirect
+					triggerRender={({ onClick }) => (
+						<Button
+							onClick={onClick}
+							variant="outline"
+							className="h-10 min-w-0 flex-1 justify-start gap-2 rounded-full bg-background px-4 font-normal dark:bg-background"
+						>
+							<SearchIcon className="size-4 shrink-0 stroke-muted-foreground" />
+							<span className="truncate text-muted-foreground">
+								Wertpapiersuche...
+							</span>
+						</Button>
+					)}
+				/>
+			</div>
+		</header>
+	)
+}
+
+function MobileTabBar({
 	tree,
 	data,
 }: {
 	tree: Record<string, Array<ItemT>>
 	data: SidebarData | null
 }) {
+	const pathname = usePathname()
 	const [open, setOpen] = useState(false)
+	// everything not in the tab bar lives in the "Mehr" sheet
+	const tabUrls = new Set(tabItems.map(item => item.url))
+	const moreActive =
+		!tabItems.some(item => isActive(pathname, item.url)) &&
+		Object.values(tree)
+			.flat()
+			.some(item => isActive(pathname, item.url))
+
+	const tabClass =
+		"flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium leading-none transition-colors"
 
 	return (
-		<div className="md:hidden w-full flex items-center justify-between flex-row px-4 py-3 border-b bg-sidebar ">
-			<Link href="/">
-				<Image
-					src={logo}
-					className="rounded-[33%]"
-					alt="FinanzQuest"
-					height={32}
-				/>
-			</Link>
-
-			<SearchBarPopOut
-				doRedirect
-				triggerRender={({ onClick }) => (
-					<Button
-						onClick={onClick}
-						variant="ghost"
-						className="w-[300px]"
-						size="icon"
-					>
-						<div className="w-full flex items-center gap-2 justify-center whitespace-nowrap text-ellipsis overflow-hidden rounded-md text-sm font-medium transition-colors border border-input shadow-sm bg-background h-9 px-3 py-1">
-							<SearchIcon className="size-6 shrink-0 stroke-muted-foreground" />
-							<span className="text-muted-foreground shrink truncate">
-								Wertpapiersuche...
-							</span>
-						</div>
-					</Button>
-				)}
-			/>
-			<div className="flex items-center gap-2 flex-row justify-between">
-				<Sheet open={open} onOpenChange={setOpen}>
-					<SheetTrigger
-						render={
-							<Button variant="ghost" size="icon">
-								<Menu className="size-5" />
-							</Button>
-						}
-					></SheetTrigger>
-					<SheetContent side="left" className="w-72 p-0 flex flex-col">
-						<div className="px-6 py-4 border-b">
-							<h1 className="font-bold text-2xl">FinanzQuest</h1>
-						</div>
-						<div className="flex-1 overflow-y-auto px-3 py-2">
-							{/* Wrap in fake sidebar context for SidebarMenuButton to work */}
-							<nav className="flex flex-col gap-1">
-								{Object.entries(tree).map(([label, items]) => (
-									<div key={label} className="mb-2">
-										<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1">
-											{label}
-										</p>
-										{items.map(item => (
-											<Link
-												key={item.title}
-												href={item.url}
-												onClick={() => setOpen(false)}
-												className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-											>
-												<item.icon className="size-5 shrink-0" />
-												<span>{item.title}</span>
-											</Link>
-										))}
-									</div>
-								))}
-							</nav>
-						</div>
-						<div className="border-t px-3 py-3 flex flex-col gap-2">
-							<SidebarAccount data={data} />
-						</div>
-					</SheetContent>
-				</Sheet>
-			</div>
-		</div>
+		<nav
+			aria-label="Hauptnavigation"
+			className="md:hidden order-last shrink-0 w-full border-t bg-sidebar pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+		>
+			<ul className="flex flex-row items-stretch gap-1 px-2 py-1">
+				{tabItems.map(item => {
+					const active = isActive(pathname, item.url)
+					return (
+						<li key={item.url} className="flex flex-1">
+							<Link
+								href={item.url}
+								aria-current={active ? "page" : undefined}
+								className={cn(
+									tabClass,
+									active
+										? "text-foreground"
+										: "text-muted-foreground hover:text-foreground"
+								)}
+							>
+								<item.icon
+									className="size-6"
+									strokeWidth={active ? 2.25 : 1.75}
+								/>
+								<span>{item.title}</span>
+							</Link>
+						</li>
+					)
+				})}
+				<li className="flex flex-1">
+					<Sheet open={open} onOpenChange={setOpen}>
+						<SheetTrigger
+							render={
+								<button
+									type="button"
+									className={cn(
+										tabClass,
+										"w-full",
+										moreActive || open
+											? "text-foreground"
+											: "text-muted-foreground hover:text-foreground"
+									)}
+								>
+									<Menu
+										className="size-6"
+										strokeWidth={moreActive ? 2.25 : 1.75}
+									/>
+									<span>Mehr</span>
+								</button>
+							}
+						/>
+						<SheetContent
+							side="bottom"
+							className="max-h-[85svh] rounded-t-3xl pb-[env(safe-area-inset-bottom)]"
+						>
+							<SheetHeader className="pb-2">
+								<SheetTitle className="text-lg font-semibold">Mehr</SheetTitle>
+							</SheetHeader>
+							<div className="min-h-0 flex-1 overflow-y-auto px-3">
+								<nav className="flex flex-col gap-3">
+									{Object.entries(tree).map(([label, items]) => {
+										const rest = items.filter(item => !tabUrls.has(item.url))
+										if (rest.length === 0) return null
+										return (
+											<div key={label} className="flex flex-col">
+												<p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+													{label}
+												</p>
+												{rest.map(item => (
+													<Link
+														key={item.url}
+														href={item.url}
+														onClick={() => setOpen(false)}
+														aria-current={
+															isActive(pathname, item.url) ? "page" : undefined
+														}
+														className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium transition-colors hover:bg-accent aria-[current=page]:bg-accent"
+													>
+														<item.icon className="size-5 shrink-0" />
+														<span>{item.title}</span>
+													</Link>
+												))}
+											</div>
+										)
+									})}
+								</nav>
+							</div>
+							<div className="mx-3 mt-3 mb-3 flex flex-col overflow-hidden rounded-2xl border bg-background/50">
+								<SidebarAccount data={data} />
+							</div>
+						</SheetContent>
+					</Sheet>
+				</li>
+			</ul>
+		</nav>
 	)
 }
 
@@ -362,8 +447,9 @@ export function AppSidebar({ data }: { data: SidebarData | null }) {
 
 	return (
 		<>
-			{/* Portrait mobile/iPad: topbar */}
-			<MobileTopbar tree={tree} data={data} />
+			{/* Phones / portrait iPad: top bar with search, bottom tab bar */}
+			<MobileTopbar />
+			<MobileTabBar tree={tree} data={data} />
 
 			{/* Landscape iPad + Desktop: collapsible sidebar */}
 			<DesktopSidebar tree={tree} data={data} />

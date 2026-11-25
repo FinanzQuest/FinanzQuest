@@ -93,7 +93,7 @@ export default function AssetPickerDialog({
 					</Button>
 				}
 			/>
-			<DialogContent className="max-w-[600px] p-2">
+			<DialogContent className="max-w-[600px] p-2 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:bottom-auto max-sm:left-3 max-sm:w-[calc(100%-1.5rem)] max-sm:rounded-b-[min(var(--radius-4xl),24px)] max-sm:pb-2">
 				<StockPicker
 					value={value}
 					onSelect={handleSelect}

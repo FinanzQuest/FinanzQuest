@@ -69,7 +69,10 @@ export default function DashboardLayout({
 					{children}
 				</div>
 			</SidebarProvider>
-			<Toaster />
+			{/* phones: above the bottom tab bar */}
+			<Toaster
+				mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+			/>
 		</>
 	)
 }
