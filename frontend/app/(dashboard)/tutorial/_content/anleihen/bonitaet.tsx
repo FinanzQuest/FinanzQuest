@@ -76,8 +76,14 @@ export const bonitaet: LessonDef = {
 				question: "Welche Anleihe passt zu welcher Beschreibung?",
 				pairs: [
 					{ left: "Bundesanleihe", right: "Sehr sicher, niedrige Rendite" },
-					{ left: "High-Yield-Anleihe", right: "Hohe Rendite, hohes Ausfallrisiko" },
-					{ left: "Inflationsgeschützte Anleihe", right: "Nennwert wird an die Teuerung angepasst" },
+					{
+						left: "High-Yield-Anleihe",
+						right: "Hohe Rendite, hohes Ausfallrisiko",
+					},
+					{
+						left: "Inflationsgeschützte Anleihe",
+						right: "Nennwert wird an die Teuerung angepasst",
+					},
 				],
 				explanation:
 					"Sicherheit, Risikoaufschlag und Inflationsschutz sind drei verschiedene Eigenschaften, die sich kombinieren lassen.",

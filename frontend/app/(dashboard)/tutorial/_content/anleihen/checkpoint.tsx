@@ -46,8 +46,7 @@ export const checkpoint: LessonDef = {
 				statement:
 					"Kaufst Du eine Anleihe unter 100 % und hältst sie bis zum Ende, liegt Deine Rendite über dem Kupon.",
 				correct: true,
-				explanation:
-					"Zum Kupon kommt der Kursgewinn bis zum Nennwert dazu.",
+				explanation: "Zum Kupon kommt der Kursgewinn bis zum Nennwert dazu.",
 			},
 		},
 		{
@@ -125,8 +124,7 @@ export const checkpoint: LessonDef = {
 			type: "exercise",
 			exercise: {
 				kind: "mc",
-				question:
-					"Welche Anleihe zahlt wahrscheinlich die höchste Rendite?",
+				question: "Welche Anleihe zahlt wahrscheinlich die höchste Rendite?",
 				options: [
 					"Bundesanleihe, AAA",
 					"Unternehmensanleihe, A",
@@ -151,8 +149,7 @@ export const checkpoint: LessonDef = {
 					"Einzelne Junk-Anleihe",
 				],
 				correct: 1,
-				explanation:
-					"Bei kurzem Horizont zählt Planbarkeit mehr als Rendite.",
+				explanation: "Bei kurzem Horizont zählt Planbarkeit mehr als Rendite.",
 			},
 		},
 	],

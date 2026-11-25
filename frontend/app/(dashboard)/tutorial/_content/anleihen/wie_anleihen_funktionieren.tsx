@@ -77,7 +77,8 @@ export const wieAnleihenFunktionieren: LessonDef = {
 			type: "exercise",
 			exercise: {
 				kind: "order",
-				question: "Bringe den Lebenslauf einer Anleihe in die richtige Reihenfolge.",
+				question:
+					"Bringe den Lebenslauf einer Anleihe in die richtige Reihenfolge.",
 				items: [
 					"Emittent gibt die Anleihe aus",
 					"Du kaufst sie",

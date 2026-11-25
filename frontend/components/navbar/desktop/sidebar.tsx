@@ -454,7 +454,10 @@ export function AppSidebar({ data }: { data: SidebarData | null }) {
 		<>
 			{/* Phones / portrait iPad: top bar with search, bottom tab bar */}
 			<MobileTopbar />
-			<MobileTabBar tree={tree} data={data} />
+			{/* usePathname needs a Suspense boundary for static prerendering */}
+			<Suspense fallback={null}>
+				<MobileTabBar tree={tree} data={data} />
+			</Suspense>
 
 			{/* Landscape iPad + Desktop: collapsible sidebar */}
 			<DesktopSidebar tree={tree} data={data} />

@@ -82,7 +82,10 @@ export function BondCashflow() {
 		<Frame note="Beispiel: Nennwert 1.000 €, Kupon 3 %, Laufzeit 5 Jahre. Der Kurs wird in % vom Nennwert angegeben.">
 			<div className="h-52 w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+					<BarChart
+						data={data}
+						margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+					>
 						<CartesianGrid stroke={GRID} vertical={false} />
 						<XAxis dataKey="year" tick={tick} />
 						<YAxis tick={tick} width={44} />
@@ -96,7 +99,10 @@ export function BondCashflow() {
 			</div>
 			<div className="mt-3 flex gap-3">
 				<Stat label="Kaufkurs" value={pct(price)} />
-				<Stat label="Gewinn gesamt" value={`${total.toLocaleString("de-DE")} €`} />
+				<Stat
+					label="Gewinn gesamt"
+					value={`${total.toLocaleString("de-DE")} €`}
+				/>
 				<Stat label="Rendite p. a." value={pct(y, 2)} />
 			</div>
 			<Slider
@@ -125,7 +131,10 @@ export function RatePriceCurve() {
 		<Frame note="10-jährige Anleihe, Kupon 3 %, Nennwert 100. Der Marktzins ist die Rendite, die neue Anleihen gerade bieten.">
 			<div className="h-52 w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+					<LineChart
+						data={data}
+						margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+					>
 						<CartesianGrid stroke={GRID} vertical={false} />
 						<XAxis
 							dataKey="r"
@@ -155,7 +164,10 @@ export function RatePriceCurve() {
 			</div>
 			<div className="mt-3 flex gap-3">
 				<Stat label="Marktzins" value={pct(rate)} />
-				<Stat label="Kurs" value={p.toLocaleString("de-DE", { maximumFractionDigits: 1 })} />
+				<Stat
+					label="Kurs"
+					value={p.toLocaleString("de-DE", { maximumFractionDigits: 1 })}
+				/>
 				<Stat label="Kursänderung" value={pct(diff)} />
 			</div>
 			<Slider
@@ -181,11 +193,19 @@ export function DurationBars() {
 		<Frame note="Kursänderung bei Zinsanstieg von 3 % auf 4 %, Kupon 3 %. Je länger die Laufzeit, desto stärker der Hebel.">
 			<div className="h-48 w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+					<BarChart
+						data={data}
+						margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+					>
 						<CartesianGrid stroke={GRID} vertical={false} />
 						<XAxis dataKey="n" tick={tick} />
 						<YAxis tick={tick} width={40} tickFormatter={v => `${v} %`} />
-						<Bar dataKey="chg" fill={BAD} radius={3} isAnimationActive={false} />
+						<Bar
+							dataKey="chg"
+							fill={BAD}
+							radius={3}
+							isAnimationActive={false}
+						/>
 					</BarChart>
 				</ResponsiveContainer>
 			</div>
@@ -211,7 +231,12 @@ export function Crash2022() {
 						margin={{ top: 4, right: 12, left: 0, bottom: 0 }}
 					>
 						<CartesianGrid stroke={GRID} horizontal={false} />
-						<XAxis type="number" domain={[-30, 5]} tick={tick} tickFormatter={v => `${v} %`} />
+						<XAxis
+							type="number"
+							domain={[-30, 5]}
+							tick={tick}
+							tickFormatter={v => `${v} %`}
+						/>
 						<YAxis type="category" dataKey="name" tick={tick} width={104} />
 						<Bar dataKey="v" radius={3} isAnimationActive={false}>
 							{data.map(d => (
@@ -242,7 +267,10 @@ export function SpreadBars() {
 		<Frame note="Illustrativer Risikoaufschlag gegenüber sicheren Staatsanleihen in Prozentpunkten, ca.-Werte; schwankt stark mit der Marktlage.">
 			<div className="h-48 w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+					<BarChart
+						data={data}
+						margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+					>
 						<CartesianGrid stroke={GRID} vertical={false} />
 						<XAxis dataKey="r" tick={tick} />
 						<YAxis tick={tick} width={40} tickFormatter={v => `${v}`} />
@@ -280,7 +308,10 @@ export function MixSlider() {
 		<Frame note="Stark vereinfachte Annahmen: Aktien ca. 7 % p. a., Anleihen ca. 3 % p. a.; schlechtestes Jahr Aktien ca. -35 %, Anleihen ca. -15 %, einfach gewichtet. Kein Versprechen, nur Intuition.">
 			<div className="h-52 w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+					<LineChart
+						data={data}
+						margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+					>
 						<CartesianGrid stroke={GRID} vertical={false} />
 						<XAxis
 							dataKey="s"
@@ -290,9 +321,26 @@ export function MixSlider() {
 							tick={tick}
 							tickFormatter={v => `${v} %`}
 						/>
-						<YAxis domain={[-40, 10]} tick={tick} width={40} tickFormatter={v => `${v}`} />
-						<Line dataKey="ret" stroke={GOOD} strokeWidth={2} dot={false} isAnimationActive={false} />
-						<Line dataKey="worst" stroke={BAD} strokeWidth={2} dot={false} isAnimationActive={false} />
+						<YAxis
+							domain={[-40, 10]}
+							tick={tick}
+							width={40}
+							tickFormatter={v => `${v}`}
+						/>
+						<Line
+							dataKey="ret"
+							stroke={GOOD}
+							strokeWidth={2}
+							dot={false}
+							isAnimationActive={false}
+						/>
+						<Line
+							dataKey="worst"
+							stroke={BAD}
+							strokeWidth={2}
+							dot={false}
+							isAnimationActive={false}
+						/>
 						<ReferenceDot x={w} y={cur.ret} r={5} fill={GOOD} stroke="none" />
 						<ReferenceDot x={w} y={cur.worst} r={5} fill={BAD} stroke="none" />
 					</LineChart>

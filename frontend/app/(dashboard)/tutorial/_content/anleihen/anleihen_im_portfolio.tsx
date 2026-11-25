@@ -19,8 +19,7 @@ export const anleihenImPortfolio: LessonDef = {
 			type: "exercise",
 			exercise: {
 				kind: "true_false",
-				statement:
-					"Staatsanleihen steigen bei fallenden Aktienkursen immer.",
+				statement: "Staatsanleihen steigen bei fallenden Aktienkursen immer.",
 				correct: false,
 				explanation:
 					"2022 fielen Aktien und Anleihen zusammen. Ob Anleihen puffern, hängt davon ab, warum die Märkte fallen.",
@@ -80,9 +79,18 @@ export const anleihenImPortfolio: LessonDef = {
 				kind: "match",
 				question: "Ordne Anlageziel und passende Tendenz zu.",
 				pairs: [
-					{ left: "Ziel in 2 Jahren", right: "Hoher Anleihen- oder Tagesgeldanteil" },
-					{ left: "Altersvorsorge in 35 Jahren", right: "Hoher Aktienanteil möglich" },
-					{ left: "Schlechter Schlaf bei Verlusten", right: "Mehr Anleihen zur Beruhigung" },
+					{
+						left: "Ziel in 2 Jahren",
+						right: "Hoher Anleihen- oder Tagesgeldanteil",
+					},
+					{
+						left: "Altersvorsorge in 35 Jahren",
+						right: "Hoher Aktienanteil möglich",
+					},
+					{
+						left: "Schlechter Schlaf bei Verlusten",
+						right: "Mehr Anleihen zur Beruhigung",
+					},
 				],
 				explanation:
 					"Horizont und Risikobereitschaft bestimmen die Mischung, nicht ein Standardrezept.",

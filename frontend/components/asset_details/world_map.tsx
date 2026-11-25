@@ -13,7 +13,8 @@ import { countryName, fmtPercent } from "./format"
 // world-atlas): very small countries (e.g. Singapore, Hong Kong) are not
 // drawn — the country list next to the map has them.
 
-const HIGHLIGHT = "opacity:1;stroke:var(--foreground);background-color:color-mix(in oklab,var(--muted) 60%,transparent)"
+const HIGHLIGHT =
+	"opacity:1;stroke:var(--foreground);background-color:color-mix(in oklab,var(--muted) 60%,transparent)"
 const WIDTH = 960
 const HEIGHT = 440
 

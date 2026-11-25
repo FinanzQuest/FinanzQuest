@@ -220,19 +220,19 @@ export default function StockChartContainer({
 					),
 					content: (
 						<div key={selectedIntervall} className="fq-fade-quick">
-						<CandleStickChart
-							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
-							data={candleData}
-							xKey="date"
-							barKey="open_close"
-							errorKey="high_low"
-							winKey="closeLargerOpen"
-							lineKey="absClose"
-							tickInterval={tickInterval}
-							timeAxis={timeAxis}
-							overlays={activeOverlays}
-							markers={candleMarkers}
-						/>
+							<CandleStickChart
+								className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
+								data={candleData}
+								xKey="date"
+								barKey="open_close"
+								errorKey="high_low"
+								winKey="closeLargerOpen"
+								lineKey="absClose"
+								tickInterval={tickInterval}
+								timeAxis={timeAxis}
+								overlays={activeOverlays}
+								markers={candleMarkers}
+							/>
 						</div>
 					),
 				},
@@ -243,21 +243,21 @@ export default function StockChartContainer({
 					),
 					content: (
 						<div key={selectedIntervall} className="fq-fade-quick">
-						<AreaChart
-							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
-							// overlay rows carry a nested `change` object for the tooltip
-							data={rows as unknown as PlainPrice[]}
-							dataKey="close"
-							xKey="tstamp"
-							yKey="close"
-							offset={offset}
-							tickInterval={tickInterval}
-							startValue={area.startValue}
-							timeAxis={timeAxis}
-							overlays={activeOverlays}
-							domain={domain}
-							markers={lineMarkers}
-						/>
+							<AreaChart
+								className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
+								// overlay rows carry a nested `change` object for the tooltip
+								data={rows as unknown as PlainPrice[]}
+								dataKey="close"
+								xKey="tstamp"
+								yKey="close"
+								offset={offset}
+								tickInterval={tickInterval}
+								startValue={area.startValue}
+								timeAxis={timeAxis}
+								overlays={activeOverlays}
+								domain={domain}
+								markers={lineMarkers}
+							/>
 						</div>
 					),
 				},

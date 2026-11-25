@@ -7,12 +7,20 @@ import { LessonPlayer } from "../../_engine/lesson_player"
 import { getProgress } from "../../_engine/progress"
 import { getLessonState } from "../../_engine/unlock"
 
-// params is a Promise in this Next version
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ path: string; lesson: string }>
-}) {
+type Params = Promise<{ path: string; lesson: string }>
+
+// Dynamic data (params, cookies, DB) must render inside a Suspense boundary.
+export default function Page({ params }: { params: Params }) {
+	return (
+		<div className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-background">
+			<Suspense>
+				<Lesson params={params} />
+			</Suspense>
+		</div>
+	)
+}
+
+async function Lesson({ params }: { params: Params }) {
 	const { path, lesson } = await params
 	const meta = getLessonMeta(`${path}.${lesson}`)
 	if (!meta) notFound()
@@ -34,15 +42,11 @@ export default async function Page({
 	)
 
 	return (
-		<div className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-background">
-			<Suspense>
-				<LessonPlayer
-					lessonId={meta.id}
-					depotId={depotId}
-					nextHref={next ? `/tutorial/${next.pathId}/${next.slug}` : null}
-					slots={slots}
-				/>
-			</Suspense>
-		</div>
+		<LessonPlayer
+			lessonId={meta.id}
+			depotId={depotId}
+			nextHref={next ? `/tutorial/${next.pathId}/${next.slug}` : null}
+			slots={slots}
+		/>
 	)
 }
