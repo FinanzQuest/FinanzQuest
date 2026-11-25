@@ -1,8 +1,18 @@
-import { pathLessons } from "../../_engine/catalog"
 import type { LessonDef } from "../../_engine/types"
-import { placeholderLesson } from "../placeholder"
+import { checkpoint } from "./checkpoint"
+import { etfSparplan } from "./etf_sparplan"
+import { renditeZinseszins } from "./rendite_zinseszins"
+import { risikoStreuung } from "./risiko_streuung"
+import { warumVorsorgen } from "./warum_vorsorgen"
 
-// TODO: replace the placeholders with real lessons (one file per lesson)
+const all = [
+	warumVorsorgen,
+	renditeZinseszins,
+	risikoStreuung,
+	etfSparplan,
+	checkpoint,
+]
+
 export const lessons: Record<string, LessonDef> = Object.fromEntries(
-	pathLessons("grundlagen").map(l => [l.id, placeholderLesson(l.id)])
+	all.map(l => [l.id, l])
 )
