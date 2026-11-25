@@ -22,6 +22,7 @@ import {
 	type OverlayKey,
 	type OverlayValues,
 } from "@/lib/data/overlays"
+import { groupByX, type TradesByX } from "@/lib/data/trades"
 import {
 	numberFormat,
 	type TimeAxis,
@@ -36,6 +37,7 @@ import {
 import { WinLossIndicator } from "../stat/indicator"
 import { Separator } from "../ui/separator"
 import { OverlayTooltipRows } from "./area"
+import { type TradeMarker, TradeTooltipRows, tradeDots } from "./trade_markers"
 
 type BarDataT = Record<
 	string,
@@ -54,6 +56,8 @@ interface props<T extends BarDataT>
 	timeAxis?: TimeAxis
 	/** lines drawn over the candles (row fields of the same name) */
 	overlays?: OverlayKey[]
+	/** buy/sell markers on the close line */
+	markers?: TradeMarker[]
 }
 export default function CandleStickChart<T extends BarDataT>({
 	data,
@@ -66,7 +70,9 @@ export default function CandleStickChart<T extends BarDataT>({
 	tickInterval,
 	timeAxis = "date",
 	overlays = [],
+	markers = [],
 }: props<T>) {
+	const tradesByX = groupByX(markers)
 	const chartData = data //data
 	const chartConfig = {
 		open: {
@@ -139,8 +145,15 @@ export default function CandleStickChart<T extends BarDataT>({
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip timeAxis={timeAxis} overlays={overlays} />}
+					content={
+						<CustomTooltip
+							timeAxis={timeAxis}
+							overlays={overlays}
+							trades={tradesByX}
+						/>
+					}
 				/>
+				{tradeDots(markers)}
 			</ComposedChart>
 		</ChartContainer>
 	)
@@ -152,6 +165,7 @@ type CustomToolTipProps = Partial<
 > & {
 	timeAxis?: TimeAxis
 	overlays?: OverlayKey[]
+	trades?: TradesByX
 }
 
 const CustomTooltip = ({
@@ -160,6 +174,7 @@ const CustomTooltip = ({
 	label,
 	timeAxis,
 	overlays = [],
+	trades,
 }: CustomToolTipProps) => {
 	if (!active || !payload?.length) {
 		return null
@@ -209,6 +224,7 @@ const CustomTooltip = ({
 				row={payload[0].payload as OverlayValues | undefined}
 				overlays={overlays}
 			/>
+			<TradeTooltipRows trades={trades} x={String(label)} />
 		</div>
 	)
 }

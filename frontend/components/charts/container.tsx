@@ -14,6 +14,7 @@ import {
 	overlayRange,
 	withOverlays,
 } from "@/lib/data/overlays"
+import { type Trade, tradesOnRows } from "@/lib/data/trades"
 import { useChartOverlays } from "@/lib/use_chart_overlays"
 import {
 	getCurrentDate,
@@ -22,6 +23,7 @@ import {
 	toISODateOnly,
 } from "@/lib/util"
 import { IntervallPickerControlled } from "../cards/pick_intervall"
+import { Button } from "../ui/button"
 import AreaChart from "./area"
 import CandleStickChart from "./candle_stick"
 import { OverlayLegend, OverlayPicker } from "./overlay_picker"
@@ -38,6 +40,8 @@ export interface props extends ComponentPropsWithoutRef<"div"> {
 	pricesIntraday5d?: Array<PlainPrice>
 	/** previous day's close, the reference line of the "1T" chart */
 	previousClose?: number | null
+	/** the active depot's buys/sells of this asset, drawn as markers */
+	trades?: Trade[]
 }
 export default function StockChartContainer({
 	assetId,
@@ -46,7 +50,9 @@ export default function StockChartContainer({
 	pricesIntraday1d = [],
 	pricesIntraday5d = [],
 	previousClose,
+	trades = [],
 }: props) {
+	const [showTrades, setShowTrades] = useState(true)
 	const hasIntraday = pricesIntraday1d.length > 0
 	const [selectedIntervall, setSelectedIntervall] = useState<number>(7)
 	const [overlays, setOverlays] = useState<OverlayKey[]>([])
@@ -152,6 +158,28 @@ export default function StockChartContainer({
 			activeOverlays.map(key => [key, rows[i]?.[key] ?? null])
 		),
 	}))
+	const lineMarkers = useMemo(
+		() =>
+			showTrades
+				? tradesOnRows(
+						rows.map(r => ({ x: r.tstamp, y: r.close })),
+						trades,
+						intraday
+					)
+				: [],
+		[showTrades, rows, trades, intraday]
+	)
+	const candleMarkers = useMemo(
+		() =>
+			showTrades
+				? tradesOnRows(
+						data.map(r => ({ x: r.tstamp, y: r.close })),
+						trades,
+						intraday
+					)
+				: [],
+		[showTrades, data, trades, intraday]
+	)
 	return (
 		<ChartContainer
 			toolbar={[
@@ -168,6 +196,18 @@ export default function StockChartContainer({
 					benchmarksAvailable={!intraday}
 					loading={overlaysLoading}
 				/>,
+				trades.length > 0 && (
+					<Button
+						key={2}
+						type="button"
+						size="sm"
+						variant={showTrades ? "secondary" : "ghost"}
+						aria-pressed={showTrades}
+						onClick={() => setShowTrades(v => !v)}
+					>
+						Käufe/Verkäufe
+					</Button>
+				),
 			]}
 			footer={<OverlayLegend value={activeOverlays} />}
 			defaultTab="line"
@@ -190,6 +230,7 @@ export default function StockChartContainer({
 							tickInterval={tickInterval}
 							timeAxis={timeAxis}
 							overlays={activeOverlays}
+							markers={candleMarkers}
 						/>
 					),
 				},
@@ -212,6 +253,7 @@ export default function StockChartContainer({
 							timeAxis={timeAxis}
 							overlays={activeOverlays}
 							domain={domain}
+							markers={lineMarkers}
 						/>
 					),
 				},

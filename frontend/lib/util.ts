@@ -250,3 +250,25 @@ export function timeAxisLabel(timestamp: string, axis: TimeAxis = "date") {
 	const date = new Date(timestamp)
 	return axis === "date" ? toAbsoluteTimeString(date) : toDateTimeString(date)
 }
+
+/** Day without time, e.g. "24.11.2026". */
+export const dayFormat = Intl.DateTimeFormat("de-DE", {
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+})
+
+/** Signed percentage from a ratio (0.05 -> "+5,0 %"). */
+export const signedPercentFormat = Intl.NumberFormat("de-DE", {
+	style: "percent",
+	minimumFractionDigits: 1,
+	maximumFractionDigits: 1,
+	signDisplay: "exceptZero",
+})
+
+/** Signed currency amount, e.g. "+12,30 €". */
+export const signedCurrencyFormat = Intl.NumberFormat("de-DE", {
+	style: "currency",
+	currency: "EUR",
+	signDisplay: "exceptZero",
+})

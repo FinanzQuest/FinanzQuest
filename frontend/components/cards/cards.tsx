@@ -149,39 +149,3 @@ export function ErrorCard({ error, className }: ErrorCardProps) {
 		</Card>
 	)
 }
-
-interface StockPositionCardProps extends CardProps {
-	position?: DepotPosition
-}
-export function StockPositionCard({
-	className,
-	position,
-}: StockPositionCardProps) {
-	return (
-		<Card className={cn(className)}>
-			<CardHeader>
-				<CardDescription className="">Deine Positionen</CardDescription>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-3">
-				<div className="flex flex-row flex-wrap gap-3 w-full *:flex-grow h-fit">
-					<div className="px-4 py-2 flex flex-col flex-nowrap bg-muted  rounded-xl ">
-						<span className="text-muted-foreground text-sm">Wert</span>
-						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl number tabular-nums text-foreground">
-								{position ? currencyFormat.format(position.worth) : "-"}
-							</span>
-						</span>
-					</div>
-					<div className="px-4 py-2 flex flex-col flex-nowrap bg-muted  rounded-xl">
-						<span className="text-sm text-muted-foreground">Anzahl</span>
-						<span className="text-sm flex flex-row items-baseline gap-1 text-muted-foreground">
-							<span className="text-2xl number tabular-nums text-foreground">
-								{position ? numberFormat.format(position.amount) : "-"}
-							</span>
-						</span>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	)
-}
