@@ -13,6 +13,7 @@ import { countryName, fmtPercent } from "./format"
 // world-atlas): very small countries (e.g. Singapore, Hong Kong) are not
 // drawn — the country list next to the map has them.
 
+const HIGHLIGHT = "opacity:1;stroke:var(--foreground);background-color:color-mix(in oklab,var(--muted) 60%,transparent)"
 const WIDTH = 960
 const HEIGHT = 440
 
@@ -62,8 +63,20 @@ export function WorldMap({
 	const opacity = (w: number) =>
 		max > 0 ? 0.25 + 0.75 * Math.sqrt(w / max) : 0
 
+	// hover linking with the country list (ShareBars `linkCountries`): one
+	// rule pair per held country, pure CSS via :has() on .fq-country-scope
+	const linkCss = weights
+		.map(w => w.country)
+		.filter(c => /^[A-Z]{2}$/.test(c))
+		.map(
+			c =>
+				`.fq-country-scope:has(li[data-country="${c}"]:hover) path[data-country="${c}"],.fq-country-scope:has(path[data-country="${c}"]:hover) li[data-country="${c}"]{${HIGHLIGHT}}`
+		)
+		.join("")
+
 	return (
 		<figure className={cn("flex flex-col gap-3", className)}>
+			<style>{linkCss}</style>
 			<svg
 				viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
 				role="img"
@@ -86,6 +99,7 @@ export function WorldMap({
 								key={id}
 								d={d}
 								fillOpacity={opacity(held.weight)}
+								data-country={held.code}
 								className="transition-opacity duration-150 ease-out hover:opacity-70"
 							>
 								<title>

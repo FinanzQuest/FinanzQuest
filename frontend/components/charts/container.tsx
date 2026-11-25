@@ -219,6 +219,7 @@ export default function StockChartContainer({
 						<CandleStickIcon className="size-7 md:size-5 stroke-muted-foreground" />
 					),
 					content: (
+						<div key={selectedIntervall} className="fq-fade-quick">
 						<CandleStickChart
 							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
 							data={candleData}
@@ -232,6 +233,7 @@ export default function StockChartContainer({
 							overlays={activeOverlays}
 							markers={candleMarkers}
 						/>
+						</div>
 					),
 				},
 				{
@@ -240,6 +242,7 @@ export default function StockChartContainer({
 						<LinechartIcon className="size-7 md:size-5 stroke-muted-foreground" />
 					),
 					content: (
+						<div key={selectedIntervall} className="fq-fade-quick">
 						<AreaChart
 							className="aspect-4/3 md:aspect-20/9 lg:aspect-6/2 xl:aspect-8/2 border rounded-3xl px-2 pt-2"
 							// overlay rows carry a nested `change` object for the tooltip
@@ -255,6 +258,7 @@ export default function StockChartContainer({
 							domain={domain}
 							markers={lineMarkers}
 						/>
+						</div>
 					),
 				},
 			]}

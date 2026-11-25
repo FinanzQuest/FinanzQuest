@@ -12,7 +12,7 @@ import {
 import type { Asset, Depot, DepotPosition } from "@/database/custom_types"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getIconURL } from "@/lib/icon_url"
-import { numberFormat, quoteTimeString } from "@/lib/util"
+import { quoteTimeString } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import URLIcon from "../icon"
 import ChangeStat from "../stat/change_stat"

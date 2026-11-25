@@ -25,11 +25,14 @@ export function ShareBars({
 	shares,
 	className,
 	label,
+	linkCountries,
 }: {
 	shares: Share[]
 	className?: string
 	/** accessible name of the chart */
 	label: string
+	/** keys are ISO alpha-2 codes: link rows to the world map on hover */
+	linkCountries?: boolean
 }) {
 	const max = Math.max(...shares.map(s => s.weight), 0.0001)
 	return (
@@ -77,7 +80,11 @@ export function ShareBars({
 					</>
 				)
 				return (
-					<li key={share.key}>
+					<li
+						key={share.key}
+						data-country={linkCountries ? share.key : undefined}
+						className="rounded-lg"
+					>
 						{share.href ? (
 							<Link
 								href={share.href}

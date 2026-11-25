@@ -327,6 +327,21 @@
   .fq-lift:hover {
     transform: translateY(-2px);
   }
+  /* chart range switch: quick crossfade, well under 180ms */
+  .fq-fade-quick {
+    animation: fq-fade-in 150ms ease-out both;
+  }
+  /* world map <-> country list hover link (see asset_details/world_map.tsx) */
+  .fq-country-scope li[data-country],
+  .fq-country-scope path[data-country] {
+    transition:
+      opacity 150ms ease-out,
+      background-color 150ms ease-out,
+      stroke 150ms ease-out;
+  }
+  .fq-country-scope:has(li[data-country]:hover) path[data-country] {
+    opacity: 0.45;
+  }
   /* tab bar: the pill fades/scales in behind the active item */
   .fq-tab {
     position: relative;

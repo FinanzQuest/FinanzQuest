@@ -96,7 +96,12 @@ export default function CandleStickChart<T extends BarDataT>({
 					tickFormatter={timestamp => timeAxisTick(timestamp, timeAxis)}
 				/>
 				<YAxis hide domain={["min", "max"]} />
-				<Bar maxBarSize={20} dataKey={barKey} fill="var(--win)">
+				<Bar
+					maxBarSize={20}
+					dataKey={barKey}
+					fill="var(--win)"
+					isAnimationActive={false}
+				>
 					{chartData.map(entry => {
 						const win = entry[winKey]
 						return (
