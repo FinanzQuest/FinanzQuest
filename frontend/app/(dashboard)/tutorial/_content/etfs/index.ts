@@ -1,8 +1,16 @@
-import { pathLessons } from "../../_engine/catalog"
 import type { LessonDef } from "../../_engine/types"
-import { placeholderLesson } from "../placeholder"
+import { checkpoint } from "./checkpoint"
+import { indexBauen } from "./index_bauen"
+import { indizesVergleich } from "./indizes_vergleich"
+import { kostenVarianten } from "./kosten_varianten"
+import { laenderSektoren } from "./laender_sektoren"
 
-// TODO: replace the placeholders with real lessons (one file per lesson)
 export const lessons: Record<string, LessonDef> = Object.fromEntries(
-	pathLessons("etfs").map(l => [l.id, placeholderLesson(l.id)])
+	[
+		indexBauen,
+		indizesVergleich,
+		laenderSektoren,
+		kostenVarianten,
+		checkpoint,
+	].map(l => [l.id, l])
 )

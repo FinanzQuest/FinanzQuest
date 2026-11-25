@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { etfsServerSlots } from "./etfs/server_slots"
 
 /**
  * Server-only content (e.g. world_map.tsx) that client lessons cannot import.
@@ -8,4 +9,6 @@ import type { ReactNode } from "react"
  */
 export type ServerSlot = () => ReactNode | Promise<ReactNode>
 
-export const serverSlots: Record<string, Record<string, ServerSlot>> = {}
+export const serverSlots: Record<string, Record<string, ServerSlot>> = {
+	...etfsServerSlots,
+}
