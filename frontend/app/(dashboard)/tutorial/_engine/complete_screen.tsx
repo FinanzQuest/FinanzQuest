@@ -12,6 +12,7 @@ import type { CompleteResult } from "./types"
 
 interface Props {
 	lessonId: string
+	attemptId: number
 	score: number
 	depotId: number | null
 	nextHref: string | null
@@ -20,6 +21,7 @@ interface Props {
 
 export function CompleteScreen({
 	lessonId,
+	attemptId,
 	score,
 	depotId,
 	nextHref,
@@ -32,11 +34,11 @@ export function CompleteScreen({
 	useEffect(() => {
 		if (sent.current) return
 		sent.current = true
-		completeLesson({ lessonId, score, depotId }).then(r => {
+		completeLesson({ lessonId, attemptId, score, depotId }).then(r => {
 			setResult(r.res)
 			setError(r.error)
 		})
-	}, [lessonId, score, depotId])
+	}, [lessonId, attemptId, score, depotId])
 
 	const pop = (delay: string) =>
 		cn(
@@ -56,7 +58,9 @@ export function CompleteScreen({
 				</span>
 			</div>
 			<div className={pop("delay-150")}>
-				<h1 className="text-3xl font-bold">Lektion geschafft!</h1>
+				<h1 className="text-3xl font-bold">
+					{result && !result.passed ? "Fast geschafft" : "Lektion geschafft!"}
+				</h1>
 				<p className="mt-1 text-muted-foreground">
 					{numberFormat.format(Math.round(score * 100))} % beim ersten Versuch
 					richtig
@@ -163,7 +167,7 @@ export function CompleteScreen({
 				>
 					Zur Übersicht
 				</Button>
-				{result && !result.passed && (
+				{(error || (result && !result.passed)) && (
 					<Button
 						size="lg"
 						variant="outline"

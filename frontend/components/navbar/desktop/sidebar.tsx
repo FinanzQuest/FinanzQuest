@@ -2,6 +2,7 @@
 
 import {
 	ArrowLeftRight,
+	GraduationCap,
 	Home,
 	LayoutDashboard,
 	Lightbulb,
@@ -75,6 +76,7 @@ function useNavTree(isTeacher: boolean): Record<string, Array<ItemT>> {
 	if (isTeacher) {
 		tree.Administration = [
 			{ title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+			{ title: "Lernfortschritt", url: "/admin/learning", icon: GraduationCap },
 		]
 	}
 	return tree
@@ -248,7 +250,9 @@ const tabItems: Array<ItemT> = [
 ]
 
 function isActive(pathname: string, url: string) {
-	return url === "/" ? pathname === "/" : pathname.startsWith(url)
+	return url === "/" || url === "/admin"
+		? pathname === url
+		: pathname.startsWith(url)
 }
 
 function MobileTopbar() {

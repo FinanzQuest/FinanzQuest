@@ -2,9 +2,9 @@ import type { LessonMeta, PathDef, PathId } from "./types"
 
 const LESSON_XP = 20
 const CHECKPOINT_XP = 50
-// placeholder amounts, pending product decision (see docs/tutorial-plan.md)
-const LESSON_REWARD = 250
-const CHECKPOINT_REWARD = 1000
+// keep in sync with dbinit/seed/tutorial_catalog.sql
+const LESSON_REWARD = 100
+const CHECKPOINT_REWARD = 500
 const CHECKPOINT_MIN_SCORE = 0.7
 
 type LessonSeed = readonly [slug: string, title: string]

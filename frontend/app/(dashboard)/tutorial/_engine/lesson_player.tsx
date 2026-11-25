@@ -1,8 +1,9 @@
 "use client"
 
 import { X } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { type ReactNode, useEffect, useReducer, useState } from "react"
+import { type ReactNode, useEffect, useReducer, useRef, useState } from "react"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { loadLesson } from "../_content"
+import { startLesson } from "./actions"
 import { CompleteScreen } from "./complete_screen"
 import {
 	isCorrect as isMatchCorrect,
@@ -56,7 +58,24 @@ export function LessonPlayer(props: LessonPlayerProps) {
 	const [lesson, setLesson] = useState<LessonDef | null>(null)
 	const [failed, setFailed] = useState(false)
 	const [attempt, setAttempt] = useState(0)
+	const [attemptId, setAttemptId] = useState<number | null>(null)
+	const [startError, setStartError] = useState<string | null>(null)
+	const router = useRouter()
+	const startedFor = useRef<string | null>(null)
 	const { lessonId } = props
+
+	// one DB attempt per run (also per retry); the ref guards StrictMode's double effect
+	useEffect(() => {
+		const key = `${lessonId}:${attempt}`
+		if (startedFor.current === key) return
+		startedFor.current = key
+		setAttemptId(null)
+		startLesson(lessonId).then(r => {
+			if (r.locked) router.replace("/tutorial")
+			else if (r.error) setStartError(r.error)
+			else setAttemptId(r.attemptId)
+		})
+	}, [lessonId, attempt, router])
 
 	useEffect(() => {
 		let cancelled = false
@@ -68,6 +87,16 @@ export function LessonPlayer(props: LessonPlayerProps) {
 		}
 	}, [lessonId])
 
+	if (startError) {
+		return (
+			<div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+				<p className="text-muted-foreground">{startError}</p>
+				<Button render={<Link href="/tutorial" />} nativeButton={false}>
+					Zur Übersicht
+				</Button>
+			</div>
+		)
+	}
 	if (failed) {
 		return (
 			<p className="p-8 text-center text-muted-foreground">
@@ -75,7 +104,7 @@ export function LessonPlayer(props: LessonPlayerProps) {
 			</p>
 		)
 	}
-	if (!lesson) {
+	if (!lesson || attemptId === null) {
 		return (
 			<div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
 				Lektion wird geladen …
@@ -86,6 +115,7 @@ export function LessonPlayer(props: LessonPlayerProps) {
 		<PlayerInner
 			key={attempt}
 			lesson={lesson}
+			attemptId={attemptId}
 			{...props}
 			onRetry={() => setAttempt(a => a + 1)}
 		/>
@@ -190,12 +220,17 @@ function ExerciseView({
 
 function PlayerInner({
 	lesson,
+	attemptId,
 	lessonId,
 	depotId,
 	nextHref,
 	slots,
 	onRetry,
-}: LessonPlayerProps & { lesson: LessonDef; onRetry: () => void }) {
+}: LessonPlayerProps & {
+	lesson: LessonDef
+	attemptId: number
+	onRetry: () => void
+}) {
 	const router = useRouter()
 	const [state, dispatch] = useReducer(
 		playerReducer,
@@ -241,6 +276,7 @@ function PlayerInner({
 			<div className="flex min-h-full flex-1 flex-col">
 				<CompleteScreen
 					lessonId={lessonId}
+					attemptId={attemptId}
 					score={getScore(state)}
 					depotId={depotId}
 					nextHref={nextHref}

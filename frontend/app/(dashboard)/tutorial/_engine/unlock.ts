@@ -7,9 +7,9 @@ import type {
 	PathState,
 } from "./types"
 
+/** "Done" = a progress row exists (the DB only writes rows on pass). */
 export function isLessonDone(meta: LessonMeta, progress: LearnerProgress) {
-	const p = progress.lessons[meta.id]
-	return !!p && p.completions > 0 && p.bestScore >= meta.minScore
+	return !!progress.lessons[meta.id]
 }
 
 export function isPathDone(path: PathDef, progress: LearnerProgress) {
