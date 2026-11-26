@@ -8,7 +8,9 @@ set -eu
 # so the \ir includes of the migrations resolve:
 #
 #   prod:  sudo -iu finanzquest finanzquest-ctl compose run --rm -T db-init sh /init/dbinit/migrate.sh [...]
-#   dev:   docker compose -f compose.dev.yml run --rm -T db-init sh /init/dbinit/migrate.sh [...]
+#   dev:   docker compose --env-file .env.local -f compose.dev.yml run --rm -T db-init sh /init/dbinit/migrate.sh [...]
+#          (the dev stack's secrets are in .env.local; without --env-file compose reads .env
+#          and recreates the containers it depends on with those secrets)
 #
 #   migrate.sh                      apply all pending migrations
 #   migrate.sh <file.sql>...        apply these, in the given order (skips applied ones)
