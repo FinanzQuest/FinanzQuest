@@ -69,8 +69,15 @@ Not automated (on purpose):
 
 - **Database migrations.** `db-init` only initialises an empty database.
   Apply new `dbinit/migrations/` files by hand, *before* merging code that
-  needs them:
-  `sudo -iu finanzquest finanzquest-ctl compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 < dbinit/migrations/<file>.sql`
+  needs them (back up first). Use `dbinit/migrate.sh` inside the `db-init`
+  service: it runs the files in the given order as superuser, stops at the
+  first error, and the `\ir` includes of the migrations resolve (piping a
+  file into `psql` over stdin does not work for them):
+  `sudo -iu finanzquest finanzquest-ctl compose run --rm -T db-init sh /init/dbinit/migrate.sh <file>.sql [<file>.sql ...]`
+  The server's `dbinit/` is the one of the last deploy (`app/dbinit/` in the
+  service user's state directory), so a migration that ships with a PR is not
+  there before that PR is deployed: copy the files into `app/dbinit/migrations/`
+  (and `migrate.sh` into `app/dbinit/` the first time) before running it.
 - **Module updates.** Changes to `nix/module.nix` or `nix/finanzquest-ctl.sh`
   reach the server with `nix flake update finanzquest && nixos-rebuild switch`.
 
