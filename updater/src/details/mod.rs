@@ -172,9 +172,11 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
         };
         match result {
             Ok(mut details) => {
-                if fund.details_source.as_deref().is_some_and(|url| {
-                    is_twin_source(fund.domicile.as_deref(), url)
-                }) {
+                if fund
+                    .details_source
+                    .as_deref()
+                    .is_some_and(|url| is_twin_source(fund.domicile.as_deref(), url))
+                {
                     details.fund_size = None;
                     details.holdings_count = None;
                     details.ter = None;
