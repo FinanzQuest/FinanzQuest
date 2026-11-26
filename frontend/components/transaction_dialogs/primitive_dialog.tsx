@@ -25,6 +25,7 @@ interface props extends React.ComponentPropsWithoutRef<"div"> {
 	commission: number
 	triggerVariant?: "default" | "secondary" | "outline"
 	triggerSize?: "xs" | "sm" | "default" | "lg"
+	triggerClassName?: string
 }
 
 export type TStock = {
@@ -56,6 +57,7 @@ export default function PrimitiveDialog({
 	commission,
 	triggerVariant,
 	triggerSize,
+	triggerClassName,
 }: props) {
 	const router = useRouter()
 	const [isOpen, setOpen] = React.useState(false)
@@ -90,6 +92,7 @@ export default function PrimitiveDialog({
 					<Button
 						variant={triggerVariant}
 						size={triggerSize}
+						className={triggerClassName}
 						disabled={limit === 0}
 						onClick={() => {
 							setOpen(true)

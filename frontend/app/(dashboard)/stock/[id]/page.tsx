@@ -6,12 +6,9 @@ import {
 	AssetDetailsSkeleton,
 } from "@/components/asset_details/asset_details"
 import { AutoRefresh } from "@/components/auto_refresh"
-import {
-	ErrorCard,
-	StockHeader,
-	StockPositionCard,
-} from "@/components/cards/cards"
+import { ErrorCard, StockHeader } from "@/components/cards/cards"
 import { ChartCard } from "@/components/cards/client"
+import { StockPositionCard } from "@/components/cards/stock_position"
 import { PageShell } from "@/components/page_shell"
 import type { DepotPosition, LatestPrice } from "@/database/custom_types"
 import { fetchStockData } from "@/database/fetch_stock_data"
@@ -20,6 +17,7 @@ import {
 	formatter as formatPrices,
 	intradayFormatter,
 } from "@/lib/data/formatter"
+import type { Trade } from "@/lib/data/trades"
 import { getDepotId } from "@/lib/get_depot_id"
 import { getDateCertainDaysAgo, msPerDay, toISODateOnly } from "@/lib/util"
 import { createPublicClient } from "@/utils/supabase/public"
@@ -39,7 +37,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
 	// parallel statt sequentiell
 	const [
-		{ depot, error, positions, commission },
+		{ depot, error, positions, commission, trades, depotValue },
 		{
 			info,
 			prices,
@@ -92,8 +90,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 				pricesIntraday1d={pricesIntraday1d}
 				pricesIntraday5d={pricesIntraday5d}
 				previousClose={quote.previousClose}
+				trades={trades}
 			/>
-			{depot && <StockPositionCard position={positions.at(0)} />}
+			{depot && (
+				<StockPositionCard
+					trades={trades}
+					price={quote.price ?? positions.at(0)?.price ?? null}
+					depotValue={depotValue}
+				/>
+			)}
 			{/* streams in after the prices: facts, holdings, countries */}
 			<Suspense fallback={<AssetDetailsSkeleton />}>
 				<AssetDetails id={id} />
@@ -171,6 +176,13 @@ const dataFetcher = async (stockId: number, depotId: number) => {
 	const { user } = await getUser()
 	if (!user) redirect("/auth/login")
 
+	const empty = {
+		positions: null,
+		commission: null,
+		trades: [] as Trade[],
+		depotValue: 0,
+	}
+
 	const { data: depot, error: depotError } = await client
 		.schema("depots")
 		.from("depots")
@@ -180,34 +192,51 @@ const dataFetcher = async (stockId: number, depotId: number) => {
 		.limit(1)
 		.maybeSingle()
 
-	if (depotError)
-		return { depot: null, error: depotError, positions: null, commission: null }
+	if (depotError) return { depot: null, error: depotError, ...empty }
 	if (!depot) redirect("/new_depot")
 
 	// parallel statt sequentiell
 	const [
 		{ data: positionRows, error: positionError },
 		{ data: commission, error: commissionError },
+		{ data: tradeRows, error: tradeError },
 	] = await Promise.all([
+		// all open positions: the depot total is needed for the share
 		client
 			.schema("depots")
-			.rpc("get_position_profits", { p_depot_id: depot.id })
-			.eq("asset_id", stockId),
+			.rpc("get_position_profits", { p_depot_id: depot.id }),
 		client.schema("depots").rpc("get_commission"),
+		client
+			.schema("depots")
+			.from("transactions")
+			.select("id, tstamp, amount, price, commission")
+			.eq("depot_id", depot.id)
+			.eq("asset_id", stockId)
+			.order("tstamp")
+			.order("id"),
 	])
 
-	if (positionError)
-		return { depot, error: positionError, positions: null, commission: null }
+	const failure = positionError ?? commissionError ?? tradeError
+	if (failure) return { depot, error: failure, ...empty }
 
-	const positions: DepotPosition[] = (positionRows ?? []).map(p => ({
-		asset_id: p.asset_id,
-		amount: p.current_amount,
-		worth: p.market_value ?? 0,
-		price: p.current_price,
-	}))
+	const depotValue =
+		depot.cash +
+		(positionRows ?? []).reduce((a, p) => a + (p.market_value ?? 0), 0)
+	const positions: DepotPosition[] = (positionRows ?? [])
+		.filter(p => p.asset_id === stockId)
+		.map(p => ({
+			asset_id: p.asset_id,
+			amount: p.current_amount,
+			worth: p.market_value ?? 0,
+			price: p.current_price,
+		}))
 
-	if (commissionError)
-		return { depot, error: commissionError, positions, commission: null }
-
-	return { depot, error: null, positions, commission }
+	return {
+		depot,
+		error: null,
+		positions,
+		commission: commission ?? 0,
+		trades: tradeRows ?? [],
+		depotValue,
+	}
 }

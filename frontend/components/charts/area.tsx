@@ -23,9 +23,11 @@ import {
 	type OverlayKey,
 	type OverlayValues,
 } from "@/lib/data/overlays"
+import { groupByX, type TradesByX } from "@/lib/data/trades"
 import { type TimeAxis, timeAxisLabel, timeAxisTick } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import { Separator } from "../ui/separator"
+import { type TradeMarker, TradeTooltipRows, tradeDots } from "./trade_markers"
 
 interface props<T extends Record<string, number | string>>
 	extends React.ComponentPropsWithoutRef<"div"> {
@@ -42,6 +44,8 @@ interface props<T extends Record<string, number | string>>
 	overlays?: OverlayKey[]
 	/** y-range covering price and overlays (default: the price) */
 	domain?: [number, number]
+	/** buy/sell markers on the line (null: hidden) */
+	markers?: TradeMarker[]
 }
 
 export default function AreaChart<T extends Record<string, number | string>>({
@@ -56,6 +60,7 @@ export default function AreaChart<T extends Record<string, number | string>>({
 	timeAxis = "date",
 	overlays = [],
 	domain,
+	markers = [],
 }: props<T>) {
 	const chartConfig = {
 		open: {
@@ -65,6 +70,8 @@ export default function AreaChart<T extends Record<string, number | string>>({
 			label: "Open",
 		},
 	} satisfies ChartConfig
+
+	const tradesByX = groupByX(markers)
 
 	return (
 		<ChartContainer
@@ -121,7 +128,13 @@ export default function AreaChart<T extends Record<string, number | string>>({
 				<ChartTooltip
 					isAnimationActive={false}
 					filterNull
-					content={<CustomTooltip timeAxis={timeAxis} overlays={overlays} />}
+					content={
+						<CustomTooltip
+							timeAxis={timeAxis}
+							overlays={overlays}
+							trades={tradesByX}
+						/>
+					}
 				/>
 				<ReferenceLine
 					y={startValue}
@@ -155,6 +168,7 @@ export default function AreaChart<T extends Record<string, number | string>>({
 						strokeDasharray={isBenchmark(key) ? undefined : "5 3"}
 					/>
 				))}
+				{tradeDots(markers)}
 			</ComposedChart>
 		</ChartContainer>
 	)
@@ -166,6 +180,7 @@ type CustomTooltipProps = Partial<
 > & {
 	timeAxis?: TimeAxis
 	overlays?: OverlayKey[]
+	trades?: TradesByX
 }
 
 const signedPercent = new Intl.NumberFormat("de-DE", {
@@ -217,6 +232,7 @@ const CustomTooltip = ({
 	label,
 	timeAxis,
 	overlays = [],
+	trades,
 }: CustomTooltipProps) => {
 	if (!active || !payload?.length) {
 		return null
@@ -242,6 +258,7 @@ const CustomTooltip = ({
 				row={payload[0].payload as OverlayValues | undefined}
 				overlays={overlays}
 			/>
+			<TradeTooltipRows trades={trades} x={String(label)} />
 		</div>
 	)
 }

@@ -3,6 +3,7 @@
 import type { ComponentPropsWithoutRef } from "react"
 import StockChartContainer from "@/components/charts/container"
 import type { PlainPrice } from "@/database/custom_types"
+import type { Trade } from "@/lib/data/trades"
 import { cn } from "@/lib/utils"
 
 type CardProps = ComponentPropsWithoutRef<"div">
@@ -14,6 +15,7 @@ interface ChartCardProps extends CardProps {
 	pricesIntraday1d?: PlainPrice[]
 	pricesIntraday5d?: PlainPrice[]
 	previousClose?: number | null
+	trades?: Trade[]
 }
 
 export function ChartCard({
@@ -23,6 +25,7 @@ export function ChartCard({
 	pricesIntraday1d,
 	pricesIntraday5d,
 	previousClose,
+	trades,
 	className,
 }: ChartCardProps) {
 	"use client"
@@ -36,6 +39,7 @@ export function ChartCard({
 				pricesIntraday1d={pricesIntraday1d}
 				pricesIntraday5d={pricesIntraday5d}
 				previousClose={previousClose}
+				trades={trades}
 			/>
 		</div>
 	)

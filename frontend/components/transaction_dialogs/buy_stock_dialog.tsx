@@ -39,6 +39,7 @@ export default function BuyStockDialog(props: {
 	commission: number
 	limit: number
 	triggerSize?: "xs" | "sm" | "default" | "lg"
+	triggerClassName?: string
 }) {
 	return (
 		<PrimitiveDialog

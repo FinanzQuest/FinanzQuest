@@ -152,7 +152,12 @@ function Description({
 			: null
 
 	return (
-		<div className={cn(buy ? "flex-row" : "flex-row-reverse", "flex gap-3")}>
+		<div
+			className={cn(
+				buy ? "flex-row" : "flex-row-reverse",
+				"flex flex-wrap items-center gap-x-3 gap-y-1"
+			)}
+		>
 			<HoverCard>
 				<HoverCardTrigger>
 					<span className="number tabular-nums bg-background border border-border/70 px-2 rounded-lg cursor-pointer">

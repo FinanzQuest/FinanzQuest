@@ -209,6 +209,91 @@ SELECT pg_temp.check(depots.execute_savings_plans() = 0 OR NOT EXISTS (
     SELECT 1 FROM depots.transactions WHERE depot_id = 991001 AND type = 'savings_plan' GROUP BY depot_id HAVING COUNT(*) > 1),
   'a plan is not executed twice in one period');
 
+-- ---------------------------------------------------------------------------
+-- Tutorial progress: no direct writes, private to the learner + teachers,
+-- teacher RPCs gated.
+-- ---------------------------------------------------------------------------
+CREATE FUNCTION pg_temp.err_as(p_uid uuid, p_sql text) RETURNS text
+LANGUAGE plpgsql AS $$
+DECLARE v text;
+BEGIN
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', p_uid, 'role', 'authenticated')::text, true);
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  BEGIN EXECUTE p_sql; EXCEPTION WHEN OTHERS THEN v := SQLSTATE; END;
+  EXECUTE 'RESET ROLE';
+  RETURN v;
+END $$;
+
+SELECT pg_temp.check(pg_temp.as_user(:s1,
+  $$INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+    VALUES ('bbbbbbbb-0000-0000-0000-000000000001', 'portfolio.checkpoint', now(), now(), 1, 3)$$),
+  'student cannot insert lesson progress (skip locks)');
+SELECT pg_temp.check(pg_temp.as_user(:s1,
+  $$INSERT INTO users.learner_stats (user_id, xp_total) VALUES ('bbbbbbbb-0000-0000-0000-000000000001', 1000000)$$),
+  'student cannot insert learner stats');
+SELECT pg_temp.check(pg_temp.as_user(:s1, $$UPDATE users.tutorial_lessons SET virtual_cash_reward = 1e9$$),
+  'student cannot change the catalog rewards');
+SELECT pg_temp.check(pg_temp.as_user(:s1,
+  $$SELECT users.record_lesson_completion('bbbbbbbb-0000-0000-0000-000000000002', 'grundlagen.warum-vorsorgen', 1, 1, NULL, now())$$)
+  AND pg_temp.as_user(:s1, $$SELECT users.record_lesson_start('bbbbbbbb-0000-0000-0000-000000000002', 'portfolio.capm', now())$$),
+  'student cannot call the internal record_lesson_start / record_lesson_completion');
+SELECT pg_temp.check(NOT has_function_privilege('authenticated', 'users.is_lesson_unlocked(uuid, text)', 'EXECUTE')
+                 AND NOT has_function_privilege('anon', 'users.complete_lesson(text, bigint, numeric, bigint)', 'EXECUTE'),
+  'internal helpers and anon have no tutorial EXECUTE');
+
+-- start_lesson as the user, then pretend 10 minutes passed (min_seconds)
+CREATE FUNCTION pg_temp.attempt(p_uid uuid, p_lesson text) RETURNS bigint
+LANGUAGE plpgsql AS $$
+DECLARE v bigint;
+BEGIN
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', p_uid, 'role', 'authenticated')::text, true);
+  EXECUTE 'SET LOCAL ROLE authenticated';
+  v := users.start_lesson(p_lesson);
+  EXECUTE 'RESET ROLE';
+  UPDATE users.lesson_attempts SET started_at = started_at - interval '10 minutes' WHERE id = v;
+  RETURN v;
+END $$;
+
+SELECT pg_temp.check(pg_temp.err_as(:s1, format('SELECT users.complete_lesson(%L, %s, 1, 991001)',
+         'grundlagen.warum-vorsorgen', pg_temp.attempt(:s1, 'grundlagen.warum-vorsorgen'))) IS NULL,
+  'student completes a lesson into their own depot');
+SELECT pg_temp.check(pg_temp.err_as(:s2, format('SELECT users.complete_lesson(%L, %s, 1, 991001)',
+         'grundlagen.warum-vorsorgen', pg_temp.attempt(:s2, 'grundlagen.warum-vorsorgen'))) = '42501',
+  'student cannot direct a reward into another depot');
+SELECT pg_temp.check(pg_temp.err_as(:s1, format('SELECT users.complete_lesson(%L, %s, 1)',
+         'grundlagen.rendite-zinseszins', (SELECT max(id) FROM users.lesson_attempts WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000002'))) = '42501',
+  'student cannot complete another student''s attempt');
+SELECT pg_temp.check(pg_temp.err_as(:s1, $$SELECT users.start_lesson('portfolio.capm')$$) = '42501',
+  'student cannot start a locked lesson');
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub":"bbbbbbbb-0000-0000-0000-000000000002","role":"authenticated"}', true);
+SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM users.lesson_progress WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000001')
+                 AND NOT EXISTS (SELECT 1 FROM users.lesson_attempts WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000001')
+                 AND NOT EXISTS (SELECT 1 FROM users.learner_overview WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000001'),
+  'tutorial progress is private to the learner');
+SELECT pg_temp.check(EXISTS (SELECT 1 FROM users.tutorial_lessons), 'catalog is readable');
+SELECT set_config('request.jwt.claims', '{"sub":"bbbbbbbb-0000-0000-0000-00000000000f","role":"authenticated"}', true);
+SELECT pg_temp.check(EXISTS (SELECT 1 FROM users.learner_overview WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000001' AND xp_total = 20),
+  'teacher can read learner progress');
+RESET ROLE;
+
+SELECT pg_temp.check(pg_temp.err_as(:s1, $$SELECT * FROM users.tutorial_class_overview()$$) = '42501',
+  'student gets 42501 from tutorial_class_overview');
+SELECT pg_temp.check(pg_temp.err_as(:s1, $$SELECT * FROM users.tutorial_class_lessons()$$) = '42501',
+  'student gets 42501 from tutorial_class_lessons');
+SELECT pg_temp.check(pg_temp.err_as(:t, $$SELECT * FROM users.tutorial_class_overview()$$) IS NULL
+                 AND pg_temp.err_as(:t, $$SELECT * FROM users.tutorial_class_lessons('bbbbbbbb-0000-0000-0000-000000000001')$$) IS NULL,
+  'teacher can call the class RPCs');
+SELECT pg_temp.check(
+  (SELECT xp_total = 20 AND lessons_completed = 1 AND current_lesson_id = 'grundlagen.rendite-zinseszins'
+   FROM users.tutorial_class_overview() WHERE user_id = 'bbbbbbbb-0000-0000-0000-000000000001')
+  AND NOT EXISTS (SELECT 1 FROM users.tutorial_class_overview() WHERE user_id = 'bbbbbbbb-0000-0000-0000-00000000000f'),
+  'class overview: per-student progress and next lesson, staff excluded');
+SELECT pg_temp.check(
+  (SELECT count(*) = 1 FROM users.tutorial_class_lessons('bbbbbbbb-0000-0000-0000-000000000001')),
+  'class lessons: one row per passed lesson');
+
 \o
 \echo 'security.sql: ALL PASS'
 ROLLBACK;

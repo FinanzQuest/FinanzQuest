@@ -13,6 +13,8 @@ import { countryName, fmtPercent } from "./format"
 // world-atlas): very small countries (e.g. Singapore, Hong Kong) are not
 // drawn — the country list next to the map has them.
 
+const HIGHLIGHT =
+	"opacity:1;stroke:var(--foreground);background-color:color-mix(in oklab,var(--muted) 60%,transparent)"
 const WIDTH = 960
 const HEIGHT = 440
 
@@ -62,8 +64,20 @@ export function WorldMap({
 	const opacity = (w: number) =>
 		max > 0 ? 0.25 + 0.75 * Math.sqrt(w / max) : 0
 
+	// hover linking with the country list (ShareBars `linkCountries`): one
+	// rule pair per held country, pure CSS via :has() on .fq-country-scope
+	const linkCss = weights
+		.map(w => w.country)
+		.filter(c => /^[A-Z]{2}$/.test(c))
+		.map(
+			c =>
+				`.fq-country-scope:has(li[data-country="${c}"]:hover) path[data-country="${c}"],.fq-country-scope:has(path[data-country="${c}"]:hover) li[data-country="${c}"]{${HIGHLIGHT}}`
+		)
+		.join("")
+
 	return (
 		<figure className={cn("flex flex-col gap-3", className)}>
+			<style>{linkCss}</style>
 			<svg
 				viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
 				role="img"
@@ -71,13 +85,13 @@ export function WorldMap({
 				className="w-full h-auto"
 			>
 				{/* base layer: every country in the muted colour */}
-				<g className="fill-muted stroke-background [stroke-width:0.5]">
+				<g className="fq-map-in fill-muted stroke-background [stroke-width:0.5]">
 					{PATHS.map(({ id, d }) => (
 						<path key={id} d={d} />
 					))}
 				</g>
 				{/* held countries on top, shaded by their share */}
-				<g className="fill-primary stroke-background [stroke-width:0.5]">
+				<g className="fq-map-in fill-primary stroke-background [stroke-width:0.5]">
 					{PATHS.map(({ id, d }) => {
 						const held = byNumeric.get(id)
 						if (!held) return null
@@ -86,7 +100,8 @@ export function WorldMap({
 								key={id}
 								d={d}
 								fillOpacity={opacity(held.weight)}
-								className="transition-opacity hover:opacity-80"
+								data-country={held.code}
+								className="transition-opacity duration-150 ease-out hover:opacity-70"
 							>
 								<title>
 									{`${countryName(held.code)}: ${fmtPercent(held.weight)}`}
@@ -96,7 +111,7 @@ export function WorldMap({
 					})}
 				</g>
 			</svg>
-			<figcaption className="flex flex-row items-center gap-3 text-xs text-muted-foreground">
+			<figcaption className="flex flex-row flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
 				<span>{fmtPercent(0)}</span>
 				<span
 					aria-hidden
