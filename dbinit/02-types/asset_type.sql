@@ -2,4 +2,4 @@
 -- public.AssetType
 -- =============================================================================
 
-CREATE TYPE AssetType AS ENUM ('commodity', 'crypto', 'fund', 'stock');
+CREATE TYPE AssetType AS ENUM ('bond', 'commodity', 'crypto', 'fund', 'stock');

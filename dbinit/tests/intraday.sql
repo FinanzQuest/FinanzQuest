@@ -83,6 +83,11 @@ SELECT pg_temp.check(
 -- ---------------------------------------------------------------------------
 -- Trades execute at the newest bar
 -- ---------------------------------------------------------------------------
+-- buying an asset needs its tutorial path (asset 1 is a stock)
+INSERT INTO auth.users (id) VALUES ('dddddddd-0000-0000-0000-000000000001') ON CONFLICT DO NOTHING;
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT 'dddddddd-0000-0000-0000-000000000001', id, now(), now(), 1, 1
+FROM users.tutorial_lessons WHERE path_id = 'aktien';
 SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claims = '{"sub":"dddddddd-0000-0000-0000-000000000001","role":"authenticated"}';
 SELECT depots.buy_asset(1, 993001, 210);

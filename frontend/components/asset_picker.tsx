@@ -34,6 +34,7 @@ const assetTypeStyles = {
 	stock: "bg-stock/30 border-stock/60 text-stock",
 	crypto: "bg-crypto/30 border-crypto/60 text-crypto",
 	fund: "bg-fund/30 border-fund/60 text-fund",
+	bond: "bg-bond/30 border-bond/60 text-bond",
 	commodity: "bg-commodity/30 border-commodity/60 text-commodity",
 }
 

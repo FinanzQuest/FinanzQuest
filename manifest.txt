@@ -60,6 +60,13 @@ dbinit/03-tables/depots/transactions.sql
 dbinit/03-tables/depots/holdings.sql
 dbinit/03-tables/depots/daily_values.sql
 dbinit/03-tables/users/special_roles.sql
+# tutorial progress: catalog first; progress FKs depots.depots/transactions
+dbinit/03-tables/users/tutorial_paths.sql
+dbinit/03-tables/users/tutorial_path_requires.sql
+dbinit/03-tables/users/tutorial_lessons.sql
+dbinit/03-tables/users/lesson_progress.sql
+dbinit/03-tables/users/lesson_attempts.sql
+dbinit/03-tables/users/learner_stats.sql
 
 # --- 04-functions ------------------------------------------------------------
 dbinit/04-functions/api/search_assets.sql
@@ -108,6 +115,18 @@ dbinit/04-functions/depots/upsert_savings_plan.sql
 dbinit/04-functions/depots/delete_savings_plan.sql
 dbinit/04-functions/depots/grant_reward.sql
 dbinit/04-functions/depots/get_depot_overview.sql
+# tutorial (users schema, but after depots/: complete_lesson calls
+# depots.is_depot_member; tutorial_class_overview reads users.learner_overview
+# at call time)
+dbinit/04-functions/users/can_view_learner.sql
+dbinit/04-functions/users/is_lesson_unlocked.sql
+dbinit/04-functions/users/require_asset_tutorial.sql
+dbinit/04-functions/users/record_lesson_start.sql
+dbinit/04-functions/users/start_lesson.sql
+dbinit/04-functions/users/record_lesson_completion.sql
+dbinit/04-functions/users/complete_lesson.sql
+dbinit/04-functions/users/tutorial_class_overview.sql
+dbinit/04-functions/users/tutorial_class_lessons.sql
 
 # --- 05-materialized-views ---------------------------------------------------
 dbinit/05-materialized-views/api/asset_prices_weekly.sql
@@ -123,6 +142,7 @@ dbinit/06-views/depots/values.sql
 dbinit/06-views/depots/aggregated_values.sql
 dbinit/06-views/users/profile.sql
 dbinit/06-views/users/admin_overview.sql
+dbinit/06-views/users/learner_overview.sql
 dbinit/06-views/depots/depot_overview.sql
 dbinit/06-views/depots/savings_plans_budget_overview.sql
 dbinit/06-views/depots/savings_plans_with_asset.sql
@@ -157,6 +177,12 @@ dbinit/09-policies/depots/daily_values.sql
 dbinit/09-policies/depots/savings_plans.sql
 dbinit/09-policies/depots/savings_plans_budget.sql
 dbinit/09-policies/users/special_roles.sql
+dbinit/09-policies/users/tutorial_paths.sql
+dbinit/09-policies/users/tutorial_path_requires.sql
+dbinit/09-policies/users/tutorial_lessons.sql
+dbinit/09-policies/users/lesson_progress.sql
+dbinit/09-policies/users/lesson_attempts.sql
+dbinit/09-policies/users/learner_stats.sql
 
 # --- 10-grants ---------------------------------------------------------------
 dbinit/10-grants/api/assets.sql
@@ -217,6 +243,22 @@ dbinit/10-grants/users/revoke_role.sql
 dbinit/10-grants/users/has_role.sql
 dbinit/10-grants/users/has_any_role.sql
 dbinit/10-grants/users/stats.sql
+dbinit/10-grants/users/tutorial_paths.sql
+dbinit/10-grants/users/tutorial_path_requires.sql
+dbinit/10-grants/users/tutorial_lessons.sql
+dbinit/10-grants/users/lesson_progress.sql
+dbinit/10-grants/users/lesson_attempts.sql
+dbinit/10-grants/users/learner_stats.sql
+dbinit/10-grants/users/learner_overview.sql
+dbinit/10-grants/users/can_view_learner.sql
+dbinit/10-grants/users/is_lesson_unlocked.sql
+dbinit/10-grants/users/require_asset_tutorial.sql
+dbinit/10-grants/users/record_lesson_start.sql
+dbinit/10-grants/users/start_lesson.sql
+dbinit/10-grants/users/record_lesson_completion.sql
+dbinit/10-grants/users/complete_lesson.sql
+dbinit/10-grants/users/tutorial_class_overview.sql
+dbinit/10-grants/users/tutorial_class_lessons.sql
 
 # --- 11-config ---------------------------------------------------------------
 dbinit/11-config/config.sql
@@ -231,3 +273,4 @@ dbinit/12-jobs/refresh_asset_stats.sql
 dbinit/seed/assets.sql
 # after assets: links listings to their funds by symbol
 dbinit/seed/funds.sql
+dbinit/seed/tutorial_catalog.sql

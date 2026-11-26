@@ -20,9 +20,12 @@ SELECT
 FROM api.asset_prices d
 GROUP BY d.asset_id, time_bucket(INTERVAL '1 week', d.tstamp);
 
+-- start_offset NULL: refresh the whole history, not just the last weeks.
+-- The aggregate is materialized-only and the updater backfills years of daily
+-- rows after this view is created, so a short window left the 5J chart empty.
 SELECT add_continuous_aggregate_policy(
   'api.asset_prices_weekly',
-  start_offset      => INTERVAL '3 weeks',
+  start_offset      => NULL,
   end_offset        => INTERVAL '1 day',
   schedule_interval => INTERVAL '1 day'
 );

@@ -119,7 +119,16 @@ struct FundRow {
     name: String,
     provider: String,
     details_source: Option<String>,
+    domicile: Option<String>,
     symbol: String,
+}
+
+/// A non-US fund whose holdings come from the CSV of a US-listed twin of the
+/// same index (e.g. the UCITS MSCI World from iShares MSCI World / URTH,
+/// because BlackRock's UCITS CSV is gone). The twin tells the holdings and
+/// country weights, nothing about this fund's own size, cost or age.
+fn is_twin_source(domicile: Option<&str>, url: &str) -> bool {
+    url.contains("ishares.com/us/") && domicile.is_some_and(|d| d != "US")
 }
 
 #[derive(sqlx::FromRow)]
@@ -136,7 +145,7 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
     // --- funds -------------------------------------------------------------
     let funds: Vec<FundRow> = sqlx::query_as(
         "SELECT DISTINCT ON (f.id) f.id, f.name, a.details_provider::text AS provider,
-                f.details_source,
+                f.details_source, f.domicile::text AS domicile,
                 a.symbol
          FROM api.funds f
          JOIN api.assets a ON a.fund_id = f.id
@@ -162,7 +171,17 @@ pub async fn run(pool: &PgPool, opts: &Options) -> anyhow::Result<()> {
             (provider, _) => Err(Error::Format(format!("unknown provider {provider}"))),
         };
         match result {
-            Ok(details) => {
+            Ok(mut details) => {
+                if fund
+                    .details_source
+                    .as_deref()
+                    .is_some_and(|url| is_twin_source(fund.domicile.as_deref(), url))
+                {
+                    details.fund_size = None;
+                    details.holdings_count = None;
+                    details.ter = None;
+                    details.inception = None;
+                }
                 store_fund(pool, fund.id, &details).await?;
                 println!(
                     "{} ({}): {} holdings, {} countries",
@@ -371,5 +390,15 @@ mod tests {
         assert!((c["ZZ"] - 0.1).abs() < 1e-9);
         let c = complete(BTreeMap::from([("US", 0.8), ("JP", 0.4)]));
         assert!((c.values().sum::<f64>() - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn only_a_us_csv_for_a_non_us_fund_is_a_twin_source() {
+        let us = "https://www.ishares.com/us/products/239696/x/latest-holdings.csv";
+        let uk = "https://www.blackrock.com/uk/individual/products/251882/x/1.ajax";
+        assert!(is_twin_source(Some("IE"), us));
+        assert!(!is_twin_source(Some("US"), us));
+        assert!(!is_twin_source(None, us));
+        assert!(!is_twin_source(Some("IE"), uk));
     }
 }

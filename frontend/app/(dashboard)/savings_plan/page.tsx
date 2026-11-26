@@ -12,10 +12,10 @@ import {
 	EmptyTitle,
 } from "@/components/ui/empty"
 import type { SearchParams } from "@/database/custom_types"
+import { getServerClient } from "@/lib/auth"
 import { currencyFormat } from "@/lib/cash_display_string"
 import { getDepotIdWithInspect } from "@/lib/get_depot_id"
 import { formatDateString } from "@/lib/util"
-import { createClient } from "@/utils/supabase/server"
 import NewEntryDialog from "./new_dialog"
 import { SavingsPlanTable } from "./table"
 export default async function Page(props: {
@@ -112,7 +112,7 @@ export default async function Page(props: {
 }
 
 const dataFetcher = async (depotId: number) => {
-	const client = await createClient()
+	const client = await getServerClient()
 
 	const [budgetResult, savingsPlansResult] = await Promise.all([
 		client

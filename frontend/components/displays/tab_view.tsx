@@ -145,8 +145,9 @@ export default function PositionTabView({
 	const displays: Map<AssetType | "other", string> = new Map([
 		["stock", "Aktien"],
 		["fund", "ETFs"],
+		["bond", "Anleihen"],
 		["crypto", "Krypto"],
-		["commodity", "Kommoditäten"],
+		["commodity", "Rohstoffe"],
 		["other", "Andere"],
 	])
 

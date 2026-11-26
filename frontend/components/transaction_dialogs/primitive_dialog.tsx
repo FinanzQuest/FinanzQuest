@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation"
 import React from "react"
 import { toast } from "sonner"
+import { tutorialGateMessage } from "@/lib/asset_tutorial"
 import { Button } from "../ui/button"
 import {
 	Dialog,
@@ -25,6 +26,7 @@ interface props extends React.ComponentPropsWithoutRef<"div"> {
 	commission: number
 	triggerVariant?: "default" | "secondary" | "outline"
 	triggerSize?: "xs" | "sm" | "default" | "lg"
+	triggerClassName?: string
 }
 
 export type TStock = {
@@ -56,6 +58,7 @@ export default function PrimitiveDialog({
 	commission,
 	triggerVariant,
 	triggerSize,
+	triggerClassName,
 }: props) {
 	const router = useRouter()
 	const [isOpen, setOpen] = React.useState(false)
@@ -68,8 +71,12 @@ export default function PrimitiveDialog({
 		)
 
 		if (error) {
-			toast.error("Failed Transaction", {
-				description: error?.message,
+			const gate = tutorialGateMessage(error)
+			toast.error(gate ? "Kurs erforderlich" : "Failed Transaction", {
+				description: gate ?? error?.message,
+				action: gate
+					? { label: "Zum Tutorial", onClick: () => router.push("/tutorial") }
+					: undefined,
 			})
 			return
 		}
@@ -90,6 +97,7 @@ export default function PrimitiveDialog({
 					<Button
 						variant={triggerVariant}
 						size={triggerSize}
+						className={triggerClassName}
 						disabled={limit === 0}
 						onClick={() => {
 							setOpen(true)

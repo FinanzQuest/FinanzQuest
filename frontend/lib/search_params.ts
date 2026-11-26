@@ -19,7 +19,9 @@ export type Sort = keyof typeof SORTS
 export const ASSET_TYPES: { value: AssetType; label: string }[] = [
 	{ value: "stock", label: "Aktien" },
 	{ value: "fund", label: "ETFs" },
+	{ value: "bond", label: "Anleihen" },
 	{ value: "crypto", label: "Krypto" },
+	{ value: "commodity", label: "Rohstoffe" },
 ]
 
 export interface SearchFilter {
@@ -54,7 +56,7 @@ export function parseSearchParams(params: RawParams): SearchFilter {
 	const dist = one(params.dist)
 	const page = Number.parseInt(one(params.page), 10)
 	const types = list(params.type).filter((t): t is AssetType =>
-		["stock", "fund", "crypto", "commodity"].includes(t)
+		["stock", "fund", "bond", "crypto", "commodity"].includes(t)
 	)
 	return {
 		q: one(params.q).slice(0, 100),

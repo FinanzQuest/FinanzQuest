@@ -40,7 +40,7 @@ export default function NewEntryDialog({
 					)
 				}
 			></DialogTrigger>
-			<DialogContent className="overflow-clip">
+			<DialogContent className="overflow-x-clip">
 				<DialogHeader>
 					<DialogTitle>Neuer Eintrag</DialogTitle>
 					<DialogClose

@@ -133,7 +133,8 @@ export function relativeDateStringCompact(
 
 const asset_type_displays = new Map(
 	Object.entries({
-		commodity: "Ware",
+		bond: "Anleihe",
+		commodity: "Rohstoff",
 		crypto: "Krypto",
 		fund: "ETF",
 		stock: "Aktie",
@@ -146,6 +147,7 @@ export function asset_type_display(asset_type: string): string | null {
 
 const asset_type_colors = new Map(
 	Object.entries({
+		bond: "var(--color-bond)",
 		commodity: "var(--color-commodity)",
 		crypto: "var(--color-crypto)",
 		fund: "var(--color-fund)",
@@ -250,3 +252,25 @@ export function timeAxisLabel(timestamp: string, axis: TimeAxis = "date") {
 	const date = new Date(timestamp)
 	return axis === "date" ? toAbsoluteTimeString(date) : toDateTimeString(date)
 }
+
+/** Day without time, e.g. "24.11.2026". */
+export const dayFormat = Intl.DateTimeFormat("de-DE", {
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+})
+
+/** Signed percentage from a ratio (0.05 -> "+5,0 %"). */
+export const signedPercentFormat = Intl.NumberFormat("de-DE", {
+	style: "percent",
+	minimumFractionDigits: 1,
+	maximumFractionDigits: 1,
+	signDisplay: "exceptZero",
+})
+
+/** Signed currency amount, e.g. "+12,30 €". */
+export const signedCurrencyFormat = Intl.NumberFormat("de-DE", {
+	style: "currency",
+	currency: "EUR",
+	signDisplay: "exceptZero",
+})

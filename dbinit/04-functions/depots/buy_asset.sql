@@ -1,11 +1,13 @@
 -- =============================================================================
 -- depots.buy_asset(p_asset_id, p_depot_id, p_worth)
 -- Depends on: api.latest_prices, depots.depots, depots.transactions,
---             depots.is_depot_member, config.commission (11-config/config.sql)
+--             depots.is_depot_member, users.require_asset_tutorial,
+--             config.commission (11-config/config.sql)
 -- -----------------------------------------------------------------------------
 -- Buys p_worth (virtual money) of an asset at its latest price. The only way
 -- for a client to add a 'user' transaction: the ledger is not writable by
 -- clients, so price, amount and commission are always set here.
+-- The asset's tutorial path must be passed first (users.require_asset_tutorial).
 -- Locks the depot row first, so the cash check and the trigger's cash update
 -- are race-free (two concurrent buys cannot both spend the same cash).
 -- =============================================================================
@@ -30,6 +32,8 @@ BEGIN
   IF NOT depots.is_depot_member(p_depot_id) THEN
     RAISE EXCEPTION 'Not a member of depot %', p_depot_id USING ERRCODE = '42501';
   END IF;
+
+  PERFORM users.require_asset_tutorial(auth.uid(), p_asset_id);
 
   SELECT d.cash INTO v_cash FROM depots.depots d WHERE d.id = p_depot_id FOR NO KEY UPDATE;
   IF v_cash IS NULL THEN

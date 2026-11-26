@@ -216,7 +216,7 @@ function FundDetails({
 		.join(" · ")
 
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="fq-country-scope flex flex-col gap-6">
 			<Section title="Über den ETF" footer={source}>
 				<FactGrid facts={facts} />
 				<FactGrid facts={performanceFacts(performance)} />
@@ -230,7 +230,11 @@ function FundDetails({
 					)}
 					{countryShares.length > 0 && (
 						<Section title="Länder">
-							<ShareBars label="Länderanteile" shares={countryShares} />
+							<ShareBars
+								label="Länderanteile"
+								shares={countryShares}
+								linkCountries
+							/>
 						</Section>
 					)}
 				</div>
