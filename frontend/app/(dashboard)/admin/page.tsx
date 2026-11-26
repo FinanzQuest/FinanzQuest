@@ -1,13 +1,13 @@
 import { ErrorCard } from "@/components/cards/cards"
 import { PageShell } from "@/components/page_shell"
 import type { Client } from "@/database/custom_types"
+import { getServerClient } from "@/lib/auth"
 import { hasSpecialRoles } from "@/lib/db"
 import { numberFormat } from "@/lib/util"
-import { createClient } from "@/utils/supabase/server"
 import { AdminUsersTable } from "./table"
 
 export default async function Page() {
-	const client = await createClient()
+	const client = await getServerClient()
 	{
 		const { error, hasPermission } = await hasSpecialRoles(["teacher"], client)
 

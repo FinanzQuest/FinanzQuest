@@ -19,6 +19,7 @@ const seeds: PathSeed[] = [
 		title: "Grundlagen",
 		description: "Warum Vorsorge, Zinseszins und der Weg zum ersten ETF.",
 		icon: "sprout",
+		asset: { kind: "fund", tier: "base" },
 		requires: [],
 		status: "available",
 		lessons: [
@@ -32,6 +33,7 @@ const seeds: PathSeed[] = [
 	{
 		id: "aktien",
 		title: "Aktien",
+		asset: { kind: "stock", tier: "base" },
 		description: "Unternehmen bewerten und Kennzahlen richtig lesen.",
 		icon: "trending-up",
 		requires: ["grundlagen"],
@@ -47,6 +49,7 @@ const seeds: PathSeed[] = [
 	{
 		id: "etfs",
 		title: "ETFs",
+		asset: { kind: "fund", tier: "advanced" },
 		description: "Indizes, Länder, Sektoren und Kosten im Vergleich.",
 		icon: "pie-chart",
 		requires: ["grundlagen"],
@@ -78,9 +81,10 @@ const seeds: PathSeed[] = [
 	{
 		id: "anleihen",
 		title: "Anleihen",
+		asset: { kind: "bond", tier: "base" },
 		description: "Kupon, Zinsen, Bonität und der Risikopuffer im Depot.",
 		icon: "landmark",
-		requires: ["grundlagen"],
+		requires: ["aktien"],
 		status: "available",
 		lessons: [
 			["wie-anleihen-funktionieren", "Wie Anleihen funktionieren"],
@@ -93,6 +97,7 @@ const seeds: PathSeed[] = [
 	{
 		id: "portfolio",
 		title: "Portfoliotheorie",
+		asset: { kind: "stock", tier: "advanced" },
 		description: "Die Mathematik hinter Rendite, Risiko und Diversifikation.",
 		icon: "sigma",
 		requires: ["aktien", "anleihen"],
@@ -105,6 +110,64 @@ const seeds: PathSeed[] = [
 			["capm", "CAPM"],
 			["optionen-griechen", "Optionen & Griechen"],
 			["checkpoint", "Checkpoint Portfolio"],
+		],
+	},
+	{
+		id: "krypto",
+		title: "Kryptowährungen",
+		description: "Bitcoin & Co.: Grundlagen, Schwankungen und Risiken.",
+		icon: "bitcoin",
+		asset: { kind: "crypto", tier: "base" },
+		requires: ["aktien"],
+		status: "available",
+		lessons: [
+			["was-ist-krypto", "Was sind Kryptowährungen?"],
+			["schwankungen", "Extreme Schwankungen"],
+			["risiken-fallen", "Risiken & Fallen"],
+			["checkpoint", "Checkpoint Krypto"],
+		],
+	},
+	{
+		id: "krypto-vertiefung",
+		title: "Krypto vertieft",
+		description: "Optional: Blockchain-Technik und Krypto im Portfolio.",
+		icon: "bitcoin",
+		asset: { kind: "crypto", tier: "advanced" },
+		requires: ["krypto"],
+		status: "available",
+		lessons: [
+			["krypto-im-portfolio", "Krypto im Portfolio"],
+			["blockchain-technik", "Blockchain-Technik"],
+			["checkpoint", "Checkpoint Krypto vertieft"],
+		],
+	},
+	{
+		id: "rohstoffe",
+		title: "Rohstoffe",
+		description: "Gold, Öl und Co.: Grundlagen und was Preise bewegt.",
+		icon: "gem",
+		asset: { kind: "commodity", tier: "base" },
+		requires: ["aktien"],
+		status: "available",
+		lessons: [
+			["was-sind-rohstoffe", "Was sind Rohstoffe?"],
+			["gold-safe-haven", "Gold & Safe Haven"],
+			["angebot-nachfrage", "Angebot, Nachfrage & Preise"],
+			["checkpoint", "Checkpoint Rohstoffe"],
+		],
+	},
+	{
+		id: "rohstoffe-vertiefung",
+		title: "Rohstoffe vertieft",
+		description: "Optional: Futures, Rollkosten und Rohstoffe im Portfolio.",
+		icon: "gem",
+		asset: { kind: "commodity", tier: "advanced" },
+		requires: ["rohstoffe"],
+		status: "available",
+		lessons: [
+			["rohstoffe-im-portfolio", "Rohstoffe im Portfolio"],
+			["futures-contango", "Futures & Contango"],
+			["checkpoint", "Checkpoint Rohstoffe vertieft"],
 		],
 	},
 	{

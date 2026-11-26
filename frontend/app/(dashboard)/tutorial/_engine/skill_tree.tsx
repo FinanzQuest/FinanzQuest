@@ -1,10 +1,12 @@
 import {
+	Bitcoin,
 	BookOpen,
 	Brain,
 	Check,
 	Crown,
 	Dices,
 	Flame,
+	Gem,
 	Landmark,
 	Lock,
 	type LucideIcon,
@@ -17,6 +19,7 @@ import {
 	Trophy,
 } from "lucide-react"
 import Link from "next/link"
+import { assetKindLabel } from "@/lib/asset_tutorial"
 import { numberFormat } from "@/lib/util"
 import { cn } from "@/lib/utils"
 import { pathLessons } from "./catalog"
@@ -38,6 +41,8 @@ const icons: Record<PathIcon, LucideIcon> = {
 	sigma: Sigma,
 	receipt: Receipt,
 	dices: Dices,
+	bitcoin: Bitcoin,
+	gem: Gem,
 }
 
 // winding trunk: horizontal offsets (px) cycled along the nodes
@@ -62,6 +67,13 @@ export function SkillTree({
 		id => byId[id]
 	)
 	const portfolio = byId.portfolio
+	// asset classes: required base course, then its optional advanced course
+	const assetClasses = [
+		"krypto",
+		"krypto-vertiefung",
+		"rohstoffe",
+		"rohstoffe-vertiefung",
+	].map(id => byId[id])
 	const stubs = paths.filter(p => p.status === "soon")
 
 	const section = (p: PathDef) => (
@@ -84,6 +96,10 @@ export function SkillTree({
 			</div>
 			<Fork columns={1} />
 			<div className="mx-auto w-full max-w-md">{section(portfolio)}</div>
+			<Fork columns={assetClasses.length} />
+			<div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+				{assetClasses.map(section)}
+			</div>
 			<div className="grid gap-4 sm:grid-cols-2">{stubs.map(section)}</div>
 		</div>
 	)
@@ -193,6 +209,13 @@ function PathSection({
 				<div className="min-w-0">
 					<h2 className="font-bold leading-tight">{path.title}</h2>
 					<p className="text-sm text-muted-foreground">{path.description}</p>
+					{path.asset && (
+						<span className="mt-1 inline-block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+							{path.asset.tier === "base"
+								? `Pflicht für ${assetKindLabel[path.asset.kind]}`
+								: "Optional"}
+						</span>
+					)}
 					{soon && (
 						<span className="mt-1 inline-block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 							bald verfügbar

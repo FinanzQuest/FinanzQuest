@@ -19,10 +19,22 @@ export interface PlayerState {
 export type PlayerAction =
 	| { type: "check"; correct: boolean }
 	| { type: "continue" }
+	| { type: "back" }
 
 function phaseFor(kinds: StepKind[], idx: number | undefined): Phase {
 	if (idx === undefined) return "done"
 	return kinds[idx] === "exercise" ? "answering" : "step"
+}
+
+/**
+ * Going back is only for re-reading explanation cards. Exercises that are
+ * already answered stay closed (no re-answering after seeing the solution),
+ * and so does the feedback screen of the exercise just answered.
+ */
+export function canGoBack(state: PlayerState): boolean {
+	if (state.phase !== "step" && state.phase !== "answering") return false
+	const prev = state.queue[state.pos - 1]
+	return prev !== undefined && state.kinds[prev] === "card"
 }
 
 export function initPlayer(kinds: StepKind[]): PlayerState {
@@ -57,6 +69,16 @@ export function playerReducer(
 					: state.firstTry,
 				queue: requeue ? [...state.queue, current] : state.queue,
 				requeued: requeue ? [...state.requeued, current] : state.requeued,
+			}
+		}
+		case "back": {
+			if (!canGoBack(state)) return state
+			const pos = state.pos - 1
+			return {
+				...state,
+				pos,
+				phase: phaseFor(state.kinds, state.queue[pos]),
+				lastCorrect: null,
 			}
 		}
 		case "continue": {

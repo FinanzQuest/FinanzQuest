@@ -52,6 +52,7 @@
     --overlay-5: oklch(64% 0.17 25);
     --overlay-6: oklch(58% 0.12 130);
 
+    --color-bond: hsl(205 70% 42%);
     --color-commodity: hsl(43 74% 45%);
     --color-crypto: hsl(262 52% 47%);
     --color-fund: hsl(24 80% 48%);
@@ -104,6 +105,7 @@
     --overlay-4: oklch(78% 0.13 200);
     --overlay-5: oklch(74% 0.16 25);
     --overlay-6: oklch(76% 0.13 130);
+    --color-bond: oklch(72% 0.12 235);
     --color-commodity: hsl(52.16 66.81% 55.1%);
     --color-crypto: oklch(63.461% 0.14547 270.701);
     --color-fund: oklch(78.397% 0.18622 151.251);
@@ -165,6 +167,7 @@
   --color-overlay-5: var(--overlay-5);
   --color-overlay-6: var(--overlay-6);
   --color-loss: var(--loss);
+  --color-bond: var(--color-bond);
   --color-commodity: var(--color-commodity);
   --color-crypto: var(--color-crypto);
   --color-fund: var(--color-fund);

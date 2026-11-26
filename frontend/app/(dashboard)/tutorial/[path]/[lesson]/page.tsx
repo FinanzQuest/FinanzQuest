@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation"
+import { connection } from "next/server"
 import { Suspense } from "react"
 import { getDepotId } from "@/lib/get_depot_id"
 import { serverSlots } from "../../_content/server_slots"
@@ -21,6 +22,8 @@ export default function Page({ params }: { params: Params }) {
 }
 
 async function Lesson({ params }: { params: Params }) {
+	// per user: the auth client reads the clock before the cookies
+	await connection()
 	const { path, lesson } = await params
 	const meta = getLessonMeta(`${path}.${lesson}`)
 	if (!meta) notFound()

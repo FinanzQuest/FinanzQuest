@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { tutorialGateMessage } from "@/lib/asset_tutorial"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 
@@ -69,7 +70,10 @@ export default function NewEntryForm({
 		})
 
 		if (error) {
-			toast.error(`Fehler beim Erstellen des Sparplans ${error.message}`)
+			toast.error(
+				tutorialGateMessage(error) ??
+					`Fehler beim Erstellen des Sparplans ${error.message}`
+			)
 		} else {
 			toast.success("Sparplan erfolgreich erstellt")
 			if (onSuccess) {

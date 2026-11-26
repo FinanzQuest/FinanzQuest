@@ -7,6 +7,10 @@ export type PathId =
 	| "psychologie"
 	| "anleihen"
 	| "portfolio"
+	| "krypto"
+	| "krypto-vertiefung"
+	| "rohstoffe"
+	| "rohstoffe-vertiefung"
 	| "steuern"
 	| "spekulation"
 
@@ -20,6 +24,11 @@ export type PathIcon =
 	| "sigma"
 	| "receipt"
 	| "dices"
+	| "bitcoin"
+	| "gem"
+
+/** Asset types a tutorial path can belong to (api.assets.asset_type). */
+export type AssetKind = "stock" | "fund" | "bond" | "crypto" | "commodity"
 
 export interface PathDef {
 	id: PathId
@@ -29,6 +38,11 @@ export interface PathDef {
 	/** paths that must be fully done before this one unlocks */
 	requires: PathId[]
 	status: "available" | "soon"
+	/**
+	 * Asset the path belongs to. `base` = required before buying it (enforced
+	 * by users.require_asset_tutorial), `advanced` = optional deepening.
+	 */
+	asset?: { kind: AssetKind; tier: "base" | "advanced" }
 	lessonIds: string[]
 }
 

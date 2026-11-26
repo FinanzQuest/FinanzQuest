@@ -1,12 +1,18 @@
 import "server-only"
+import { connection } from "next/server"
 import { cache } from "react"
 import { createClient } from "@/utils/supabase/server"
 
 /**
  * The Supabase server client of the current request. React `cache` makes it
- * one client per server render instead of one per helper.
+ * one client per server render instead of one per helper. The client is
+ * per request: `connection()` keeps it (the auth client reads the clock
+ * before the cookies) and everything built on it out of the prerender.
  */
-export const getServerClient = cache(createClient)
+export const getServerClient = cache(async () => {
+	await connection()
+	return createClient()
+})
 
 /**
  * The logged-in user, verified with the auth server once per request: layout,

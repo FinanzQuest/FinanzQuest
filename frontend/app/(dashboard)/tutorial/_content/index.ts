@@ -10,6 +10,10 @@ const pathModules: Partial<Record<PathId, () => Promise<PathModule>>> = {
 	psychologie: () => import("./psychologie"),
 	anleihen: () => import("./anleihen"),
 	portfolio: () => import("./portfolio"),
+	krypto: () => import("./krypto"),
+	"krypto-vertiefung": () => import("./krypto_vertiefung"),
+	rohstoffe: () => import("./rohstoffe"),
+	"rohstoffe-vertiefung": () => import("./rohstoffe_vertiefung"),
 }
 
 /** lessonId -> dynamic import of that lesson's content. */

@@ -1,3 +1,4 @@
+import { connection } from "next/server"
 import { Suspense } from "react"
 import { paths } from "./_engine/catalog"
 import { getProgress } from "./_engine/progress"
@@ -15,6 +16,8 @@ export default function Page() {
 }
 
 async function Overview() {
+	// per user: the auth client reads the clock before the cookies
+	await connection()
 	const progress = await getProgress()
 	const pathStates = Object.fromEntries(
 		paths.map(p => [p.id, getPathState(p, progress)])

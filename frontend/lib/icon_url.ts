@@ -9,6 +9,7 @@ export function getIconURL(
 	const query = `?format=webp&size=${iconSize}`
 	switch (asset_type) {
 		case "stock":
+		case "bond":
 			return `${pre}/symbol/${symbol}${query}`
 
 		case "crypto": {

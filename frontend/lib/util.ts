@@ -133,7 +133,8 @@ export function relativeDateStringCompact(
 
 const asset_type_displays = new Map(
 	Object.entries({
-		commodity: "Ware",
+		bond: "Anleihe",
+		commodity: "Rohstoff",
 		crypto: "Krypto",
 		fund: "ETF",
 		stock: "Aktie",
@@ -146,6 +147,7 @@ export function asset_type_display(asset_type: string): string | null {
 
 const asset_type_colors = new Map(
 	Object.entries({
+		bond: "var(--color-bond)",
 		commodity: "var(--color-commodity)",
 		crypto: "var(--color-crypto)",
 		fund: "var(--color-fund)",

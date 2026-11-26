@@ -2567,7 +2567,7 @@ export type Database = {
 			uuid_version: { Args: { uuid: string }; Returns: number }
 		}
 		Enums: {
-			assettype: "commodity" | "crypto" | "fund" | "stock"
+			assettype: "bond" | "commodity" | "crypto" | "fund" | "stock"
 			detailsprovider: "ishares" | "vanguard" | "yahoo"
 			priceprovider: "alpaca" | "yahoo"
 			savingsperiod: "annually" | "monthly" | "weekly" | "daily"
@@ -2839,7 +2839,7 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
-			assettype: ["commodity", "crypto", "fund", "stock"],
+			assettype: ["bond", "commodity", "crypto", "fund", "stock"],
 			detailsprovider: ["ishares", "vanguard", "yahoo"],
 			priceprovider: ["alpaca", "yahoo"],
 			savingsperiod: ["annually", "monthly", "weekly", "daily"],

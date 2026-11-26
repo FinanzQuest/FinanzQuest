@@ -1,6 +1,6 @@
 "use client"
 
-import { X } from "lucide-react"
+import { ArrowLeft, ArrowRight, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { type ReactNode, useEffect, useReducer, useRef, useState } from "react"
@@ -38,6 +38,7 @@ import {
 import { isCorrect as isTfCorrect, TrueFalse } from "./exercises/true_false"
 import { FeedbackBar } from "./feedback_bar"
 import {
+	canGoBack,
 	currentStepIndex,
 	getProgressRatio,
 	getScore,
@@ -119,6 +120,16 @@ export function LessonPlayer(props: LessonPlayerProps) {
 			{...props}
 			onRetry={() => setAttempt(a => a + 1)}
 		/>
+	)
+}
+
+/** Elements that use the arrow keys themselves (sliders, option groups, fields). */
+function usesArrowKeys(target: EventTarget | null) {
+	return (
+		target instanceof HTMLElement &&
+		!!target.closest(
+			'input, textarea, select, [role="slider"], [role="radio"], [role="radiogroup"], [contenteditable="true"]'
+		)
 	)
 }
 
@@ -259,13 +270,31 @@ function PlayerInner({
 		} else dispatch({ type: "continue" })
 	}
 
-	// Enter = check / continue
+	const back = canGoBack(state)
+
+	// Enter = check / continue, ArrowLeft / ArrowRight = previous card /
+	// continue (the right arrow never checks an answer: that stays on Enter)
+	const forward = state.phase === "step" || state.phase === "feedback"
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key !== "Enter" || e.repeat || exitOpen || state.phase === "done")
+			if (e.repeat || exitOpen || state.phase === "done") return
+			if (e.key === "Enter") {
+				e.preventDefault()
+				act()
+			} else if (
+				usesArrowKeys(e.target) ||
+				e.altKey ||
+				e.metaKey ||
+				e.ctrlKey
+			) {
 				return
-			e.preventDefault()
-			act()
+			} else if (e.key === "ArrowLeft" && back) {
+				e.preventDefault()
+				dispatch({ type: "back" })
+			} else if (e.key === "ArrowRight" && forward) {
+				e.preventDefault()
+				dispatch({ type: "continue" })
+			}
 		}
 		window.addEventListener("keydown", onKey)
 		return () => window.removeEventListener("keydown", onKey)
@@ -337,14 +366,26 @@ function PlayerInner({
 					/>
 				) : (
 					<div className="border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-						<div className="mx-auto flex w-full max-w-2xl">
+						<div className="mx-auto flex w-full max-w-2xl gap-3">
+							{back && (
+								<Button
+									variant="outline"
+									size="lg"
+									className="h-11 text-base"
+									onClick={() => dispatch({ type: "back" })}
+								>
+									<ArrowLeft />
+									Zurück
+								</Button>
+							)}
 							<Button
 								size="lg"
-								className="h-11 w-full text-base sm:ml-auto sm:w-auto sm:px-8"
+								className="h-11 flex-1 text-base sm:ml-auto sm:flex-none sm:px-8"
 								disabled={state.phase === "answering" && !ready}
 								onClick={act}
 							>
 								{state.phase === "answering" ? "Prüfen" : "Weiter"}
+								{state.phase === "step" && <ArrowRight />}
 							</Button>
 						</div>
 					</div>

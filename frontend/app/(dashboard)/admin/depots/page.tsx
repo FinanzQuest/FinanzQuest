@@ -1,6 +1,6 @@
 import { ErrorCard } from "@/components/cards/cards"
 import { PageShell } from "@/components/page_shell"
-import { createClient } from "@/utils/supabase/server"
+import { getServerClient } from "@/lib/auth"
 import { DepotTable } from "./table"
 
 export default async function Page({
@@ -31,7 +31,7 @@ export default async function Page({
 }
 
 async function dataFetcher(user_id?: string) {
-	const client = await createClient()
+	const client = await getServerClient()
 	const [
 		{ data: depots, error: depotError },
 		{ data: profile, error: profileError },
