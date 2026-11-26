@@ -41,3 +41,7 @@ while IFS= read -r line; do
     -v SERVICE_WORKER_PASSWORD="$SERVICE_WORKER_PASSWORD" \
     -f "$BASE/$line"
 done < "$MANIFEST"
+
+# a fresh database has every migration's changes already: record them, so
+# migrate.sh only ever applies files added later
+sh "$(dirname "$0")/migrate.sh" --baseline-all

@@ -68,9 +68,23 @@ deployed version at boot; `nixos-rebuild` never restarts the stack.
 Not automated (on purpose):
 
 - **Database migrations.** `db-init` only initialises an empty database.
-  Apply new `dbinit/migrations/` files by hand, *before* merging code that
-  needs them:
-  `sudo -iu finanzquest finanzquest-ctl compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 < dbinit/migrations/<file>.sql`
+  Existing databases are upgraded with `dbinit/migrate.sh`, run inside the
+  `db-init` service (the migrations use `\ir` includes, so piping a file into
+  `psql` does not work). It applies the files of `dbinit/migrations/` in
+  order as superuser, stops at the first error and records each applied file
+  in `public.schema_migrations`, so nothing runs twice. Back up first, and
+  apply *before* merging code that needs them:
+  `sudo -iu finanzquest finanzquest-ctl compose run --rm -T db-init sh /init/dbinit/migrate.sh [--status | <file>.sql ...]`
+  - Once on an existing database (prod): `... migrate.sh --baseline <last migration it already has>`
+    records everything up to that file as applied without running it; check
+    with `--status`. Databases built from the manifest are baselined by
+    `apply_manifest.sh`. Until a baseline exists, `migrate.sh` refuses to apply.
+  - After that `migrate.sh` (no arguments) applies all pending files.
+  - The server's `dbinit/` is the one of the last deploy (`app/dbinit/` in the
+    service user's state directory), so a migration that ships with a PR is
+    not there before that PR is deployed: copy the files into
+    `app/dbinit/migrations/` (and `migrate.sh` into `app/dbinit/` the first
+    time) before running it.
 - **Module updates.** Changes to `nix/module.nix` or `nix/finanzquest-ctl.sh`
   reach the server with `nix flake update finanzquest && nixos-rebuild switch`.
 
