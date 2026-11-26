@@ -120,6 +120,7 @@ dbinit/04-functions/depots/get_depot_overview.sql
 # at call time)
 dbinit/04-functions/users/can_view_learner.sql
 dbinit/04-functions/users/is_lesson_unlocked.sql
+dbinit/04-functions/users/require_asset_tutorial.sql
 dbinit/04-functions/users/record_lesson_start.sql
 dbinit/04-functions/users/start_lesson.sql
 dbinit/04-functions/users/record_lesson_completion.sql
@@ -251,6 +252,7 @@ dbinit/10-grants/users/learner_stats.sql
 dbinit/10-grants/users/learner_overview.sql
 dbinit/10-grants/users/can_view_learner.sql
 dbinit/10-grants/users/is_lesson_unlocked.sql
+dbinit/10-grants/users/require_asset_tutorial.sql
 dbinit/10-grants/users/record_lesson_start.sql
 dbinit/10-grants/users/start_lesson.sql
 dbinit/10-grants/users/record_lesson_completion.sql

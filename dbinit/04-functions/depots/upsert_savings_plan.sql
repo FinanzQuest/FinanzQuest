@@ -1,12 +1,13 @@
 -- =============================================================================
 -- depots.upsert_savings_plan(p_depot_id, p_asset_id, p_worth, p_frequency)
 -- Depends on: depots.savings_plans, depots.is_depot_member,
---             depots.check_savings_budget, public.SavingsPeriod,
+--             depots.check_savings_budget, users.require_asset_tutorial, public.SavingsPeriod,
 --             auth.uid() (auth schema, created by GoTrue)
 -- -----------------------------------------------------------------------------
 -- Creates or replaces the depot's plan for an asset. Depot members only, and
 -- only within the monthly budget. SECURITY DEFINER because clients have no
--- direct write access to depots.savings_plans.
+-- direct write access to depots.savings_plans. The asset's tutorial path must
+-- be passed first (users.require_asset_tutorial).
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION depots.upsert_savings_plan(
@@ -26,6 +27,8 @@ BEGIN
   IF p_worth IS NULL OR p_worth <= 0 THEN
     RAISE EXCEPTION 'Amount must be positive' USING ERRCODE = '22023';
   END IF;
+
+  PERFORM users.require_asset_tutorial(auth.uid(), p_asset_id);
 
   PERFORM depots.check_savings_budget(
     p_depot_id,

@@ -92,9 +92,9 @@ INSERT INTO depots.depots (id, created, cash, cash_start, users) OVERRIDING SYST
 \set s1 '''cccccccc-0000-0000-0000-000000000001'''
 \set s2 '''cccccccc-0000-0000-0000-000000000002'''
 
-SELECT pg_temp.check((SELECT count(*) FROM users.tutorial_lessons) = 33
+SELECT pg_temp.check((SELECT count(*) FROM users.tutorial_lessons) = 47
                  AND (SELECT count(*) FROM users.tutorial_path_requires WHERE path_id = 'portfolio') = 2,
-  'catalog seeded (33 lessons, portfolio requires two paths)');
+  'catalog seeded (47 lessons, portfolio requires two paths)');
 
 -- ---------------------------------------------------------------------------
 -- Locking (checked when the attempt starts).
@@ -214,24 +214,27 @@ SELECT pg_temp.check(pg_temp.finish(:s1, 'grundlagen.checkpoint', 0.7, 992001) I
   'checkpoint at min_score passes');
 SELECT pg_temp.check((SELECT cash FROM depots.depots WHERE id = 992001) = 10900, 'checkpoint pays 500');
 SELECT pg_temp.check(users.is_lesson_unlocked(:s1, 'aktien.unternehmen-bewerten')
-                 AND users.is_lesson_unlocked(:s1, 'anleihen.wie-anleihen-funktionieren')
+                 AND users.is_lesson_unlocked(:s1, 'etfs.index-bauen')
+                 AND users.is_lesson_unlocked(:s1, 'psychologie.crashs')
+                 AND NOT users.is_lesson_unlocked(:s1, 'anleihen.wie-anleihen-funktionieren')
                  AND NOT users.is_lesson_unlocked(:s1, 'portfolio.rendite-volatilitaet-mathe'),
-  'grundlagen done unlocks the branches, not portfolio');
+  'grundlagen done unlocks aktien and etfs; anleihen wait for aktien');
 INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery, reward_paid_at)
 SELECT :s1, id, now(), now(), 1, 3, now() FROM users.tutorial_lessons WHERE path_id = 'aktien';
-SELECT pg_temp.check(NOT users.is_lesson_unlocked(:s1, 'portfolio.rendite-volatilitaet-mathe'),
-  'portfolio needs anleihen too');
+SELECT pg_temp.check(users.is_lesson_unlocked(:s1, 'anleihen.wie-anleihen-funktionieren')
+                 AND NOT users.is_lesson_unlocked(:s1, 'portfolio.rendite-volatilitaet-mathe'),
+  'aktien done unlocks anleihen; portfolio needs anleihen too');
 INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery, reward_paid_at)
 SELECT :s1, id, now(), now(), 1, 3, now() FROM users.tutorial_lessons WHERE path_id = 'anleihen';
 SELECT pg_temp.check(users.is_lesson_unlocked(:s1, 'portfolio.rendite-volatilitaet-mathe'),
   'aktien + anleihen unlock portfolio');
 
 -- A passed lesson stays repeatable even if the catalog later locks its path.
-INSERT INTO users.tutorial_path_requires (path_id, requires_path_id) VALUES ('aktien', 'etfs');
+INSERT INTO users.tutorial_path_requires (path_id, requires_path_id) VALUES ('aktien', 'portfolio');
 SELECT pg_temp.check(pg_temp.err_as(:s1, $$SELECT users.start_lesson('aktien.unternehmen-bewerten')$$) IS NULL
                  AND NOT users.is_lesson_unlocked(:s1, 'aktien.unternehmen-bewerten'),
   'repeat of a passed lesson skips the lock check');
-DELETE FROM users.tutorial_path_requires WHERE path_id = 'aktien' AND requires_path_id = 'etfs';
+DELETE FROM users.tutorial_path_requires WHERE path_id = 'aktien' AND requires_path_id = 'portfolio';
 
 SELECT pg_temp.check(pg_temp.raises($$DELETE FROM users.tutorial_lessons WHERE id = 'grundlagen.warum-vorsorgen'$$)
                  AND pg_temp.raises($$DELETE FROM users.tutorial_paths WHERE id = 'grundlagen'$$),
@@ -274,6 +277,65 @@ SELECT pg_temp.check(pg_temp.raises($$SELECT users.record_lesson_start('cccccccc
   '21st attempt on the same Berlin day rejected');
 SELECT pg_temp.check(users.record_lesson_start(:s2, 'grundlagen.warum-vorsorgen', '2026-02-01 23:01+00') IS NOT NULL,
   '... allowed again after Berlin midnight');
+
+-- ---------------------------------------------------------------------------
+-- Asset gate: users.require_asset_tutorial (stock -> aktien, fund -> grundlagen,
+-- bond -> anleihen, crypto -> krypto, commodity -> rohstoffe), called by buy_asset and
+-- upsert_savings_plan. g is a fresh learner without progress; s2 has a few grundlagen lessons only.
+-- ---------------------------------------------------------------------------
+INSERT INTO auth.users (id) VALUES ('cccccccc-0000-0000-0000-000000000003');
+\set g '''cccccccc-0000-0000-0000-000000000003'''
+
+CREATE FUNCTION pg_temp.gate(p_uid uuid, p_type text) RETURNS text
+LANGUAGE plpgsql AS $$
+DECLARE v_id bigint; v_hint text;
+BEGIN
+  SELECT id INTO v_id FROM api.assets WHERE asset_type = p_type::assettype ORDER BY id LIMIT 1;
+  IF v_id IS NULL THEN RETURN 'no asset'; END IF;
+  PERFORM users.require_asset_tutorial(p_uid, v_id);
+  RETURN 'ok';
+EXCEPTION WHEN SQLSTATE '42501' THEN
+  GET STACKED DIAGNOSTICS v_hint = PG_EXCEPTION_HINT;
+  RETURN v_hint;
+END $$;
+
+SELECT pg_temp.check(pg_temp.gate(:g, 'stock') = 'aktien' AND pg_temp.gate(:g, 'fund') = 'grundlagen'
+                 AND pg_temp.gate(:g, 'bond') = 'anleihen'
+                 AND pg_temp.gate(:g, 'crypto') = 'krypto' AND pg_temp.gate(:g, 'commodity') = 'rohstoffe',
+  'each asset type names its tutorial path');
+SELECT pg_temp.check(NOT pg_temp.raises($$SELECT users.require_asset_tutorial(NULL, 1)$$), 'no user (internal call) is not gated');
+
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT :g, id, now(), now(), 1, 1 FROM users.tutorial_lessons WHERE path_id = 'grundlagen' AND NOT is_checkpoint;
+SELECT pg_temp.check(pg_temp.gate(:g, 'fund') = 'grundlagen', 'all lessons of the path count, the checkpoint too');
+
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT :g, id, now(), now(), 1, 1 FROM users.tutorial_lessons WHERE path_id = 'grundlagen' AND is_checkpoint;
+SELECT pg_temp.check(pg_temp.gate(:g, 'fund') = 'ok' AND pg_temp.gate(:g, 'stock') = 'aktien',
+  'the introduction opens ETFs (the optional ETF course is not needed), not stocks');
+SELECT pg_temp.check(NOT users.is_lesson_unlocked(:g, 'krypto.was-ist-krypto')
+                 AND users.is_lesson_unlocked(:g, 'etfs.index-bauen'),
+  'the ETF course is open but optional; crypto waits for the stock course');
+
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT :g, id, now(), now(), 1, 1 FROM users.tutorial_lessons WHERE path_id = 'aktien';
+SELECT pg_temp.check(pg_temp.gate(:g, 'stock') = 'ok' AND pg_temp.gate(:g, 'bond') = 'anleihen'
+                 AND pg_temp.gate(:g, 'crypto') = 'krypto' AND pg_temp.gate(:g, 'commodity') = 'rohstoffe',
+  'passing aktien opens stocks; bonds, crypto and commodities have their own paths');
+SELECT pg_temp.check(NOT users.is_lesson_unlocked(:s2, 'krypto.was-ist-krypto')
+                 AND (SELECT count(*) FROM users.tutorial_path_requires WHERE requires_path_id = 'aktien') = 4
+                 AND (SELECT requires_path_id FROM users.tutorial_path_requires WHERE path_id = 'etfs') = 'grundlagen'
+                 AND users.is_lesson_unlocked(:g, 'krypto.was-ist-krypto')
+                 AND users.is_lesson_unlocked(:g, 'rohstoffe.was-sind-rohstoffe')
+                 AND users.is_lesson_unlocked(:g, 'anleihen.wie-anleihen-funktionieren'),
+  'etfs follows grundlagen; anleihen, krypto, rohstoffe and portfolio follow aktien');
+SELECT pg_temp.check(pg_temp.gate(:g, 'crypto') = 'krypto', 'the advanced krypto course does not unlock buying');
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT :g, id, now(), now(), 1, 1 FROM users.tutorial_lessons WHERE path_id = 'krypto';
+SELECT pg_temp.check(pg_temp.gate(:g, 'crypto') = 'ok'
+                 AND NOT users.is_lesson_unlocked(:s2, 'krypto-vertiefung.krypto-im-portfolio')
+                 AND users.is_lesson_unlocked(:g, 'krypto-vertiefung.krypto-im-portfolio'),
+  'the base krypto course alone opens crypto; the advanced course is optional and follows it');
 
 \o
 \echo 'tutorial.sql: ALL PASS'

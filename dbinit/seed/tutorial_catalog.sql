@@ -16,7 +16,7 @@
 -- positions are unique: move the managed rows out of the way first so a
 -- reorder cannot collide mid-statement (the upserts set them back)
 UPDATE users.tutorial_paths SET position = -position - 1
-WHERE id IN ('grundlagen', 'aktien', 'etfs', 'psychologie', 'anleihen', 'portfolio') AND position >= 0;
+WHERE id IN ('grundlagen', 'aktien', 'etfs', 'psychologie', 'anleihen', 'portfolio', 'krypto', 'krypto-vertiefung', 'rohstoffe', 'rohstoffe-vertiefung') AND position >= 0;
 
 INSERT INTO users.tutorial_paths (id, position) VALUES
   ('grundlagen', 1),
@@ -24,7 +24,11 @@ INSERT INTO users.tutorial_paths (id, position) VALUES
   ('etfs', 3),
   ('psychologie', 4),
   ('anleihen', 5),
-  ('portfolio', 6)
+  ('portfolio', 6),
+  ('krypto', 7),
+  ('krypto-vertiefung', 8),
+  ('rohstoffe', 9),
+  ('rohstoffe-vertiefung', 10)
 ON CONFLICT (id) DO UPDATE SET position = EXCLUDED.position;
 
 DELETE FROM users.tutorial_path_requires
@@ -32,18 +36,26 @@ WHERE (path_id, requires_path_id) NOT IN (VALUES
   ('aktien', 'grundlagen'),
   ('etfs', 'grundlagen'),
   ('psychologie', 'grundlagen'),
-  ('anleihen', 'grundlagen'),
+  ('anleihen', 'aktien'),
   ('portfolio', 'aktien'),
-  ('portfolio', 'anleihen')
+  ('portfolio', 'anleihen'),
+  ('krypto', 'aktien'),
+  ('krypto-vertiefung', 'krypto'),
+  ('rohstoffe', 'aktien'),
+  ('rohstoffe-vertiefung', 'rohstoffe')
 );
 
 INSERT INTO users.tutorial_path_requires (path_id, requires_path_id) VALUES
   ('aktien', 'grundlagen'),
   ('etfs', 'grundlagen'),
   ('psychologie', 'grundlagen'),
-  ('anleihen', 'grundlagen'),
+  ('anleihen', 'aktien'),
   ('portfolio', 'aktien'),
-  ('portfolio', 'anleihen')
+  ('portfolio', 'anleihen'),
+  ('krypto', 'aktien'),
+  ('krypto-vertiefung', 'krypto'),
+  ('rohstoffe', 'aktien'),
+  ('rohstoffe-vertiefung', 'rohstoffe')
 ON CONFLICT DO NOTHING;
 
 UPDATE users.tutorial_lessons SET position = -position - 1
@@ -56,7 +68,11 @@ WHERE id IN (
   'psychologie.checkpoint', 'anleihen.wie-anleihen-funktionieren', 'anleihen.zinsen-und-kurse', 'anleihen.bonitaet',
   'anleihen.anleihen-im-portfolio', 'anleihen.checkpoint', 'portfolio.rendite-volatilitaet-mathe', 'portfolio.kovarianz-korrelation',
   'portfolio.sharpe-alpha-beta', 'portfolio.efficient-frontier', 'portfolio.capm', 'portfolio.optionen-griechen',
-  'portfolio.checkpoint'
+  'portfolio.checkpoint',
+  'krypto.was-ist-krypto', 'krypto.schwankungen', 'krypto.risiken-fallen', 'krypto.checkpoint',
+  'krypto-vertiefung.krypto-im-portfolio', 'krypto-vertiefung.blockchain-technik', 'krypto-vertiefung.checkpoint',
+  'rohstoffe.was-sind-rohstoffe', 'rohstoffe.gold-safe-haven', 'rohstoffe.angebot-nachfrage', 'rohstoffe.checkpoint',
+  'rohstoffe-vertiefung.rohstoffe-im-portfolio', 'rohstoffe-vertiefung.futures-contango', 'rohstoffe-vertiefung.checkpoint'
 ) AND position >= 0;
 
 INSERT INTO users.tutorial_lessons (id, path_id, position, is_checkpoint, xp, virtual_cash_reward, min_score, min_seconds) VALUES
@@ -92,7 +108,21 @@ INSERT INTO users.tutorial_lessons (id, path_id, position, is_checkpoint, xp, vi
   ('portfolio.efficient-frontier', 'portfolio', 4, false, 20, 100, 0, 45),
   ('portfolio.capm', 'portfolio', 5, false, 20, 100, 0, 45),
   ('portfolio.optionen-griechen', 'portfolio', 6, false, 20, 100, 0, 45),
-  ('portfolio.checkpoint', 'portfolio', 7, true, 50, 500, 0.7, 90)
+  ('portfolio.checkpoint', 'portfolio', 7, true, 50, 500, 0.7, 90),
+  ('krypto.was-ist-krypto', 'krypto', 1, false, 20, 100, 0, 45),
+  ('krypto.schwankungen', 'krypto', 2, false, 20, 100, 0, 45),
+  ('krypto.risiken-fallen', 'krypto', 3, false, 20, 100, 0, 45),
+  ('krypto.checkpoint', 'krypto', 4, true, 50, 500, 0.7, 90),
+  ('krypto-vertiefung.krypto-im-portfolio', 'krypto-vertiefung', 1, false, 20, 100, 0, 45),
+  ('krypto-vertiefung.blockchain-technik', 'krypto-vertiefung', 2, false, 20, 100, 0, 45),
+  ('krypto-vertiefung.checkpoint', 'krypto-vertiefung', 3, true, 50, 500, 0.7, 90),
+  ('rohstoffe.was-sind-rohstoffe', 'rohstoffe', 1, false, 20, 100, 0, 45),
+  ('rohstoffe.gold-safe-haven', 'rohstoffe', 2, false, 20, 100, 0, 45),
+  ('rohstoffe.angebot-nachfrage', 'rohstoffe', 3, false, 20, 100, 0, 45),
+  ('rohstoffe.checkpoint', 'rohstoffe', 4, true, 50, 500, 0.7, 90),
+  ('rohstoffe-vertiefung.rohstoffe-im-portfolio', 'rohstoffe-vertiefung', 1, false, 20, 100, 0, 45),
+  ('rohstoffe-vertiefung.futures-contango', 'rohstoffe-vertiefung', 2, false, 20, 100, 0, 45),
+  ('rohstoffe-vertiefung.checkpoint', 'rohstoffe-vertiefung', 3, true, 50, 500, 0.7, 90)
 ON CONFLICT (id) DO UPDATE SET
   path_id             = EXCLUDED.path_id,
   position            = EXCLUDED.position,

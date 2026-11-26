@@ -147,14 +147,22 @@ SELECT pg_temp.check(NOT EXISTS (
     SELECT 1 FROM api.latest_prices lp
     WHERE lp.close IS DISTINCT FROM (SELECT p.close::numeric FROM api.asset_prices p
                                      WHERE p.asset_id = lp.asset_id AND p.close IS NOT NULL
-                                     ORDER BY p.tstamp DESC LIMIT 1)),
-  'latest_prices == newest close per asset');
+                                     ORDER BY p.tstamp DESC LIMIT 1)
+      -- assets with intraday bars legitimately quote a newer bar price
+      AND NOT EXISTS (SELECT 1 FROM api.asset_prices_intraday i WHERE i.asset_id = lp.asset_id)),
+  'latest_prices == newest close per asset (without bars)');
 
 -- -----------------------------------------------------------------------------
 -- Freshness: a trade through the real RPC shows up immediately.
 -- -----------------------------------------------------------------------------
 CREATE TEMP TABLE snap AS SELECT * FROM depots.values WHERE depot_id = 990001;
 GRANT SELECT ON snap TO authenticated;
+
+-- buying an asset needs its tutorial path (asset 1 is a stock)
+INSERT INTO auth.users (id) VALUES ('aaaaaaaa-0000-0000-0000-000000000001') ON CONFLICT DO NOTHING;
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT 'aaaaaaaa-0000-0000-0000-000000000001', id, now(), now(), 1, 1
+FROM users.tutorial_lessons WHERE path_id = 'aktien';
 
 SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claims = '{"sub":"aaaaaaaa-0000-0000-0000-000000000001","role":"authenticated"}';

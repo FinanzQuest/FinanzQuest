@@ -9,7 +9,7 @@
 -- api.asset_prices_intraday (as of the bar time). Row-level because
 -- TimescaleDB hypertables do not support transition tables. Rows without a
 -- close are ignored. SECURITY DEFINER: the ingestion role only needs rights
--- on the price tables.
+-- on the price tables. Prices are compared at float noise tolerance (see below).
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION api.on_asset_prices_change()
@@ -42,7 +42,11 @@ BEGIN
   ON CONFLICT (asset_id) DO UPDATE
     SET tstamp = EXCLUDED.tstamp, close = EXCLUDED.close
     WHERE EXCLUDED.tstamp >= l.tstamp
-      AND (EXCLUDED.close IS DISTINCT FROM l.close
+      -- a price counts as new only beyond float noise: the float4 close is
+      -- stored in the numeric column with 6 digits (66.0792 for 66.07921) and
+      -- the updater stores bars with the noise of an f32 (4.572 vs
+      -- 4.57200002670288); neither is a price change
+      AND (abs(EXCLUDED.close - l.close) > abs(l.close) * 0.00001
            OR (NOT v_partial_day AND EXCLUDED.tstamp IS DISTINCT FROM l.tstamp));
   RETURN NULL;
 END;

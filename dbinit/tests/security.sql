@@ -148,6 +148,17 @@ SELECT pg_temp.check(NOT has_function_privilege('anon', 'depots.new_depot_for_us
 -- ---------------------------------------------------------------------------
 -- Trading.
 -- ---------------------------------------------------------------------------
+-- Assets are unlocked by tutorial paths: without them, buying and new
+-- savings plans are rejected (details: tests/tutorial.sql).
+SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT depots.buy_asset(1, 991001, 100)$$), 'buying needs the asset''s tutorial path');
+SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT depots.upsert_savings_plan(991001, 1, 10, 'monthly')$$), 'a savings plan needs the asset''s tutorial path');
+-- both students pass every path from here on
+INSERT INTO users.lesson_progress (user_id, lesson_id, first_completed_at, last_completed_at, best_score, mastery)
+SELECT u, l.id, now(), now(), 1, 1
+FROM users.tutorial_lessons l,
+     (VALUES ('bbbbbbbb-0000-0000-0000-000000000001'::uuid), ('bbbbbbbb-0000-0000-0000-000000000002'::uuid)) AS t(u)
+WHERE l.path_id IN ('grundlagen', 'aktien', 'krypto', 'rohstoffe') AND NOT l.id LIKE '%-vertiefung.%';
+
 SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT depots.buy_asset(1, 991002, 100)$$), 'student cannot buy in another depot');
 SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT depots.buy_asset(1, 991001, -100)$$), 'negative buy rejected');
 SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT depots.sell_asset(1, 991001, -100)$$), 'negative sell rejected');
@@ -196,6 +207,11 @@ SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM depots.savings_plans_with_asset W
                  AND NOT EXISTS (SELECT 1 FROM depots.savings_plans WHERE depot_id = 991001),
   'savings plans are private to the depot');
 RESET ROLE;
+
+-- the gate setup above must not leak into the class overview below
+DELETE FROM users.lesson_progress
+WHERE user_id IN ('bbbbbbbb-0000-0000-0000-000000000001', 'bbbbbbbb-0000-0000-0000-000000000002')
+  AND lesson_id IN (SELECT id FROM users.tutorial_lessons WHERE path_id IN ('grundlagen', 'aktien', 'krypto', 'rohstoffe'));
 
 -- Execution: due plans run once at the latest price, funded by the budget.
 SELECT pg_temp.check(depots.execute_savings_plans() >= 1, 'execute_savings_plans runs the new plan');

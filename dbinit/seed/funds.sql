@@ -8,8 +8,8 @@
 -- updater fills ter/inception from its provider where they are NULL.
 -- Re-runnable: funds are matched by name.
 -- details_source:
---   ishares  BlackRock holdings CSV (UCITS: blackrock.com/uk …ajax?fileType=csv,
---            US: ishares.com/us/products/<id>/x/latest-holdings.csv)
+--   ishares  BlackRock holdings CSV (ishares.com/us/products/<id>/x/latest-holdings.csv;
+--            UCITS funds use the CSV of their US twin, see below)
 --   vanguard Vanguard UK product page (server-rendered country and holdings
 --            tables)
 --   yahoo    no source: the updater asks Yahoo for one of the listings
@@ -22,19 +22,24 @@ CREATE TEMP TABLE seed_funds (
 );
 
 INSERT INTO seed_funds VALUES
-  -- iShares UCITS (BlackRock product id in the CSV URL)
+  -- iShares UCITS. BlackRock's UCITS CSV is gone (the UK site now answers with
+  -- its web page), so holdings and country weights come from the CSV of the
+  -- US-listed twin of the same index: MSCI World = iShares MSCI World ETF
+  -- (URTH), S&P 500 = IVV, MSCI EM IMI = IEMG. The updater then leaves the
+  -- fund's own size / TER / inception alone (details/mod.rs is_twin_source).
+  -- MSCI Europe has no US twin: no details until a source exists.
   ('iShares Core S&P 500 UCITS ETF USD (Acc)', 'IE00B5BMR087', 'iShares', 'S&P 500', 0.0007, 'full', 'accumulating', 'IE', 'USD', '2010-05-19', 'ishares',
-   'https://www.blackrock.com/uk/individual/products/253743/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{SXR8.DE,CSPX.MI}'),
+   'https://www.ishares.com/us/products/239726/x/latest-holdings.csv', '{SXR8.DE,CSPX.MI}'),
   ('iShares Core MSCI World UCITS ETF USD (Acc)', 'IE00B4L5Y983', 'iShares', 'MSCI World', 0.0020, 'sampling', 'accumulating', 'IE', 'USD', '2009-09-25', 'ishares',
-   'https://www.blackrock.com/uk/individual/products/251882/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{EUNL.DE,IWDA.AS,SWDA.L,SWDA.MI}'),
+   'https://www.ishares.com/us/products/239696/x/latest-holdings.csv', '{EUNL.DE,IWDA.AS,SWDA.L,SWDA.MI}'),
   ('iShares Core MSCI Europe UCITS ETF EUR (Acc)', 'IE00B4K48X80', 'iShares', 'MSCI Europe', 0.0012, 'sampling', 'accumulating', 'IE', 'EUR', '2009-09-25', 'ishares',
    'https://www.blackrock.com/uk/individual/products/251861/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{EUNK.DE,IMAE.AS,SMEA.MI}'),
   ('iShares Core MSCI EM IMI UCITS ETF USD (Acc)', 'IE00BKM4GZ66', 'iShares', 'MSCI Emerging Markets IMI', 0.0018, 'full', 'accumulating', 'IE', 'USD', '2014-05-30', 'ishares',
-   'https://www.blackrock.com/uk/individual/products/264659/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{EMIM.AS,IS3N.DE}'),
+   'https://www.ishares.com/us/products/244050/x/latest-holdings.csv', '{EMIM.AS,IS3N.DE}'),
   ('iShares Core S&P 500 UCITS ETF USD (Dist)', 'IE0031442068', 'iShares', 'S&P 500', 0.0007, 'full', 'distributing', 'IE', 'USD', '2002-03-15', 'ishares',
-   'https://www.blackrock.com/uk/individual/products/251900/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{IUSA.L}'),
+   'https://www.ishares.com/us/products/239726/x/latest-holdings.csv', '{IUSA.L}'),
   ('iShares MSCI World UCITS ETF USD (Dist)', 'IE00B0M62Q58', 'iShares', 'MSCI World', 0.0050, 'sampling', 'distributing', 'IE', 'USD', '2005-10-28', 'ishares',
-   'https://www.blackrock.com/uk/individual/products/251881/x/1472631233320.ajax?fileType=csv&fileName=holdings&dataType=fund', '{IWRD.L}'),
+   'https://www.ishares.com/us/products/239696/x/latest-holdings.csv', '{IWRD.L}'),
   -- iShares US (inception comes from the CSV header)
   ('iShares Core S&P 500 ETF', 'US4642872000', 'iShares', 'S&P 500', 0.0003, 'full', 'distributing', 'US', 'USD', NULL, 'ishares',
    'https://www.ishares.com/us/products/239726/x/latest-holdings.csv', '{IVV}'),
