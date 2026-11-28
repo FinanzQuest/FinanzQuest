@@ -37,7 +37,7 @@ services:
     environment:
       GOTRUE_SITE_URL: ${SITE_URL}
       GOTRUE_API_HOST: 0.0.0.0
-      API_EXTERNAL_URL: http://localhost:8081
+      API_EXTERNAL_URL: ${SITE_URL}/auth/v1
       PORT: 9999
       DB_NAMESPACE: auth
       GOTRUE_LOG_LEVEL: debug
@@ -46,7 +46,21 @@ services:
       GOTRUE_JWT_SECRET: ${JWT_SECRET}
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
-      GOTRUE_MAILER_AUTOCONFIRM: true
+      # e-mail verification: off only for dev (MAILER_AUTOCONFIRM=true), see docs/email.md
+      GOTRUE_MAILER_AUTOCONFIRM: ${MAILER_AUTOCONFIRM:-false}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL:-}
+      GOTRUE_SMTP_SENDER_NAME: FinanzQuest
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: Bestätige deine E-Mail-Adresse für FinanzQuest
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: Bestätige deine E-Mail-Adresse für FinanzQuest
+      # templates are static files of the frontend (public/email), fetched by GoTrue
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://frontend:3000/email/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://frontend:3000/email/email_change.html
+      # GoTrue's default is low (30/h); every sign-up and resend counts
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: ${EMAILS_PER_HOUR:-300}
       GOTRUE_DISABLE_SIGNUP: false
       GOTRUE_EXTERNAL_EMAIL_ENABLED: true
       GOTRUE_EXTERNAL_PHONE_ENABLED: false

@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import type { z } from "zod"
@@ -16,7 +17,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { signUpRedirect, upgradeGuestRedirect } from "../actions"
+import {
+	resendConfirmation,
+	signUpRedirect,
+	upgradeGuestRedirect,
+} from "../actions"
 import GuestButton from "../guest_button"
 import { formSchema } from "./form_schema"
 
@@ -36,18 +41,62 @@ export default function SignUpForm({
 		},
 	})
 
+	const [pending, setPending] = useState<{
+		email: string
+		kind: "signup" | "email_change"
+	} | null>(null)
+	const [resending, setResending] = useState(false)
+
+	async function resend() {
+		if (!pending) return
+		setResending(true)
+		const res = await resendConfirmation(pending.email, pending.kind)
+		setResending(false)
+		toast(res.message ? "Senden fehlgeschlagen" : "E-Mail gesendet", {
+			description: res.message ?? "Prüfe dein Postfach.",
+		})
+	}
+
 	async function onSubmit(data: z.infer<typeof formSchema>) {
-		const error =
+		const result =
 			mode === "upgrade"
 				? await upgradeGuestRedirect(data.fullName, data.email, data.password)
 				: await signUpRedirect(data.fullName, data.email, data.password)
 
-		if (error) {
-			toast("Registrierung fehlgeschlagen", {
-				description: error.message,
+		if (result && "pendingEmail" in result && result.pendingEmail) {
+			setPending({
+				email: result.pendingEmail,
+				kind: "kind" in result && result.kind ? result.kind : "signup",
 			})
 			return
 		}
+		if (result && "message" in result) {
+			toast("Registrierung fehlgeschlagen", {
+				description: result.message,
+			})
+		}
+	}
+
+	if (pending) {
+		return (
+			<div className="flex flex-col gap-4 text-center">
+				<h2 className="font-semibold">Prüfe dein Postfach</h2>
+				<p className="text-sm text-muted-foreground">
+					Wir haben einen Bestätigungslink an{" "}
+					<span className="font-medium text-foreground">{pending.email}</span>{" "}
+					geschickt. Öffne ihn, um dein Konto zu aktivieren. Schau auch im
+					Spam-Ordner nach.
+				</p>
+				<Button
+					type="button"
+					variant="outline"
+					disabled={resending}
+					onClick={resend}
+				>
+					E-Mail erneut senden
+				</Button>
+			</div>
+		)
 	}
 
 	return (

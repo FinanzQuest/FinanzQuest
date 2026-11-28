@@ -342,7 +342,12 @@ SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM depots.leaderboard WHERE id IN (9
 INSERT INTO depots.depots (id, created, cash, cash_start, users) OVERRIDING SYSTEM VALUE VALUES
   (991902, now(), 50000, 50000, '{cccccccc-0000-0000-0000-000000000001,bbbbbbbb-0000-0000-0000-000000000002}');
 
+INSERT INTO auth.users (id, is_anonymous, created_at, last_sign_in_at, email_change, email_change_sent_at) VALUES
+  ('cccccccc-0000-0000-0000-000000000003', true, now() - interval '60 days', now() - interval '60 days', 'neu@example.org', now() - interval '1 day');
+
 CALL users.cleanup_guests(0, '{"days":30}');
+SELECT pg_temp.check(EXISTS (SELECT 1 FROM auth.users WHERE id = 'cccccccc-0000-0000-0000-000000000003'),
+  'cleanup keeps a stale guest with a pending email change');
 SELECT pg_temp.check((SELECT users = '{bbbbbbbb-0000-0000-0000-000000000002}'::uuid[] FROM depots.depots WHERE id = 991902),
   'cleanup removes the stale guest id from shared depots');
 SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM auth.users WHERE id = 'cccccccc-0000-0000-0000-000000000001')
