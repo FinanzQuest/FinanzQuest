@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 <body style="margin:0;padding:24px;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#18181b;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-    <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:32px;">
-      <tr><td>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;">
+      <tr><td style="padding:32px;">
         <h1 style="margin:0 0 16px;font-size:22px;">Willkommen bei FinanzQuest</h1>
         <p style="margin:0 0 24px;font-size:15px;line-height:1.5;">Bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren und mit dem virtuellen Investieren zu starten.</p>
         <p style="margin:0 0 24px;"><a href="{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&type=email&next=%2Fnew_depot" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:15px;">E-Mail bestätigen</a></p>
