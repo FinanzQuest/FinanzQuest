@@ -39,9 +39,7 @@ export default function SimpleAlertDialog({
 					>
 						{confirm}
 					</AlertDialogAction>
-					<AlertDialogCancel className="border-none bg-primary text-primary-foreground hover:bg-primary/90">
-						{cancel}
-					</AlertDialogCancel>
+					<AlertDialogCancel variant="default">{cancel}</AlertDialogCancel>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

@@ -4,7 +4,7 @@
 -- -----------------------------------------------------------------------------
 -- TimescaleDB job (12-jobs/cleanup_guests.sql). Deletes stale guests: anonymous
 -- users whose last activity (newest session / refresh token update, else last sign-in, else
--- creation) is older than config->>'days' days (default 30), together with
+-- creation; a pending email_change_sent_at counts as activity) is older than config->>'days' days (default 30), together with
 -- their depots. depots.depots.users is a uuid[] without FK, so depots whose
 -- members are all stale guests are deleted explicitly (holdings, transactions,
 -- daily_values, savings plans cascade from the depot); the stale ids are
@@ -28,7 +28,9 @@ BEGIN
     AND COALESCE(
           GREATEST(
             (SELECT max(s.updated_at) FROM auth.sessions s WHERE s.user_id = u.id),
-            (SELECT max(r.updated_at) FROM auth.refresh_tokens r WHERE r.user_id = u.id::text)
+            (SELECT max(r.updated_at) FROM auth.refresh_tokens r WHERE r.user_id = u.id::text),
+            -- a pending e-mail change (guest upgrade awaiting confirmation) is activity
+            u.email_change_sent_at
           ),
           u.last_sign_in_at,
           u.created_at

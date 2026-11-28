@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
 			token_hash,
 		})
 		if (!error) {
+			// guest upgrade: re-issue the token so is_anonymous=false takes effect
+			if (type === "email_change") await supabase.auth.refreshSession()
 			// redirect user to specified redirect URL or root of app
 			revalidatePath("/", "layout")
 			redirect(next)

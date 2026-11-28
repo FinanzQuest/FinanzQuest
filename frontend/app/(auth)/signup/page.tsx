@@ -1,11 +1,5 @@
 import { Suspense } from "react"
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { getUser } from "@/lib/auth"
 
 import SignUpForm from "./form"
@@ -15,21 +9,14 @@ async function Content() {
 	const upgrade = user?.is_anonymous === true
 
 	return (
-		<>
-			<CardHeader className="text-center">
-				<CardTitle>
-					{upgrade
-						? "Konto erstellen – dein Depot bleibt erhalten"
-						: "Erstelle einen Account"}
-				</CardTitle>
-				<CardDescription>
-					Gib dazu deine Daten in das Formular ein
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-2">
-				<SignUpForm mode={upgrade ? "upgrade" : "signup"} />
-			</CardContent>
-		</>
+		<SignUpForm
+			mode={upgrade ? "upgrade" : "signup"}
+			title={
+				upgrade
+					? "Konto erstellen – dein Depot bleibt erhalten"
+					: "Erstelle einen Account"
+			}
+		/>
 	)
 }
 

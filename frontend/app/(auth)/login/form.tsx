@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import type { z } from "zod"
@@ -15,7 +16,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { loginRedirect } from "../actions"
+import { loginRedirect, resendConfirmation } from "../actions"
 import GuestButton from "../guest_button"
 import { formSchema } from "./form_schema"
 
@@ -29,15 +30,25 @@ export default function LoginForm() {
 		},
 	})
 
+	const [unconfirmed, setUnconfirmed] = useState(false)
+
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		const error = await loginRedirect(data.email, data.password)
 
+		setUnconfirmed(error?.unconfirmed === true)
 		if (error) {
 			toast("Log-In gescheitert", {
-				description: error,
+				description: error.message,
 			})
 			return
 		}
+	}
+
+	async function resend() {
+		const res = await resendConfirmation(form.getValues("email"))
+		toast(res.message ? "Senden fehlgeschlagen" : "E-Mail gesendet", {
+			description: res.message ?? "Prüfe dein Postfach.",
+		})
 	}
 
 	return (
@@ -80,6 +91,11 @@ export default function LoginForm() {
 				<Button className="w-full mx-auto" type="submit">
 					Einloggen
 				</Button>
+				{unconfirmed && (
+					<Button type="button" variant="outline" onClick={resend}>
+						Bestätigungs-E-Mail erneut senden
+					</Button>
+				)}
 				<GuestButton />
 				<span className="text-muted-foreground text-sm text-center">
 					Kein Account?{" "}
