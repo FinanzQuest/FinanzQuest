@@ -7,7 +7,8 @@
 -- -----------------------------------------------------------------------------
 -- One row per depot, ranked by today's live value. prev_rank ranks the last
 -- stored day before today (NULL for depots without history); sparkline is the
--- live value followed by up to 6 stored days, newest first.
+-- live value followed by up to 6 stored days, newest first. Only depots with at
+-- least one non-guest member are listed.
 -- Per depot this is one hash-joined live row plus one backward primary-key
 -- range scan of at most 6 daily_values rows — no window over the history.
 -- =============================================================================
@@ -55,4 +56,9 @@ LEFT JOIN (
   JOIN users.profile up ON up.user_id = m.user_id
   GROUP BY d2.id
 ) u ON u.depot_id = b.depot_id
+-- guest (anonymous) depots stay off the leaderboard
+WHERE EXISTS (
+  SELECT 1 FROM auth.users au
+  WHERE au.id = ANY(d.users) AND NOT au.is_anonymous
+)
 ORDER BY rank;

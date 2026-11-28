@@ -1,6 +1,6 @@
 -- =============================================================================
 -- depots.new_depot_for_user(p_user_id)
--- Depends on: depots.depots, users.has_any_role, users.is_superuser_session
+-- Depends on: depots.depots, users.has_any_role, users.is_guest, users.is_superuser_session
 -- -----------------------------------------------------------------------------
 -- Creates a depot with the standard starting cash. Clients cannot insert into
 -- depots.depots directly (they could pick their own cash_start); a user may
@@ -23,6 +23,14 @@ BEGIN
           OR users.has_any_role('admin', 'teacher')
           OR users.is_superuser_session()) THEN
     RAISE EXCEPTION 'Unauthorized: can only create a depot for yourself' USING ERRCODE = '42501';
+  END IF;
+
+  -- guests (anonymous users) get exactly one depot
+  -- serialise per user so two concurrent calls cannot both pass the check
+  PERFORM pg_advisory_xact_lock(hashtext(p_user_id::text));
+  IF users.is_guest(p_user_id)
+     AND EXISTS (SELECT 1 FROM depots.depots d WHERE p_user_id = ANY(d.users)) THEN
+    RAISE EXCEPTION 'Gäste können nur ein Depot haben' USING ERRCODE = '42501';
   END IF;
 
   -- empty / missing name -> random friendly name (column default)

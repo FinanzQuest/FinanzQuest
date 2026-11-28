@@ -18,9 +18,10 @@ BEGIN
             USING ERRCODE = '42501';
     END IF;
 
-    -- Total user count
+    -- Total user count (guests excluded)
     SELECT COUNT(*) INTO v_user_count
-    FROM auth.users;
+    FROM auth.users
+    WHERE NOT is_anonymous;
 
     -- Teacher count
     SELECT COUNT(DISTINCT user_id) INTO v_teacher_count
@@ -35,7 +36,7 @@ BEGIN
     -- Student count (users with no special roles)
     SELECT COUNT(*) INTO v_student_count
     FROM auth.users au
-    WHERE NOT EXISTS (
+    WHERE NOT au.is_anonymous AND NOT EXISTS (
         SELECT 1 FROM users.special_roles sr
         WHERE sr.user_id = au.id
     );

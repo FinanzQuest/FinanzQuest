@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import { connection } from "next/server"
 import type React from "react"
 import { Suspense } from "react"
+import { GuestBanner } from "@/components/guest_banner"
 import {
 	AppSidebar,
 	type SidebarData,
@@ -30,7 +31,13 @@ async function getSidebarData(): Promise<SidebarData> {
 	await connection()
 	const { user } = await getUser()
 	if (!user) {
-		return { user: null, isTeacher: false, depots: [], activeDepotId: null }
+		return {
+			user: null,
+			isTeacher: false,
+			isGuest: false,
+			depots: [],
+			activeDepotId: null,
+		}
 	}
 	const [roles, depots, active] = await Promise.all([
 		hasSpecialRoles(["teacher"], await getServerClient()),
@@ -43,9 +50,16 @@ async function getSidebarData(): Promise<SidebarData> {
 			email: user.email ?? null,
 		},
 		isTeacher: roles.hasPermission === true,
+		isGuest: user.is_anonymous === true,
 		depots,
 		activeDepotId: active?.id ?? null,
 	}
+}
+
+/** Banner for guests only; streams in with the user. */
+async function GuestNotice() {
+	const { user } = await getUser()
+	return user?.is_anonymous ? <GuestBanner /> : null
 }
 
 /** Sidebar with the user's data; streams in after the static shell. */
@@ -65,8 +79,11 @@ export default function DashboardLayout({
 					<Sidebar />
 				</Suspense>
 				{/* each route's loading.tsx shows its page-shaped skeleton */}
-				<div className="flex-1 min-h-0 min-w-0 w-full overflow-hidden">
-					{children}
+				<div className="flex-1 min-h-0 min-w-0 w-full overflow-hidden flex flex-col">
+					<Suspense fallback={null}>
+						<GuestNotice />
+					</Suspense>
+					<div className="flex-1 min-h-0">{children}</div>
 				</div>
 			</SidebarProvider>
 			{/* phones: above the bottom tab bar */}

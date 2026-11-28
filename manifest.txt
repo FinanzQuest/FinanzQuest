@@ -80,6 +80,7 @@ dbinit/04-functions/api/asset_facets.sql
 dbinit/04-functions/api/refresh_asset_stats.sql
 dbinit/04-functions/users/has_role.sql
 dbinit/04-functions/users/has_any_role.sql
+dbinit/04-functions/users/is_guest.sql
 dbinit/04-functions/users/is_superuser_session.sql
 dbinit/04-functions/users/get_all_profiles.sql
 dbinit/04-functions/users/grant_role.sql
@@ -88,6 +89,7 @@ dbinit/04-functions/users/revoke_teacher.sql
 dbinit/04-functions/users/revoke_role.sql
 dbinit/04-functions/users/get_admin_overview.sql
 dbinit/04-functions/users/stats.sql
+dbinit/04-functions/users/cleanup_guests.sql
 dbinit/04-functions/depots/transaction_expense.sql
 dbinit/04-functions/depots/transaction_affects_commission.sql
 dbinit/04-functions/depots/apply_ledger_delta.sql
@@ -242,6 +244,8 @@ dbinit/10-grants/users/grant_teacher.sql
 dbinit/10-grants/users/revoke_role.sql
 dbinit/10-grants/users/has_role.sql
 dbinit/10-grants/users/has_any_role.sql
+dbinit/10-grants/users/is_guest.sql
+dbinit/10-grants/users/cleanup_guests.sql
 dbinit/10-grants/users/stats.sql
 dbinit/10-grants/users/tutorial_paths.sql
 dbinit/10-grants/users/tutorial_path_requires.sql
@@ -268,6 +272,7 @@ dbinit/12-jobs/refresh_depot_values.sql
 dbinit/12-jobs/execute_savings_plans.sql
 dbinit/12-jobs/asset_prices_intraday_retention.sql
 dbinit/12-jobs/refresh_asset_stats.sql
+dbinit/12-jobs/cleanup_guests.sql
 
 # --- seed (runs last; COPY needs api.assets + the CSV mounted) ---------------
 dbinit/seed/assets.sql

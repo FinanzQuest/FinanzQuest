@@ -53,6 +53,7 @@ BEGIN
     LEFT JOIN depots.holdings AS p
         ON d.id = p.depot_id AND p.asset_id IS NOT NULL AND p.amount > 0
     LEFT JOIN depots.transactions AS t ON d.id = t.depot_id
+    WHERE NOT au.is_anonymous
     GROUP BY au.id, au.email, au.created_at, au.raw_user_meta_data, roles.user_roles, roles.role_granted_at;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' STABLE;
