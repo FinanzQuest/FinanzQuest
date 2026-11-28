@@ -1,6 +1,7 @@
 import { Geist_Mono as FontMono, Inter, Space_Grotesk } from "next/font/google"
 
 import "./globals.css"
+import type { Metadata } from "next"
 import type React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -16,6 +17,12 @@ const fontMono = FontMono({
 	subsets: ["latin"],
 	variable: "--font-mono",
 })
+
+export const metadata: Metadata = {
+	icons: {
+		icon: { url: "/logo_favicon.svg", type: "image/svg+xml" },
+	},
+}
 
 export default function RootLayout({
 	children,
