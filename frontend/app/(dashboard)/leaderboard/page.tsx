@@ -1,5 +1,6 @@
 import { Minus, TriangleIcon } from "lucide-react"
 import { cacheLife, cacheTag } from "next/cache"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import { ErrorCard } from "@/components/cards/cards"
 import { PageShell } from "@/components/page_shell"
@@ -22,7 +23,11 @@ export default async function Page(props: {
 		return <ErrorCard error={depotIdError} />
 	}
 
-	const { leaderboard, depot } = await dataFetcher(depotId)
+	const [{ leaderboard, depot }, { user }] = await Promise.all([
+		dataFetcher(depotId),
+		getUser(),
+	])
+	const isGuest = user?.is_anonymous === true
 
 	if (leaderboard.error || !leaderboard.data) {
 		return (
@@ -60,29 +65,38 @@ export default async function Page(props: {
 
 	return (
 		<PageShell>
-			<div className="flex flex-col gap-4">
-				<div className="flex flex-col gap-2">
-					<span className="text-sm text-muted-foreground">
-						Deine Position{depot.data?.name && ` · ${depot.data.name}`}
-					</span>
-					<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
-						#{depot.data?.rank}
-					</span>
-				</div>
-				<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
-					<ChangeStat
-						label="Depotwert"
-						value={depot.data?.value ?? 0}
-						neutral
-					/>
-					<div className="flex flex-col gap-1">
-						<span className="text-sm uppercase tracking-wide text-muted-foreground">
-							Veränderung
+			{isGuest ? (
+				<p className="text-sm text-muted-foreground">
+					Als Gast erscheinst du nicht in der Rangliste.{" "}
+					<Link href="/signup" className="underline underline-offset-2">
+						Konto erstellen
+					</Link>
+				</p>
+			) : (
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2">
+						<span className="text-sm text-muted-foreground">
+							Deine Position{depot.data?.name && ` · ${depot.data.name}`}
 						</span>
-						{rankIndicator}
+						<span className="text-[clamp(2.5rem,6vw,4rem)] leading-none font-extrabold number tabular-nums tracking-tight">
+							#{depot.data?.rank}
+						</span>
+					</div>
+					<div className="flex flex-row gap-x-10 gap-y-4 flex-wrap">
+						<ChangeStat
+							label="Depotwert"
+							value={depot.data?.value ?? 0}
+							neutral
+						/>
+						<div className="flex flex-col gap-1">
+							<span className="text-sm uppercase tracking-wide text-muted-foreground">
+								Veränderung
+							</span>
+							{rankIndicator}
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 			<div className="flex flex-col w-full border rounded-2xl divide-y divide-border/50 overflow-hidden">
 				{leaderboard.data.map(row => (
 					<LeaderboardEntry

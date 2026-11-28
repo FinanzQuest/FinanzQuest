@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { loginRedirect } from "../actions"
+import GuestButton from "../guest_button"
 import { formSchema } from "./form_schema"
 
 export default function LoginForm() {
@@ -79,6 +80,7 @@ export default function LoginForm() {
 				<Button className="w-full mx-auto" type="submit">
 					Einloggen
 				</Button>
+				<GuestButton />
 				<span className="text-muted-foreground text-sm text-center">
 					Kein Account?{" "}
 					<Link className={"underline underline-offset-2"} href="/signup">

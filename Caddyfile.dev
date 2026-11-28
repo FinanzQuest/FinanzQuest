@@ -16,8 +16,24 @@
 			respond "" 204
 		}
 
+		# GoTrue rate-limits guest sign-ins by X-Signup-Client-Ip. Only set it on
+		# POST /signup (real client IP); strip anything the client sent.
+		@signup {
+			method POST
+			path /signup
+		}
+		handle @signup {
+			reverse_proxy auth:9999 {
+				header_up X-Signup-Client-Ip {client_ip}
+				header_down Access-Control-Allow-Origin *
+				header_down Access-Control-Allow-Methods "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT"
+				header_down Access-Control-Allow-Headers "Authorization,apikey,Content-Type,X-Client-Info,x-supabase-api-version"
+			}
+		}
+
 		handle {
 			reverse_proxy auth:9999 {
+				header_up -X-Signup-Client-Ip
 				header_down Access-Control-Allow-Origin *
 				header_down Access-Control-Allow-Methods "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT"
 				header_down Access-Control-Allow-Headers "Authorization,apikey,Content-Type,X-Client-Info,x-supabase-api-version"

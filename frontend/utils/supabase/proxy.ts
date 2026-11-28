@@ -4,8 +4,8 @@ import { jwtVerify } from "jose"
 import { type NextRequest, NextResponse } from "next/server"
 import type { Database } from "@/database/types"
 
-/** Reachable without a session (login, sign-up, e-mail confirmation, errors). */
-const PUBLIC_PATHS = ["/login", "/signup", "/confirm", "/error"]
+/** Reachable without a session (login, sign-up, guest start, e-mail confirmation, errors). */
+const PUBLIC_PATHS = ["/login", "/signup", "/try", "/confirm", "/error"]
 
 function isPublic(pathname: string) {
 	return PUBLIC_PATHS.some(

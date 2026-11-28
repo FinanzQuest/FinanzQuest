@@ -50,6 +50,14 @@ services:
       GOTRUE_DISABLE_SIGNUP: false
       GOTRUE_EXTERNAL_EMAIL_ENABLED: true
       GOTRUE_EXTERNAL_PHONE_ENABLED: false
+      # guest mode: anonymous sign-ins, rate-limited per client IP that Caddy
+      # sets on POST /signup only (see Caddyfile)
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "true"
+      GOTRUE_RATE_LIMIT_ANONYMOUS_USERS: ${GUEST_SIGNUPS_PER_HOUR:-100}
+      GOTRUE_RATE_LIMIT_HEADER: X-Signup-Client-Ip
+      # email sign-ups run from the Next server action, so they share one
+      # bucket (the frontend's IP) instead of one per student
+      GOTRUE_RATE_LIMIT_SIGN_IN_SIGN_UPS: ${SIGNUPS_PER_5MIN:-150}
     healthcheck:
       test:
         [

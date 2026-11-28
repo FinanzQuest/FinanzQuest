@@ -51,6 +51,8 @@ import User from "./user"
 export interface SidebarData {
 	user: { name: string | null; email: string | null } | null
 	isTeacher: boolean
+	/** anonymous guest session (no account) */
+	isGuest: boolean
 	depots: { id: number; name: string }[]
 	/** the active depot (cookie, validated against the user's depots) */
 	activeDepotId: number | null
@@ -434,7 +436,7 @@ function SidebarAccount({
 	}
 	return (
 		<>
-			<User collapsed={collapsed} user={data.user} />
+			<User collapsed={collapsed} user={data.user} isGuest={data.isGuest} />
 			<Suspense fallback={<Skeleton className="h-8 w-full" />}>
 				<DepotPicker
 					collapsed={collapsed}

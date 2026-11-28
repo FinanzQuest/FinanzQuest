@@ -44,7 +44,8 @@ BEGIN
   WITH students AS (
     SELECT au.id, au.email, au.raw_user_meta_data
     FROM auth.users au
-    WHERE NOT EXISTS (SELECT 1 FROM users.special_roles sr WHERE sr.user_id = au.id)
+    WHERE NOT au.is_anonymous
+      AND NOT EXISTS (SELECT 1 FROM users.special_roles sr WHERE sr.user_id = au.id)
   ), first_open AS (
     -- per student and path: the first lesson not yet passed
     SELECT DISTINCT ON (st.id, l.path_id) st.id AS user_id, l.path_id, l.id AS lesson_id, tp.position AS path_position

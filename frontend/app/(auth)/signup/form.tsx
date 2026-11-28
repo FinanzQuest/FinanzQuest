@@ -16,10 +16,16 @@ import {
 	FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { signUpRedirect } from "../actions"
+import { signUpRedirect, upgradeGuestRedirect } from "../actions"
+import GuestButton from "../guest_button"
 import { formSchema } from "./form_schema"
 
-export default function SignUpForm() {
+export default function SignUpForm({
+	mode = "signup",
+}: {
+	/** "upgrade": the viewer is a guest; the account keeps their depot */
+	mode?: "signup" | "upgrade"
+}) {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -31,10 +37,13 @@ export default function SignUpForm() {
 	})
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
-		const error = await signUpRedirect(data.fullName, data.email, data.password)
+		const error =
+			mode === "upgrade"
+				? await upgradeGuestRedirect(data.fullName, data.email, data.password)
+				: await signUpRedirect(data.fullName, data.email, data.password)
 
 		if (error) {
-			toast("Failed to sign up", {
+			toast("Registrierung fehlgeschlagen", {
 				description: error.message,
 			})
 			return
@@ -129,8 +138,9 @@ export default function SignUpForm() {
 				/>
 
 				<Button className="w-full mx-auto" type="submit">
-					Registrieren
+					{mode === "upgrade" ? "Konto erstellen" : "Registrieren"}
 				</Button>
+				{mode === "signup" && <GuestButton />}
 				<span className="text-muted-foreground text-sm text-center">
 					Schon registriert?{" "}
 					<Link className="underline underline-offset-2" href="/login">

@@ -6,7 +6,23 @@
 
 	handle /auth/v1/* {
 		uri strip_prefix /auth/v1
-		reverse_proxy auth:9999
+
+		# GoTrue rate-limits guest sign-ins by this header. Only set it on
+		# POST /signup (to the real client IP); strip anything the client sent.
+		@signup {
+			method POST
+			path /signup
+		}
+		handle @signup {
+			reverse_proxy auth:9999 {
+				header_up X-Signup-Client-Ip {client_ip}
+			}
+		}
+		handle {
+			reverse_proxy auth:9999 {
+				header_up -X-Signup-Client-Ip
+			}
+		}
 	}
 
 	handle /rest/v1/* {

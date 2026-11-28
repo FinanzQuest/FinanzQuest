@@ -310,6 +310,50 @@ SELECT pg_temp.check(
   (SELECT count(*) = 1 FROM users.tutorial_class_lessons('bbbbbbbb-0000-0000-0000-000000000001')),
   'class lessons: one row per passed lesson');
 
+-- ---------------------------------------------------------------------------
+-- Guest mode: one depot, off the leaderboard, cleanup of stale guests.
+-- ---------------------------------------------------------------------------
+INSERT INTO auth.users (id, is_anonymous, created_at, last_sign_in_at) VALUES
+  ('cccccccc-0000-0000-0000-000000000001', true, now() - interval '60 days', now() - interval '60 days'),
+  ('cccccccc-0000-0000-0000-000000000002', true, now(), now());
+\set g_old '''cccccccc-0000-0000-0000-000000000001'''
+\set g_new '''cccccccc-0000-0000-0000-000000000002'''
+
+SELECT depots.new_depot_for_user(:g_new) AS g_new_depot \gset
+SELECT pg_temp.check(pg_temp.err_as(:g_new, format('SELECT depots.new_depot_for_user(%L)', 'cccccccc-0000-0000-0000-000000000002')) = '42501',
+  'guest cannot create a second depot');
+SELECT pg_temp.check(pg_temp.err_as(:s1, format('SELECT depots.new_depot_for_user(%L)', 'bbbbbbbb-0000-0000-0000-000000000001')) IS NULL,
+  'normal user can still create more depots');
+SELECT pg_temp.check(NOT users.is_guest('bbbbbbbb-0000-0000-0000-000000000001')
+                 AND users.is_guest('cccccccc-0000-0000-0000-000000000002')
+                 AND NOT users.is_guest(gen_random_uuid()),
+  'is_guest: anonymous only');
+
+INSERT INTO depots.depots (id, created, cash, cash_start, users) OVERRIDING SYSTEM VALUE VALUES
+  (991901, now(), 50000, 50000, '{cccccccc-0000-0000-0000-000000000001}');
+
+SELECT pg_temp.check(pg_temp.as_user(:s1, $$SELECT users.is_guest('cccccccc-0000-0000-0000-000000000002')$$),
+  'client cannot call users.is_guest');
+SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM depots.leaderboard WHERE id IN (991901, :g_new_depot))
+                 AND EXISTS (SELECT 1 FROM depots.leaderboard WHERE id = 991001),
+  'guest depots are not on the leaderboard');
+
+-- shared depot: stale guest + normal user
+INSERT INTO depots.depots (id, created, cash, cash_start, users) OVERRIDING SYSTEM VALUE VALUES
+  (991902, now(), 50000, 50000, '{cccccccc-0000-0000-0000-000000000001,bbbbbbbb-0000-0000-0000-000000000002}');
+
+CALL users.cleanup_guests(0, '{"days":30}');
+SELECT pg_temp.check((SELECT users = '{bbbbbbbb-0000-0000-0000-000000000002}'::uuid[] FROM depots.depots WHERE id = 991902),
+  'cleanup removes the stale guest id from shared depots');
+SELECT pg_temp.check(NOT EXISTS (SELECT 1 FROM auth.users WHERE id = 'cccccccc-0000-0000-0000-000000000001')
+                 AND NOT EXISTS (SELECT 1 FROM depots.depots WHERE id = 991901),
+  'cleanup removes the stale guest and its depot');
+SELECT pg_temp.check(EXISTS (SELECT 1 FROM auth.users WHERE id = 'cccccccc-0000-0000-0000-000000000002')
+                 AND EXISTS (SELECT 1 FROM depots.depots WHERE id = :g_new_depot)
+                 AND EXISTS (SELECT 1 FROM auth.users WHERE id = 'bbbbbbbb-0000-0000-0000-000000000001')
+                 AND EXISTS (SELECT 1 FROM depots.depots WHERE id IN (991001, 991002)),
+  'cleanup keeps fresh guests and normal users');
+SELECT pg_temp.check(pg_temp.as_user(:s1, $$CALL users.cleanup_guests(0, '{}')$$), 'client cannot call cleanup_guests');
 \o
 \echo 'security.sql: ALL PASS'
 ROLLBACK;
