@@ -1,3 +1,10 @@
+{
+	servers {
+		# Behind the host Caddy, set CADDY_TRUSTED_PROXIES=private_ranges
+		trusted_proxies static {$CADDY_TRUSTED_PROXIES:127.0.0.1/32}
+	}
+}
+
 {$CADDY_HOST} {
 	# 10MB upload limit
     request_body {

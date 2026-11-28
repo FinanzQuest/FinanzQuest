@@ -39,8 +39,9 @@ by `nix build .#checks.x86_64-linux.module`, a VM test).
 - `finanzquest` has **no sudo** and is **not in the `docker` group**.
   `finanzquest-docker.service` is a rootless Docker daemon for this user
   only (socket `/run/finanzquest/docker.sock`). Only that service gets
-  `CAP_NET_BIND_SERVICE`, so Caddy can use 80/443 without changing the
-  host-wide unprivileged port limit. A compromised deploy can only affect
+  `CAP_NET_BIND_SERVICE`, so Caddy could bind 80/443 without changing the
+  host-wide unprivileged port limit (production uses 8080/8443 behind the
+  host proxy instead, see below). A compromised deploy can only affect
   FinanzQuest's containers, not the host or other services.
 - The CI deploy key works **only as a forced command**
   (`restrict,command="finanzquest-ctl"`): no shell, no port forwarding, no
@@ -65,7 +66,20 @@ module, pinned by the server's flake, never from the upload):
    otherwise **rolls back** to the previous release and fails the job
 
 `compose.prod.yml` makes production use the GHCR images and publish only
-Caddy's ports (Postgres and the frontend stay internal). Dev
+Caddy's ports (Postgres and the frontend stay internal).
+
+**Production behind the host proxy.** The app lives at
+`https://app.finanzquest.app`; `finanzquest.app` is a static landing page
+(repo FinanzQuest/FinanzQuestWebsite). The server's own (NixOS host) Caddy
+owns 80/443, terminates TLS and proxies `app.finanzquest.app` to this
+stack's gateway Caddy on `127.0.0.1:8080` over plain HTTP. The gateway
+listens on `httpPort = 8080` / `httpsPort = 8443`, both closed in the
+firewall. Because rootless Docker's port forwarding hides the source
+address, the gateway trusts `X-Forwarded-For` from private ranges
+(`CADDY_TRUSTED_PROXIES=private_ranges`) so `{client_ip}` (GoTrue's signup
+rate limit) is the real user and not the proxy. That is only safe while
+8080/8443 stay closed to the outside. The host Caddy and the website module
+are documented in FinanzQuest/FinanzQuestWebsite `docs/ci-cd.md`. Dev
 (`compose.dev.yml`) is unaffected. `finanzquest.service` starts the last
 deployed version at boot; `nixos-rebuild` never restarts the stack.
 
@@ -135,8 +149,10 @@ systemctl status finanzquest-docker finanzquest
             enable = true;
             environmentFile = "/var/lib/finanzquest-secrets/env";
             deployKeys = [ "ssh-ed25519 AAAA... finanzquest-ci-deploy" ];
-            # httpPort = 80; httpsPort = 443;  (defaults)
-            # openFirewall = true;  # or open the ports in your own config
+            # behind the host Caddy (defaults: 80/443)
+            httpPort = 8080;
+            httpsPort = 8443;
+            openFirewall = false;
           };
         }
       ];
@@ -146,9 +162,10 @@ systemctl status finanzquest-docker finanzquest
 ```
 
 Options: `nix/module.nix`. The firewall is left to you (`openFirewall`
-defaults to false, as in nixpkgs modules). If another service on the host
-already uses 80/443, pick other ports and put that host's reverse proxy in
-front. Remove any old `systemd.services.finanzquest` definition (e.g. from
+defaults to false, as in nixpkgs modules). Production uses 8080/8443 with
+the host's Caddy in front (see *Production behind the host proxy*); keep
+both ports closed. A standalone server can use the 80/443 defaults and
+open them. Remove any old `systemd.services.finanzquest` definition (e.g. from
 this repo's `nixos/configuration.nix`): same unit name.
 
 ### 2. Secrets file (on the server, never in Git or the Nix store)
@@ -162,8 +179,20 @@ sudoedit /var/lib/finanzquest-secrets/env
 Contents, `.env` syntax: `POSTGRES_PASSWORD`, `JWT_SECRET`,
 `AUTH_ADMIN_PASSWORD`, `AUTHENTICATOR_PASSWORD`, `SERVICE_WORKER_PASSWORD`,
 `SITE_URL`, `API_URL_SERVER`, `API_URL_CLIENT`, `ALPACA_KEY_ID`,
-`ALPACA_SECRET_KEY`, `CADDY_HOST`, `FRONTEND_URL`. agenix/sops-nix work too
-(owner `finanzquest`, mode 0400).
+`ALPACA_SECRET_KEY`, `CADDY_HOST`, `FRONTEND_URL`, `CADDY_TRUSTED_PROXIES`.
+agenix/sops-nix work too (owner `finanzquest`, mode 0400).
+
+Domain-related values for production:
+
+```
+# http:// = the gateway requests no certificates; TLS is the host Caddy's job
+CADDY_HOST=http://app.finanzquest.app
+CADDY_TRUSTED_PROXIES=private_ranges
+SITE_URL=https://app.finanzquest.app
+API_URL_SERVER=https://app.finanzquest.app
+API_URL_CLIENT=https://app.finanzquest.app
+FRONTEND_URL=https://app.finanzquest.app
+```
 
 ### 3. GitHub
 
@@ -179,6 +208,9 @@ Secrets (Settings → Secrets and variables → Actions):
 Variables: `API_URL_SERVER`, `API_URL_CLIENT` (inlined into the frontend
 build, same as in the secrets file); optional `PRODUCTION_URL`,
 `DEPLOY_USER` (default `finanzquest`), `DEPLOY_PORT` (default `22`).
+`API_URL_SERVER`, `API_URL_CLIENT` and `PRODUCTION_URL` are
+`https://app.finanzquest.app`. They are baked into the image, so rebuild the
+frontend (re-run CI on `main`) after changing them.
 
 Environment `production` (Settings → Environments): *Deployment branches →
 Selected branches → `main`*, so only `main` can use the deploy secrets.
@@ -210,3 +242,13 @@ old `nixos/configuration.nix`, which the module replaces) and trigger the
 first deploy (*Run workflow* on `main`). Volume names come from the compose
 project name `FinanzQuest` → `finanzquest_*`; check with `docker volume ls`
 (old) and `fq volume ls` (new).
+
+### 5. Moving to app.finanzquest.app (zero downtime)
+
+1. Set the secrets file and GitHub variables as above, but serve both names
+   for now: `CADDY_HOST=http://app.finanzquest.app, http://finanzquest.app`.
+   Redeploy (rebuilds the frontend with the new URLs).
+2. Point the host Caddy's `app.finanzquest.app` at `127.0.0.1:8080`; the old
+   name keeps working through the same gateway.
+3. Once the host Caddy routes `finanzquest.app` to the website, drop it:
+   `CADDY_HOST=http://app.finanzquest.app`, redeploy.

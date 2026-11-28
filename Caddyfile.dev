@@ -1,4 +1,4 @@
-{$CADDY_HOST:finanzquest.app} {
+{$CADDY_HOST:app.finanzquest.app} {
 	# 10MB upload limit
 	request_body {
 		max_size 10MB

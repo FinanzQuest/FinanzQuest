@@ -124,6 +124,7 @@ services:
     environment:
       CADDY_HOST: ${CADDY_HOST}
       FRONTEND_URL: ${FRONTEND_URL}
+      CADDY_TRUSTED_PROXIES: ${CADDY_TRUSTED_PROXIES:-127.0.0.1/32}
     depends_on:
       auth:
         condition: service_healthy
