@@ -135,6 +135,22 @@ cmd_deploy() {
   log "deploying $sha (previous: ${previous:-none})"
   write_env "$sha"
   compose pull --quiet
+
+  # Pending dbinit/migrations/ from this bundle, before the new code starts.
+  # A no-op on an empty database (db-init then builds it from the manifest);
+  # fails if an existing database has no baseline yet (see docs/ci-cd.md).
+  log "applying database migrations"
+  if ! compose run --rm -T db-init sh /init/dbinit/migrate.sh --if-initialised; then
+    if [ -n "$previous" ] && [ -d "$STATE_DIR/app.previous" ]; then
+      log "migrations failed: keeping $previous"
+      rm -rf "$APP.failed"
+      mv "$APP" "$APP.failed"
+      mv "$STATE_DIR/app.previous" "$APP"
+      start "$previous" || true
+    fi
+    die "database migrations for $sha failed (applied ones stay recorded in public.schema_migrations)"
+  fi
+
   compose up -d --no-build --remove-orphans
 
   log "waiting for health checks (timeout ${HEALTH_TIMEOUT}s)"

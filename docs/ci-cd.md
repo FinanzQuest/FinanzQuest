@@ -56,8 +56,12 @@ module, pinned by the server's flake, never from the upload):
 2. swaps the files into `/var/lib/finanzquest/app` (keeps `app.previous`)
 3. writes `.env` = your secrets file + `COMPOSE_FILE`, `IMAGE_TAG`,
    `IMAGE_PREFIX`, `HTTP_PORT`, `HTTPS_PORT`
-4. logs in to GHCR with the job's short-lived token, pulls, `up -d`, logs out
-5. waits for `postgres`, `auth_container`, `frontend` to be healthy;
+4. logs in to GHCR with the job's short-lived token, pulls
+5. applies pending database migrations (`migrate.sh --if-initialised` in the
+   `db-init` service, see below); on failure it restores the previous
+   release's files and fails the job without starting the new code
+6. `up -d`, logs out
+7. waits for `postgres`, `auth_container`, `frontend` to be healthy;
    otherwise **rolls back** to the previous release and fails the job
 
 `compose.prod.yml` makes production use the GHCR images and publish only
@@ -65,26 +69,32 @@ Caddy's ports (Postgres and the frontend stay internal). Dev
 (`compose.dev.yml`) is unaffected. `finanzquest.service` starts the last
 deployed version at boot; `nixos-rebuild` never restarts the stack.
 
+**Database migrations** run automatically on every deploy (step 5).
+`db-init` only initialises an empty database; existing databases are
+upgraded with `dbinit/migrate.sh`, run inside the `db-init` service (the
+migrations use `\ir` includes, so piping a file into `psql` does not work).
+It applies the files of `dbinit/migrations/` in order as superuser, stops at
+the first error and records each applied file in `public.schema_migrations`,
+so nothing runs twice.
+
+- **Baseline once** on a database that predates `schema_migrations` (prod),
+  *before* the first deploy that runs migrations, or that deploy fails:
+  `sudo -iu finanzquest finanzquest-ctl compose run --rm -T db-init sh /init/dbinit/migrate.sh --baseline <last migration it already has>`
+  records everything up to that file as applied without running it; check
+  with `--status`. Databases built from the manifest are baselined by
+  `apply_manifest.sh`.
+- Migrations are not rolled back. A health-check rollback (or a failed
+  migration) puts the previous release's code back on the already migrated
+  schema, so a migration must keep the previous release working
+  (add/extend first, drop in a later release).
+- Manual runs use the same command with `--status` or `<file>.sql ...`; the
+  server's `dbinit/` is the one of the last deploy (`app/dbinit/` in the
+  service user's state directory).
+
 Not automated (on purpose):
 
-- **Database migrations.** `db-init` only initialises an empty database.
-  Existing databases are upgraded with `dbinit/migrate.sh`, run inside the
-  `db-init` service (the migrations use `\ir` includes, so piping a file into
-  `psql` does not work). It applies the files of `dbinit/migrations/` in
-  order as superuser, stops at the first error and records each applied file
-  in `public.schema_migrations`, so nothing runs twice. Back up first, and
-  apply *before* merging code that needs them:
-  `sudo -iu finanzquest finanzquest-ctl compose run --rm -T db-init sh /init/dbinit/migrate.sh [--status | <file>.sql ...]`
-  - Once on an existing database (prod): `... migrate.sh --baseline <last migration it already has>`
-    records everything up to that file as applied without running it; check
-    with `--status`. Databases built from the manifest are baselined by
-    `apply_manifest.sh`. Until a baseline exists, `migrate.sh` refuses to apply.
-  - After that `migrate.sh` (no arguments) applies all pending files.
-  - The server's `dbinit/` is the one of the last deploy (`app/dbinit/` in the
-    service user's state directory), so a migration that ships with a PR is
-    not there before that PR is deployed: copy the files into
-    `app/dbinit/migrations/` (and `migrate.sh` into `app/dbinit/` the first
-    time) before running it.
+- **Backups** before migrations: take them yourself before merging a PR
+  that adds a risky migration.
 - **Module updates.** Changes to `nix/module.nix` or `nix/finanzquest-ctl.sh`
   reach the server with `nix flake update finanzquest && nixos-rebuild switch`.
 

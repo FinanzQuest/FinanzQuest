@@ -47,6 +47,11 @@ if ! compose wait db-init; then
   exit 1
 fi
 
+echo "==> migrate.sh as the deploy runs it (fresh init is baselined: applies nothing)"
+compose run --rm -T db-init sh /init/dbinit/migrate.sh --if-initialised
+compose run --rm -T db-init sh /init/dbinit/migrate.sh --status | grep -q '^pending' \
+  && { echo "fresh database has pending migrations" >&2; exit 1; }
+
 run_sql() {
   echo "==> $1"
   compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q -f - < "$1"

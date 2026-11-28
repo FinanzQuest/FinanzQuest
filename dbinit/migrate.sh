@@ -21,6 +21,11 @@ set -eu
 #   migrate.sh --baseline-all       record every file as applied (a database freshly
 #                                   built from the manifest has them all; apply_manifest.sh
 #                                   calls this)
+#   migrate.sh --if-initialised [...]
+#                                   exit 0 without doing anything on an empty database
+#                                   (first deploy: db-init builds it from the manifest),
+#                                   otherwise as without the flag. The CI deploy
+#                                   (nix/finanzquest-ctl.sh) runs this before `up`.
 #
 # Back up first. Without a baseline (empty table) nothing is applied unasked:
 # a database that predates this script would otherwise re-run old migrations.
@@ -31,8 +36,15 @@ q() { psql -Atq -v ON_ERROR_STOP=1 -c "$1"; }
 
 die() { echo "error: $*" >&2; exit 1; }
 
-[ "$(q "SELECT to_regclass('depots.depots') IS NOT NULL")" = "t" ] \
-  || die "database is not initialised (use the manifest)"
+initialised="$(q "SELECT to_regclass('depots.depots') IS NOT NULL")"
+if [ "${1:-}" = "--if-initialised" ]; then
+  shift
+  if [ "$initialised" != "t" ]; then
+    echo "Database is not initialised yet: nothing to migrate (db-init applies the manifest)."
+    exit 0
+  fi
+fi
+[ "$initialised" = "t" ] || die "database is not initialised (use the manifest)"
 
 q "CREATE TABLE IF NOT EXISTS public.schema_migrations (
      name       text        PRIMARY KEY,
