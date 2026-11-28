@@ -134,7 +134,10 @@ cmd_deploy() {
 
   log "deploying $sha (previous: ${previous:-none})"
   write_env "$sha"
-  compose pull --quiet
+  # Always pull: compose.prod.yml sets pull_policy: missing (so boot and
+  # rollback work without a GHCR login), but a CI re-run rebuilds the same sha
+  # (e.g. after changing API_URL_*) and that tag is already present locally.
+  compose pull --quiet --policy always
 
   # Pending dbinit/migrations/ from this bundle, before the new code starts.
   # A no-op on an empty database (db-init then builds it from the manifest);
