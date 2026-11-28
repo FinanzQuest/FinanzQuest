@@ -16,7 +16,13 @@ export async function loginRedirect(email: string, password: string) {
 	})
 
 	if (error) {
-		return error.message
+		return {
+			message:
+				error.code === "email_not_confirmed"
+					? "Deine E-Mail-Adresse ist noch nicht bestätigt. Prüfe dein Postfach (auch den Spam-Ordner) oder lass dir den Link erneut senden."
+					: error.message,
+			unconfirmed: error.code === "email_not_confirmed",
+		}
 	}
 
 	// a previous user's depot cookie does not apply; the first depot is active
@@ -69,7 +75,7 @@ export async function signUpRedirect(
 	password: string
 ) {
 	const client = await createClient()
-	const { error } = await client.auth.signUp({
+	const { data, error } = await client.auth.signUp({
 		email,
 		password,
 		options: { data: { name: fullName } },
@@ -79,9 +85,32 @@ export async function signUpRedirect(
 		return { message: error.message }
 	}
 
+	// e-mail verification on: no session until the link in the mail is opened
+	if (!data.session) {
+		return { pendingEmail: email, kind: "signup" as const }
+	}
+
 	await clearActiveDepotId()
 	revalidatePath("/", "layout")
 	redirect("/")
+}
+
+/** Sends the confirmation mail again (sign-up, or guest upgrade). */
+export async function resendConfirmation(
+	email: string,
+	kind: "signup" | "email_change" = "signup"
+): Promise<{ message?: string }> {
+	const client = await createClient()
+	const { error } = await client.auth.resend({ type: kind, email })
+	if (error) {
+		return {
+			message:
+				error.code === "over_email_send_rate_limit"
+					? "Zu viele E-Mails. Bitte warte kurz und versuche es später erneut."
+					: error.message,
+		}
+	}
+	return {}
 }
 
 /** After the browser-side signInAnonymously(): depot + redirect. */
@@ -151,10 +180,7 @@ export async function upgradeGuestRedirect(
 
 	// email verification enabled: the address is only pending
 	if (data.user?.new_email) {
-		return {
-			message:
-				"Bestätige deine E-Mail über den Link, den wir dir geschickt haben, um dein Konto abzuschließen.",
-		}
+		return { pendingEmail: data.user.new_email, kind: "email_change" as const }
 	}
 
 	await client.auth.refreshSession()

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de">
+<body style="margin:0;padding:24px;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#18181b;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:32px;">
+      <tr><td>
+        <h1 style="margin:0 0 16px;font-size:22px;">Willkommen bei FinanzQuest</h1>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.5;">Bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren und mit dem virtuellen Investieren zu starten.</p>
+        <p style="margin:0 0 24px;"><a href="{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&type=email&next=%2Fnew_depot" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:15px;">E-Mail bestätigen</a></p>
+        <p style="margin:0 0 8px;font-size:13px;color:#52525b;line-height:1.5;">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:<br><span style="word-break:break-all;">{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&amp;type=email&amp;next=%2Fnew_depot</span></p>
+        <p style="margin:16px 0 0;font-size:13px;color:#52525b;">Wenn du dich nicht bei FinanzQuest angemeldet hast, kannst du diese E-Mail ignorieren.</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>
